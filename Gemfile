@@ -134,6 +134,8 @@ gem 'oj'
 gem 'pg', '0.15.1'
 gem 'rake'
 
+gem "capistrano" , "~> 2.15.0"
+gem "rvm-capistrano"
 
 gem 'rest-client'
 gem 'rinku'

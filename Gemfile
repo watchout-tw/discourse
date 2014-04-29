@@ -138,6 +138,8 @@ gem "capistrano" , "~> 2.15.0"
 gem "rvm-capistrano"
 gem "capistrano-sidekiq"
 
+gem "ransack"
+
 gem 'rest-client'
 gem 'rinku'
 gem 'sanitize'

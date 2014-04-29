@@ -246,7 +246,7 @@ describe Search do
     end
 
   end
-
+  
   context 'cyrillic topic' do
     let!(:cyrillic_topic) { Fabricate(:topic) do
                                                 user

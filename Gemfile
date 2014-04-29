@@ -151,7 +151,7 @@ gem 'sinatra', require: nil
 gem 'slim'  # required for sidekiq-web
 
 gem 'therubyracer'
-# gem 'thin', require: false
+#gem 'thin', require: false
 gem 'highline', require: false
 gem 'rack-protection' # security
 
@@ -212,7 +212,7 @@ gem 'lru_redux'
 #  we are open to it. by deferring require to the initializer we can configure discourse installs without it
 
 gem 'flamegraph', require: false
-#gem 'rack-mini-profiler', require: false
+gem 'rack-mini-profiler', require: false
 
 # used for caching, optional
 gem 'rack-cors', require: false

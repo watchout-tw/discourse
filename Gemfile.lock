@@ -250,6 +250,8 @@ GEM
       railties
     rack (1.5.2)
     rack-cors (0.2.9)
+    rack-mini-profiler (0.9.1)
+      rack (>= 1.1.3)
     rack-openid (1.3.1)
       rack (>= 1.1.0)
       ruby-openid (>= 2.1.8)
@@ -461,6 +463,7 @@ DEPENDENCIES
   puma
   qunit-rails
   rack-cors
+  rack-mini-profiler
   rack-protection
   rails
   rails-observers

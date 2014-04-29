@@ -76,4 +76,5 @@ namespace :remote_rake do
 end
 
 after "deploy:finalize_update", "my_tasks:symlink"
+after 'deploy:restart', 'unicorn:reload'
 after 'deploy:restart', 'unicorn:restart'

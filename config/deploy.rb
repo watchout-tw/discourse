@@ -5,6 +5,8 @@ require "bundler/capistrano"
 require "rvm/capistrano"
 require 'capistrano/sidekiq'
 
+require 'capistrano-unicorn'
+
 default_environment["PATH"] = "/opt/ruby/bin:/usr/local/bin:/usr/bin:/bin"
 
 set :application, "discourse"
@@ -74,4 +76,4 @@ namespace :remote_rake do
 end
 
 after "deploy:finalize_update", "my_tasks:symlink"
-
+after 'deploy:restart', 'unicorn:restart'

@@ -67,6 +67,8 @@ GEM
     capistrano-sidekiq (0.2.7)
       capistrano
       sidekiq
+    capistrano-unicorn (0.2.0)
+      capistrano (< 3.0)
     celluloid (0.15.2)
       timers (~> 1.1.0)
     certified (0.1.1)
@@ -419,6 +421,7 @@ DEPENDENCIES
   binding_of_caller
   capistrano (~> 2.15.0)
   capistrano-sidekiq
+  capistrano-unicorn
   certified
   discourse_plugin!
   email_reply_parser-discourse

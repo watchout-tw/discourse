@@ -11,7 +11,7 @@ set :application, "discourse"
 set :repository,  "git@github.com:xdite/#{application}.git"
 set :deploy_to, "/home/apps/#{application}"
 
-set :branch, "master"
+set :branch, "production"
 set :scm, :git
 
 set :user, "apps"

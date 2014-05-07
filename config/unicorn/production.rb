@@ -4,7 +4,7 @@ app_dir = "/home/apps/discourse/current"
 
 # Use at least one worker per core if you're on a dedicated server,
 # more will usually help for _short_ waits on databases/caches.
-worker_processes ENV["RAILS_ENV"] == "production" ? 8 : 2
+worker_processes ENV["RAILS_ENV"] == "production" ? 3 : 1
 
 # Help ensure your application will always spawn in the symlinked
 # "current" directory that Capistrano sets up.

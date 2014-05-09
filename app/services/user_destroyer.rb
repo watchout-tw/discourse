@@ -40,9 +40,11 @@ class UserDestroyer
             b = ScreenedEmail.block(u.email, ip_address: u.ip_address)
             b.record_match! if b
           end
-          if opts[:block_ip]
-            b = ScreenedIpAddress.watch(u.ip_address)
-            b.record_match! if b
+          if opts[:block_ip] && u.ip_address
+            b.record_match! if b = ScreenedIpAddress.watch(u.ip_address)
+            if u.registration_ip_address && u.ip_address != u.registration_ip_address
+              b.record_match! if b = ScreenedIpAddress.watch(u.registration_ip_address)
+            end
           end
           Post.with_deleted.where(user_id: user.id).update_all("user_id = NULL")
 
@@ -51,7 +53,7 @@ class UserDestroyer
           categories.each do |c|
             c.user_id = Discourse.system_user.id
             c.save!
-            if topic = Topic.with_deleted.where(id: c.topic_id).first
+            if topic = Topic.with_deleted.find_by(id: c.topic_id)
               topic.try(:recover!)
               topic.user_id = Discourse.system_user.id
               topic.save!

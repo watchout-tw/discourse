@@ -1,6 +1,6 @@
 <a href="http://www.discourse.org/">![Logo](images/discourse.png)</a>
 
-Discourse is the 100% open source, next-generation discussion platform built for the next decade of the Internet. It works as:
+Discourse is the 100% open source discussion platform built for the next decade of the Internet. It works as:
 
 - a mailing list
 - a discussion forum
@@ -70,6 +70,10 @@ Before contributing to Discourse:
 4. Not sure what to work on? [**We've got some ideas.**](http://meta.discourse.org/t/so-you-want-to-help-out-with-discourse/3823)
 
 We look forward to seeing your pull requests!
+
+## Security
+
+We take security very seriously at Discourse; all our code is 100% open source and peer reviewed. Please read [our security guide](https://github.com/discourse/discourse/blob/master/docs/SECURITY.md) for an overview of security measures in Discourse.
 
 ## The Discourse Team
 

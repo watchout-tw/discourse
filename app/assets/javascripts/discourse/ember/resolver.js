@@ -1,3 +1,4 @@
+/* global requirejs, require */
 /**
   A custom resolver to allow template names in the format we like.
 
@@ -6,7 +7,55 @@
   @namespace Discourse
   @module Discourse
 **/
+
+var classify = Ember.String.classify;
+var get = Ember.get;
+
+function parseName(fullName) {
+    /*jshint validthis:true */
+
+    var nameParts = fullName.split(":"),
+        type = nameParts[0], fullNameWithoutType = nameParts[1],
+        name = fullNameWithoutType,
+        namespace = get(this, 'namespace'),
+        root = namespace;
+
+    return {
+      fullName: fullName,
+      type: type,
+      fullNameWithoutType: fullNameWithoutType,
+      name: name,
+      root: root,
+      resolveMethodName: "resolve" + classify(type)
+    };
+}
+
 Discourse.Resolver = Ember.DefaultResolver.extend({
+
+  parseName: parseName,
+
+  normalize: function(fullName) {
+    var split = fullName.split(':');
+    if (split.length > 1) {
+      var dashed = Ember.String.dasherize(split[1].replace(/\./g, '/')),
+          moduleName = 'discourse/' + split[0] + 's/' + dashed;
+      if (requirejs.entries[moduleName]) {
+        return split[0] + ":" + dashed;
+      }
+    }
+    return this._super(fullName);
+  },
+
+  resolveController: function(parsedName) {
+    var moduleName = 'discourse/controllers/' + parsedName.fullNameWithoutType,
+        module = requirejs.entries[moduleName];
+
+    if (module) {
+      module = require(moduleName, null, null, true /* force sync */);
+      if (module && module['default']) { module = module['default']; }
+    }
+    return module || this._super(parsedName);
+  },
 
   /**
     Attaches a view and wires up the container properly

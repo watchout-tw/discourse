@@ -382,7 +382,7 @@ describe UsersController do
       end
 
       it 'should not result in an active account' do
-        User.where(username: @user.username).first.active.should be_false
+        User.find_by(username: @user.username).active.should be_false
       end
     end
 
@@ -976,6 +976,21 @@ describe UsersController do
           expect(user.reload.name).not_to eq 'Jim Tom'
         end
       end
+    end
+  end
+
+  describe "badge_title" do
+    let(:user) { Fabricate(:user) }
+    let(:badge) { Fabricate(:badge) }
+    let(:user_badge) { BadgeGranter.grant(badge, user) }
+
+    it "sets the user's title to the badge name if it is titleable" do
+      log_in_user user
+      xhr :put, :badge_title, user_badge_id: user_badge.id, username: user.username
+      user.reload.title.should_not == badge.name
+      badge.update_attributes allow_title: true
+      xhr :put, :badge_title, user_badge_id: user_badge.id, username: user.username
+      user.reload.title.should == badge.name
     end
   end
 

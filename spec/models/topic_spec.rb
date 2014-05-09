@@ -282,7 +282,7 @@ describe Topic do
 
 
   context 'private message' do
-    let(:coding_horror) { User.where(username: 'CodingHorror').first }
+    let(:coding_horror) { User.find_by(username: "CodingHorror") }
     let(:evil_trout) { Fabricate(:evil_trout) }
     let(:topic) { Fabricate(:private_message_topic) }
 
@@ -298,11 +298,6 @@ describe Topic do
     end
 
     context 'invite' do
-
-      it "delegates to topic.invite_by_email when the user doesn't exist, but it's an email" do
-        topic.expects(:invite_by_email).with(topic.user, 'jake@adventuretime.ooo')
-        topic.invite(topic.user, 'jake@adventuretime.ooo')
-      end
 
       context 'existing user' do
         let(:walter) { Fabricate(:walter_white) }
@@ -324,17 +319,12 @@ describe Topic do
         end
 
         context 'by email' do
-          it 'returns true' do
-            topic.invite(topic.user, walter.email).should be_true
-          end
 
-          it 'adds walter to the allowed users' do
-            topic.invite(topic.user, walter.email)
+          it 'adds user correctly' do
+            lambda {
+              topic.invite(topic.user, walter.email).should be_true
+            }.should change(Notification, :count)
             topic.allowed_users.include?(walter).should be_true
-          end
-
-          it 'creates a notification' do
-            lambda { topic.invite(topic.user, walter.email) }.should change(Notification, :count)
           end
 
         end
@@ -670,7 +660,7 @@ describe Topic do
       it 'updates the last_post_user_id to the second_user' do
         @topic.last_post_user_id.should == @second_user.id
         @topic.last_posted_at.to_i.should == @new_post.created_at.to_i
-        topic_user = @second_user.topic_users.where(topic_id: @topic.id).first
+        topic_user = @second_user.topic_users.find_by(topic_id: @topic.id)
         topic_user.posted?.should be_true
       end
 
@@ -720,6 +710,21 @@ describe Topic do
           topic.meta_data['hello'].should == 'world'
         end
 
+      end
+
+      context 'new key' do
+        before do
+          topic.update_meta_data('other' => 'key')
+          topic.save!
+        end
+
+        it "can be loaded" do
+          Topic.find(topic.id).meta_data["other"].should == "key"
+        end
+
+        it "is in sync with custom_fields" do
+          Topic.find(topic.id).custom_fields["other"].should == "key"
+        end
       end
 
 
@@ -1380,7 +1385,17 @@ describe Topic do
       topic.stubs(:has_topic_embed?).returns(false)
       topic.expandable_first_post?.should be_false
     end
+  end
 
+  it "has custom fields" do
+    topic = Fabricate(:topic)
+    topic.custom_fields["a"].should == nil
 
+    topic.custom_fields["bob"] = "marley"
+    topic.custom_fields["jack"] = "black"
+    topic.save
+
+    topic = Topic.find(topic.id)
+    topic.custom_fields.should == {"bob" => "marley", "jack" => "black"}
   end
 end

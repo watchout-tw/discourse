@@ -1,6 +1,7 @@
 class Category < ActiveRecord::Base
 
   include Positionable
+  include HasCustomFields
 
   belongs_to :topic, dependent: :destroy
   belongs_to :topic_only_relative_url,
@@ -305,7 +306,7 @@ SQL
   end
 
   def self.find_by_email(email)
-    self.where(email_in: Email.downcase(email)).first
+    self.find_by(email_in: Email.downcase(email))
   end
 
   def has_children?

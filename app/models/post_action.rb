@@ -77,8 +77,7 @@ class PostAction < ActiveRecord::Base
     actions = PostAction.where(
       defer: nil,
       post_id: post.id,
-      post_action_type_id:
-      PostActionType.flag_types.values,
+      post_action_type_id: PostActionType.flag_types.values,
       deleted_at: nil
     )
 
@@ -144,9 +143,7 @@ class PostAction < ActiveRecord::Base
   end
 
   def self.remove_act(user, post, post_action_type_id)
-    if action = where(post_id: post.id,
-                      user_id: user.id,
-                      post_action_type_id: post_action_type_id).first
+    if action = find_by(post_id: post.id, user_id: user.id, post_action_type_id: post_action_type_id)
       action.remove_act!(user)
     end
   end
@@ -284,13 +281,13 @@ class PostAction < ActiveRecord::Base
       old_flags, new_flags = PostAction.flag_counts_for(post.id)
 
       if new_flags >= SiteSetting.flags_required_to_hide_post
-        hide_post!(post, guess_hide_reason(old_flags))
+        hide_post!(post, post_action_type, guess_hide_reason(old_flags))
       end
     end
   end
 
 
-  def self.hide_post!(post, reason=nil)
+  def self.hide_post!(post, post_action_type, reason=nil)
     return if post.hidden
 
     unless reason
@@ -304,10 +301,12 @@ class PostAction < ActiveRecord::Base
 
     # inform user
     if post.user
-      SystemMessage.create(post.user,
-                           :post_hidden,
-                           url: post.url,
-                           edit_delay: SiteSetting.cooldown_minutes_after_hiding_posts)
+      options = {
+        url: post.url,
+        edit_delay: SiteSetting.cooldown_minutes_after_hiding_posts,
+        flag_reason: I18n.t("flag_reasons.#{post_action_type}"),
+      }
+      SystemMessage.create(post.user, :post_hidden, options)
     end
   end
 
@@ -315,6 +314,11 @@ class PostAction < ActiveRecord::Base
     old_flags > 0 ?
       Post.hidden_reasons[:flag_threshold_reached_again] :
       Post.hidden_reasons[:flag_threshold_reached]
+  end
+
+  def self.post_action_type_for_post(post_id)
+    post_action = PostAction.find_by(defer: nil, post_id: post_id, post_action_type_id: PostActionType.flag_types.values, deleted_at: nil)
+    PostActionType.types[post_action.post_action_type_id]
   end
 
   protected

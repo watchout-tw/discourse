@@ -31,15 +31,8 @@ module Discourse
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
-    # HACK!! regression in rubygems / bundler in ruby-head
-    if RUBY_VERSION == "2.1.0"
-      $:.map! do |path|
-        path = File.expand_path(path.sub("../../","../")) if path =~ /fast_xor/ && !File.directory?(File.expand_path(path))
-        path
-      end
-    end
-
     require 'discourse'
+    require 'es6_module_transpiler/rails'
     require 'js_locale_helper'
 
     # mocha hates us, active_support/testing/mochaing.rb line 2 is requiring the wrong
@@ -136,8 +129,11 @@ module Discourse
     config.handlebars.templates_root = 'discourse/templates'
 
     require 'discourse_redis'
+    require 'logster/redis_store'
     # Use redis for our cache
     config.cache_store = DiscourseRedis.new_redis_store
+    $redis = DiscourseRedis.new
+    Logster.store = Logster::RedisStore.new(DiscourseRedis.new)
 
     # we configure rack cache on demand in an initializer
     # our setup does not use rack cache and instead defers to nginx

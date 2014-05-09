@@ -68,7 +68,7 @@ class UsersController < ApplicationController
     guardian.ensure_can_edit!(user)
 
     user_badge = UserBadge.find(params[:user_badge_id])
-    if user_badge.user == user && ["Gold", "Silver"].include?(user_badge.badge.badge_type.name)
+    if user_badge.user == user && user_badge.badge.allow_title?
       user.title = user_badge.badge.name
       user.save!
     end
@@ -312,7 +312,7 @@ class UsersController < ApplicationController
   # [LEGACY] avatars in quotes/oneboxes might still be pointing to this route
   # fixing it requires a rebake of all the posts
   def avatar
-    user = User.where(username_lower: params[:username].downcase).first
+    user = User.find_by(username_lower: params[:username].downcase)
     if user.present?
       size = determine_avatar_size(params[:size])
       url = user.avatar_template.gsub("{size}", size.to_s)
@@ -462,6 +462,6 @@ class UsersController < ApplicationController
         :password,
         :username,
         :active
-      ).merge(ip_address: request.ip)
+      ).merge(ip_address: request.ip, registration_ip_address: request.ip)
     end
 end

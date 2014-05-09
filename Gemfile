@@ -145,7 +145,6 @@ gem 'rinku'
 gem 'sanitize'
 gem 'sass'
 gem 'sidekiq'
-gem 'sidekiq-failures'
 
 gem 'sinatra', require: nil
 gem 'slim'  # required for sidekiq-web
@@ -230,6 +229,11 @@ gem 'ruby-readability', require: false
 gem 'simple-rss', require: false
 gem 'gctools', require: false, platform: :mri_21
 gem 'stackprof', require: false, platform: :mri_21
+gem 'memory_profiler', require: false, platform: :mri_21
+
+# This silly path comment just makes it easier for me to do dev
+# will be removed in a few weeks
+gem 'logster'#, path: '/home/sam/Source/logster'
 
 # perftools only works on 1.9 atm
 group :profile do

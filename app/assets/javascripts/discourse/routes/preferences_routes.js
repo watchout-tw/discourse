@@ -18,18 +18,17 @@ Discourse.PreferencesRoute = Discourse.RestrictedUserRoute.extend({
 
   actions: {
     showAvatarSelector: function() {
-      Discourse.Route.showModal(this, 'avatarSelector');
+      Discourse.Route.showModal(this, 'avatar-selector');
       // all the properties needed for displaying the avatar selector modal
-      var avatarSelector = this.modelFor('user').getProperties(
+      this.controllerFor('avatar-selector').setProperties(this.modelFor('user').getProperties(
         'username', 'email',
         'has_uploaded_avatar', 'use_uploaded_avatar',
-        'gravatar_template', 'uploaded_avatar_template');
-      this.controllerFor('avatarSelector').setProperties(avatarSelector);
+        'gravatar_template', 'uploaded_avatar_template'));
     },
 
     saveAvatarSelection: function() {
       var user = this.modelFor('user');
-      var avatarSelector = this.controllerFor('avatarSelector');
+      var avatarSelector = this.controllerFor('avatar-selector');
       // sends the information to the server if it has changed
       if (avatarSelector.get('use_uploaded_avatar') !== user.get('use_uploaded_avatar')) {
         user.toggleAvatarSelection(avatarSelector.get('use_uploaded_avatar'));
@@ -194,7 +193,7 @@ Discourse.PreferencesBadgeTitleRoute = Discourse.RestrictedUserRoute.extend({
         controller.set('selectedUserBadgeId', userBadge.get('id'));
       }
     });
-    if (!controller.get('selectedUserBadgeId')) {
+    if (!controller.get('selectedUserBadgeId') && controller.get('selectableUserBadges.length') > 0) {
       controller.set('selectedUserBadgeId', controller.get('selectableUserBadges')[0].get('id'));
     }
   }

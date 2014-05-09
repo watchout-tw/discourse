@@ -9,6 +9,7 @@ require_dependency 'archetype'
 class Topic < ActiveRecord::Base
   include ActionView::Helpers::SanitizeHelper
   include RateLimiter::OnCreateRecord
+  include HasCustomFields
   include Trashable
   extend Forwardable
 
@@ -103,17 +104,16 @@ class Topic < ActiveRecord::Base
   attr_accessor :user_data
   attr_accessor :posters  # TODO: can replace with posters_summary once we remove old list code
   attr_accessor :topic_list
+  attr_accessor :meta_data
   attr_accessor :include_last_poster
 
   # The regular order
-  scope :topic_list_order, lambda { order('topics.bumped_at desc') }
+  scope :topic_list_order, -> { order('topics.bumped_at desc') }
 
   # Return private message topics
-  scope :private_messages, lambda {
-    where(archetype: Archetype.private_message)
-  }
+  scope :private_messages, -> { where(archetype: Archetype.private_message) }
 
-  scope :listable_topics, lambda { where('topics.archetype <> ?', [Archetype.private_message]) }
+  scope :listable_topics, -> { where('topics.archetype <> ?', [Archetype.private_message]) }
 
   scope :by_newest, -> { order('topics.created_at desc, topics.id desc') }
 
@@ -121,16 +121,15 @@ class Topic < ActiveRecord::Base
 
   scope :created_since, lambda { |time_ago| where('created_at > ?', time_ago) }
 
-  scope :secured, lambda {|guardian=nil|
+  scope :secured, lambda { |guardian=nil|
     ids = guardian.secure_category_ids if guardian
 
     # Query conditions
-    condition =
-      if ids.present?
-        ["NOT c.read_restricted or c.id in (:cats)", cats: ids]
-      else
-        ["NOT c.read_restricted"]
-      end
+    condition = if ids.present?
+      ["NOT c.read_restricted or c.id in (:cats)", cats: ids]
+    else
+      ["NOT c.read_restricted"]
+    end
 
     where("category_id IS NULL OR category_id IN (
            SELECT c.id FROM categories c
@@ -318,8 +317,16 @@ class Topic < ActiveRecord::Base
     topics.where("topics.id NOT IN (?)", featured_topic_ids)
   end
 
+  def meta_data=(data)
+    custom_fields.replace(data)
+  end
+
+  def meta_data
+    custom_fields
+  end
+
   def update_meta_data(data)
-    self.meta_data = (self.meta_data || {}).merge(data.stringify_keys)
+    custom_fields.update(data)
     save
   end
 
@@ -341,8 +348,7 @@ class Topic < ActiveRecord::Base
   end
 
   def meta_data_string(key)
-    return unless meta_data.present?
-    meta_data[key.to_s]
+    custom_fields[key.to_s]
   end
 
   def self.listable_count_per_day(sinceDaysAgo=30)
@@ -438,7 +444,7 @@ class Topic < ActiveRecord::Base
   end
 
   def changed_to_category(cat)
-    return true if cat.blank? || Category.where(topic_id: id).first.present?
+    return true if cat.blank? || Category.find_by(topic_id: id).present?
 
     Topic.transaction do
       old_category = category
@@ -493,9 +499,9 @@ class Topic < ActiveRecord::Base
   def change_category(name)
     # If the category name is blank, reset the attribute
     if name.blank?
-      cat = Category.where(id: SiteSetting.uncategorized_category_id).first
+      cat = Category.find_by(id: SiteSetting.uncategorized_category_id)
     else
-      cat = Category.where(name: name).first
+      cat = Category.find_by(name: name)
     end
 
     return true if cat == category
@@ -505,9 +511,9 @@ class Topic < ActiveRecord::Base
 
 
   def remove_allowed_user(username)
-    user = User.where(username: username).first
+    user = User.find_by(username: username)
     if user
-      topic_user = topic_allowed_users.where(user_id: user.id).first
+      topic_user = topic_allowed_users.find_by(user_id: user.id)
       if topic_user
         topic_user.destroy
       else
@@ -517,7 +523,7 @@ class Topic < ActiveRecord::Base
   end
 
   # Invite a user to the topic by username or email. Returns success/failure
-  def invite(invited_by, username_or_email)
+  def invite(invited_by, username_or_email, group_ids=nil)
     if private_message?
       # If the user exists, add them to the topic.
       user = User.find_by_username_or_email(username_or_email)
@@ -535,14 +541,14 @@ class Topic < ActiveRecord::Base
 
     if username_or_email =~ /^.+@.+$/
       # NOTE callers expect an invite object if an invite was sent via email
-      invite_by_email(invited_by, username_or_email)
+      invite_by_email(invited_by, username_or_email, group_ids)
     else
       false
     end
   end
 
-  def invite_by_email(invited_by, email)
-    Invite.invite_by_email(email, invited_by, self)
+  def invite_by_email(invited_by, email, group_ids=nil)
+    Invite.invite_by_email(email, invited_by, self, group_ids)
   end
 
   def email_already_exists_for?(invite)
@@ -550,7 +556,7 @@ class Topic < ActiveRecord::Base
   end
 
   def grant_permission_to_user(lower_email)
-    user = User.where(email: lower_email).first
+    user = User.find_by(email: lower_email)
     topic_allowed_users.create!(user_id: user.id)
   end
 
@@ -820,7 +826,6 @@ end
 #  archived                :boolean          default(FALSE), not null
 #  bumped_at               :datetime         not null
 #  has_summary             :boolean          default(FALSE), not null
-#  meta_data               :hstore
 #  vote_count              :integer          default(0), not null
 #  archetype               :string(255)      default("regular"), not null
 #  featured_user4_id       :integer

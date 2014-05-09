@@ -13,6 +13,7 @@ require 'digest/sha1'
 class Post < ActiveRecord::Base
   include RateLimiter::OnCreateRecord
   include Trashable
+  include HasCustomFields
 
   rate_limit
   rate_limit :limit_posts_per_day
@@ -66,7 +67,7 @@ class Post < ActiveRecord::Base
   end
 
   def self.find_by_detail(key, value)
-    includes(:post_details).where(post_details: { key: key, value: value }).first
+    includes(:post_details).find_by(post_details: { key: key, value: value })
   end
 
   def add_detail(key, value, extra = nil)
@@ -249,17 +250,12 @@ class Post < ActiveRecord::Base
 
   def reply_to_post
     return if reply_to_post_number.blank?
-    @reply_to_post ||= Post.where("topic_id = :topic_id AND post_number = :post_number",
-                                  topic_id: topic_id,
-                                  post_number: reply_to_post_number).first
+    @reply_to_post ||= Post.find_by("topic_id = :topic_id AND post_number = :post_number", topic_id: topic_id, post_number: reply_to_post_number)
   end
 
   def reply_notification_target
     return if reply_to_post_number.blank?
-    Post.where("topic_id = :topic_id AND post_number = :post_number AND user_id <> :user_id",
-                topic_id: topic_id,
-                post_number: reply_to_post_number,
-                user_id: user_id).first.try(:user)
+    Post.find_by("topic_id = :topic_id AND post_number = :post_number AND user_id <> :user_id", topic_id: topic_id, post_number: reply_to_post_number, user_id: user_id).try(:user)
   end
 
   def self.excerpt(cooked, maxlength = nil, options = {})
@@ -400,7 +396,7 @@ class Post < ActiveRecord::Base
 
     # Create a reply relationship between quoted posts and this new post
     self.quoted_post_numbers.each do |p|
-      post = Post.where(topic_id: topic_id, post_number: p).first
+      post = Post.find_by(topic_id: topic_id, post_number: p)
       create_reply_relationship_with(post)
     end
   end
@@ -441,7 +437,7 @@ class Post < ActiveRecord::Base
 
   def revert_to(number)
     return if number >= version
-    post_revision = PostRevision.where(post_id: id, number: number + 1).first
+    post_revision = PostRevision.find_by(post_id: id, number: (number + 1))
     post_revision.modifications.each do |attribute, change|
       attribute = "version" if attribute == "cached_version"
       write_attribute(attribute, change[0])
@@ -494,10 +490,17 @@ class Post < ActiveRecord::Base
   end
 
   def update_revision
-    revision = PostRevision.where(post_id: id, number: version).first
+    revision = PostRevision.find_by(post_id: id, number: version)
     return unless revision
     revision.user_id = last_editor_id
-    revision.modifications = changes.extract!(:raw, :cooked, :edit_reason)
+    modifications = changes.extract!(:raw, :cooked, :edit_reason)
+    [:raw, :cooked, :edit_reason].each do |field|
+      if modifications[field].present?
+        old_value = revision.modifications[field].try(:[], 0) || ""
+        new_value = modifications[field][1]
+        revision.modifications[field] = [old_value, new_value]
+      end
+    end
     revision.save
   end
 

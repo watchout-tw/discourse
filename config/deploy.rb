@@ -19,7 +19,6 @@ set :scm, :git
 set :user, "apps"
 set :group, "apps"
 
-set :deploy_to, "/home/apps/#{application}"
 set :runner, "apps"
 set :deploy_via, :remote_cache
 set :git_shallow_clone, 1
@@ -52,7 +51,7 @@ namespace :my_tasks do
   task :symlink, :roles => [:web] do
     run "mkdir -p #{deploy_to}/shared/log"
     run "mkdir -p #{deploy_to}/shared/pids"
-    
+
     symlink_hash = {
       "#{shared_path}/config/discourse_defaults.conf"   => "#{release_path}/config/discourse_defaults.conf",
       "#{shared_path}/config/s3.yml"   => "#{release_path}/config/s3.yml",

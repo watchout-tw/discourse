@@ -42,10 +42,10 @@ class PostAction < ActiveRecord::Base
   	return {} if collection.blank?
 
     collection_ids = collection.map {|p| p.id}
-
     user_id = user.present? ? user.id : 0
 
     result = PostAction.where(post_id: collection_ids, user_id: user_id)
+
     user_actions = {}
     result.each do |r|
       user_actions[r.post_id] ||= {}
@@ -96,27 +96,30 @@ class PostAction < ActiveRecord::Base
 
     return unless opts[:message] && [:notify_moderators, :notify_user].include?(post_action_type)
 
-    # this is a hack to allow a PM with no reciepients, we should think through
-    # a cleaner technique, a PM with myself is valid for flagging
-    target_usernames = post_action_type == :notify_user ? post.user.username : "x"
+    title = I18n.t("post_action_types.#{post_action_type}.email_title", title: post.topic.title)
+    body = I18n.t("post_action_types.#{post_action_type}.email_body", message: opts[:message], link: "#{Discourse.base_url}#{post.url}")
 
-    title = I18n.t("post_action_types.#{post_action_type}.email_title",
-                    title: post.topic.title)
-    body = I18n.t("post_action_types.#{post_action_type}.email_body",
-                  message: opts[:message],
-                  link: "#{Discourse.base_url}#{post.url}")
+    opts = {
+      archetype: Archetype.private_message,
+      title: title,
+      raw: body
+    }
 
-    subtype = post_action_type == :notify_moderators ? TopicSubtype.notify_moderators : TopicSubtype.notify_user
-
-    if target_usernames.present?
-      PostCreator.new(user,
-              target_usernames: target_usernames,
-              archetype: Archetype.private_message,
-              subtype: subtype,
-              title: title,
-              raw: body
-       ).create.id
+    if post_action_type == :notify_moderators
+      opts[:subtype] = TopicSubtype.notify_moderators
+      opts[:target_group_names] = "moderators"
+    else
+      opts[:subtype] = TopicSubtype.notify_user
+      opts[:target_usernames] = if post_action_type == :notify_user
+        post.user.username
+      elsif post_action_type != :notify_moderators
+        # this is a hack to allow a PM with no reciepients, we should think through
+        # a cleaner technique, a PM with myself is valid for flagging
+        'x'
+      end
     end
+
+    PostCreator.new(user, opts).create.id
   end
 
   def self.act(user, post, post_action_type_id, opts={})
@@ -128,13 +131,19 @@ class PostAction < ActiveRecord::Base
       post.topic.posts_count != 1
     end
 
-    create( post_id: post.id,
-            user_id: user.id,
-            post_action_type_id: post_action_type_id,
-            message: opts[:message],
-            staff_took_action: opts[:take_action] || false,
-            related_post_id: related_post_id,
-            targets_topic: !!targets_topic )
+    post_action = create( post_id: post.id,
+                          user_id: user.id,
+                          post_action_type_id: post_action_type_id,
+                          message: opts[:message],
+                          staff_took_action: opts[:take_action] || false,
+                          related_post_id: related_post_id,
+                          targets_topic: !!targets_topic )
+
+    if post_action && post_action.is_like?
+      BadgeGranter.update_badges(action: :post_like, post_id: post.id)
+    end
+
+    post_action
 
   rescue ActiveRecord::RecordNotUnique
     # can happen despite being .create
@@ -143,7 +152,9 @@ class PostAction < ActiveRecord::Base
   end
 
   def self.remove_act(user, post, post_action_type_id)
-    if action = find_by(post_id: post.id, user_id: user.id, post_action_type_id: post_action_type_id)
+    finder = PostAction.where(post_id: post.id, user_id: user.id, post_action_type_id: post_action_type_id)
+    finder = finder.with_deleted if user.try(:staff?)
+    if action = finder.first
       action.remove_act!(user)
     end
   end
@@ -246,8 +257,8 @@ class PostAction < ActiveRecord::Base
       Post.where(id: post_id).update_all ["#{column} = #{column} + ?", delta]
     end
 
+    post = Post.with_deleted.where(id: post_id).first
     Topic.where(id: post.topic_id).update_all ["#{column} = #{column} + ?", delta]
-
 
     if PostActionType.notify_flag_type_ids.include?(post_action_type_id)
       PostAction.update_flagged_posts_count
@@ -256,6 +267,7 @@ class PostAction < ActiveRecord::Base
   end
 
   def enforce_rules
+    post = Post.with_deleted.where(id: post_id).first
     PostAction.auto_hide_if_needed(post, post_action_type_key)
     SpamRulesEnforcer.enforce!(post.user) if post_action_type_key == :spam
   end
@@ -295,9 +307,9 @@ class PostAction < ActiveRecord::Base
       reason = guess_hide_reason(old_flags)
     end
 
-    Post.where(id: post.id).update_all(["hidden = true, hidden_reason_id = COALESCE(hidden_reason_id, ?)", reason])
+    Post.where(id: post.id).update_all(["hidden = true, hidden_at = CURRENT_TIMESTAMP, hidden_reason_id = COALESCE(hidden_reason_id, ?)", reason])
     Topic.where(["id = :topic_id AND NOT EXISTS(SELECT 1 FROM POSTS WHERE topic_id = :topic_id AND NOT hidden)",
-                      topic_id: post.topic_id]).update_all({ visible: false })
+                      topic_id: post.topic_id]).update_all(visible: false)
 
     # inform user
     if post.user
@@ -338,8 +350,8 @@ end
 #  user_id             :integer          not null
 #  post_action_type_id :integer          not null
 #  deleted_at          :datetime
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
+#  created_at          :datetime
+#  updated_at          :datetime
 #  deleted_by_id       :integer
 #  message             :text
 #  related_post_id     :integer

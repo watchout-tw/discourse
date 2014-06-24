@@ -59,6 +59,12 @@ Discourse.URL = Em.Object.createWithMixins({
       return;
     }
 
+    // Protocol relative URLs
+    if (path.indexOf('//') === 0) {
+      document.location = path;
+      return;
+    }
+
     // Scroll to the same page, differnt anchor
     if (path.indexOf('#') === 0) {
       var $elem = $(path);
@@ -80,8 +86,6 @@ Discourse.URL = Em.Object.createWithMixins({
       path = path.replace(rootURL, '');
     }
 
-    // Schedule a DOM cleanup event
-    Em.run.scheduleOnce('afterRender', Discourse.Route, 'cleanDOM');
 
     // Rewrite /my/* urls
     if (path.indexOf('/my/') === 0) {
@@ -94,9 +98,12 @@ Discourse.URL = Em.Object.createWithMixins({
       }
     }
 
+    if (this.navigatedToPost(oldPath, path)) { return; }
+    // Schedule a DOM cleanup event
+    Em.run.scheduleOnce('afterRender', Discourse.Route, 'cleanDOM');
+
     // TODO: Extract into rules we can inject into the URL handler
     if (this.navigatedToHome(oldPath, path)) { return; }
-    if (this.navigatedToPost(oldPath, path)) { return; }
 
     if (path.match(/^\/?users\/[^\/]+$/)) {
       path += "/activity";
@@ -123,6 +130,7 @@ Discourse.URL = Em.Object.createWithMixins({
   **/
   isInternal: function(url) {
     if (url && url.length) {
+      if (url.indexOf('#') === 0) { return true; }
       if (url.indexOf('/') === 0) { return true; }
       if (url.indexOf(this.origin()) === 0) { return true; }
       if (url.replace(/^http/, 'https').indexOf(this.origin()) === 0) { return true; }
@@ -154,7 +162,9 @@ Discourse.URL = Em.Object.createWithMixins({
       if (oldTopicId === newTopicId) {
         Discourse.URL.replaceState(path);
 
-        var topicController = Discourse.__container__.lookup('controller:topic'),
+        var container = Discourse.__container__,
+            topicController = container.lookup('controller:topic'),
+            topicProgressController = container.lookup('controller:topic-progress'),
             opts = {},
             postStream = topicController.get('postStream');
 
@@ -165,10 +175,11 @@ Discourse.URL = Em.Object.createWithMixins({
         postStream.refresh(opts).then(function() {
           topicController.setProperties({
             currentPost: closest,
-            progressPosition: closest,
             highlightOnInsert: closest,
             enteredAt: new Date().getTime().toString()
           });
+          topicProgressController.set('progressPosition', closest);
+          Discourse.PostView.considerHighlighting(topicController, closest);
         }).then(function() {
           Discourse.TopicView.jumpToPost(closest);
         });

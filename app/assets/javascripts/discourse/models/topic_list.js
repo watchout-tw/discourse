@@ -163,6 +163,11 @@ Discourse.TopicList.reopenClass({
       t.posters.forEach(function(p) {
         p.user = users[p.user_id];
       });
+      if (t.participants) {
+        t.participants.forEach(function(p) {
+          p.user = users[p.user_id];
+        });
+      }
       return Discourse.Topic.create(t);
     });
   },
@@ -200,7 +205,7 @@ Discourse.TopicList.reopenClass({
     var session = Discourse.Session.current(),
         list = session.get('topicList');
 
-    if (list && (list.get('filter') === filter) && window.location.pathname.indexOf('more') > 0) {
+    if (list && (list.get('filter') === filter)) {
       list.set('loaded', true);
       return Ember.RSVP.resolve(list);
     }

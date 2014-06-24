@@ -26,6 +26,14 @@ describe UserBadgesController do
       parsed = JSON.parse(response.body)
       parsed["user_badges"].length.should == 1
     end
+
+    it 'includes counts when passed the aggregate argument' do
+      xhr :get, :index, username: user.username, grouped: true
+
+      response.status.should == 200
+      parsed = JSON.parse(response.body)
+      parsed["user_badges"].first.has_key?('count').should be_true
+    end
   end
 
   context 'create' do
@@ -59,7 +67,7 @@ describe UserBadgesController do
     it 'grants badges from master api calls' do
       api_key = Fabricate(:api_key)
       StaffActionLogger.any_instance.expects(:log_badge_grant).never
-      xhr :post, :create, badge_id: badge.id, username: user.username, api_key: api_key.key
+      xhr :post, :create, badge_id: badge.id, username: user.username, api_key: api_key.key, api_username: "system"
       response.status.should == 200
       user_badge = UserBadge.find_by(user: user, badge: badge)
       user_badge.should be_present

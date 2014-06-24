@@ -7,7 +7,7 @@ require_dependency 'gaps'
 class TopicView
 
   attr_reader :topic, :posts, :guardian, :filtered_posts
-  attr_accessor :draft, :draft_key, :draft_sequence
+  attr_accessor :draft, :draft_key, :draft_sequence, :user_custom_fields
 
   def initialize(topic_id, user=nil, options={})
     @user = user
@@ -29,6 +29,10 @@ class TopicView
     @index_reverse = false
 
     filter_posts(options)
+
+    if SiteSetting.public_user_custom_fields.present? && @posts
+      @user_custom_fields = User.custom_fields_for_ids(@posts.map(&:user_id), SiteSetting.public_user_custom_fields.split('|'))
+    end
 
     @draft_key = @topic.draft_key
     @draft_sequence = DraftSequence.current(@user, @draft_key)
@@ -60,7 +64,7 @@ class TopicView
   end
 
   def prev_page
-    if @page && @page > 1
+    if @page && @page > 1 && posts.length > 0
       @page - 1
     else
       nil
@@ -179,6 +183,7 @@ class TopicView
   end
 
   def read?(post_number)
+    return true unless @user
     read_posts_set.include?(post_number)
   end
 
@@ -202,7 +207,7 @@ class TopicView
   end
 
   def all_post_actions
-    @all_post_actions ||= PostAction.counts_for(posts, @user)
+    @all_post_actions ||= PostAction.counts_for(@posts, @user)
   end
 
   def links
@@ -272,7 +277,7 @@ class TopicView
 
   def filter_posts_by_ids(post_ids)
     # TODO: Sort might be off
-    @posts = Post.where(id: post_ids)
+    @posts = Post.where(id: post_ids, topic_id: @topic.id)
                  .includes(:user)
                  .includes(:reply_to_user)
                  .order('sort_order')
@@ -302,6 +307,7 @@ class TopicView
   def unfiltered_posts
     result = @topic.posts
     result = result.with_deleted if @user.try(:staff?)
+    result = @topic.posts.where("user_id IS NOT NULL") if @exclude_deleted_users
     result
   end
 

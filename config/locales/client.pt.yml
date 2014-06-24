@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 pt:
   js:
@@ -121,12 +121,6 @@ pt:
       other: "em {{count}} dias"
     suggested_topics:
       title: "Tópicos Sugeridos"
-    bookmarks:
-      not_logged_in: "Desculpe, precisa de entrar na sua conta para adicionar um marcador às mensagens."
-      created: "Adicionou um marcador a esta mensagem."
-      not_bookmarked: "Leu esta mensagem, clique para adicionar-lhe um marcador."
-      last_read: "Esta é a última mensagem que leu; selecione para lhe adicionar um marcador."
-    new_topics_inserted: "{{count}} novos tópicos."
     show_new_topics: "Selecione para mostrar."
     preview: "prever"
     cancel: "cancelar"
@@ -192,9 +186,9 @@ pt:
       change: "alterar"
       moderator: "{{user}} é um moderador"
       admin: "{{user}} é um administrador"
-      deleted: "(removido)"
       suspended_notice: "Utilizador suspenso até {{date}}."
       suspended_reason: "Razão: "
+      unread_message_count: "Mensagens"
       messages:
         all: "Todas"
         mine: "Minha"
@@ -220,7 +214,6 @@ pt:
       change_avatar:
         title: "Alterar o seu avatar"
         gravatar: "<a href='//gravatar.com/emails' target='_blank'>Gravatar</a>, baseado em"
-        gravatar_title: "Alterar o seu avatar no Gravatar"
         uploaded_avatar: "Foto pessoal"
         uploaded_avatar_empty: "Adicionar foto pessoal"
         upload_title: "Enviar a sua foto"
@@ -252,7 +245,6 @@ pt:
       last_posted: "Última Entrada"
       last_emailed: "Último Email"
       last_seen: "Visto"
-      log_out: "Sair"
       website: "Site"
       email_settings: "Email"
       email_digests:
@@ -264,9 +256,6 @@ pt:
       other_settings: "Outros"
       new_topic_duration:
         label: "Considerar tópicos como novos quando"
-        after_n_days:
-          one: "foram postados no último dia"
-          other: "foram colocados nos últimos {{count}} dias"
       auto_track_options:
         never: "nunca"
         always: "sempre"
@@ -280,18 +269,16 @@ pt:
         search: "escreva para procurar convites..."
         title: "Convites"
         user: "Utilizadores convidados"
-        none: "Não foi encontrado nenhum convite."
         truncated: "Mostra os primeiros {{count}} convites."
         redeemed: "Convites usados"
         redeemed_at: "Compensado"
         pending: "Convites Pendentes"
         posts_read_count: "Entradas Vistas"
-        rescind: "Remover Convite"
         rescinded: "Convite Removido"
         time_read: "Tempo de Leitura"
         days_visited: "Dias Visitados"
         account_age_days: "Idade da conta em dias"
-        create: "Convidar amigos para este Fórum"
+        create: "Enviar um Convite"
       password:
         title: "Palavra-chave"
         too_short: "A sua palavra-chave é muito curta."
@@ -311,20 +298,17 @@ pt:
         the_topic: "o tópico"
     loading: "A carregar..."
     close: "Fechar"
+    too_few_topics_notice: "Crie pelo menos 5 tópicos e 30 posts públicos para dar inicio à discussão. Novos utilizadores não poderão ganhar níveis de confiança se não houver conteúdo para lerem."
     learn_more: "sabe mais..."
     year: 'ano'
-    year_desc: 'tópicos colocados nos últimos 365 dias'
     month: 'mês'
-    month_desc: 'tópicos colocados nos últimos 30 dias'
     week: 'semana'
-    week_desc: 'tópicos colocados nos últimos 7 dias'
     first_post: Primeira mensagem
     mute: Silenciar
     unmute: Reativar
     last_post: Última mensagem
     summary:
       enabled_description: "Está a ver um sumário deste tópico. Para ver todos as mensagens, clique em baixo."
-      description: "Existem <b>{{count}}</b> respostas. Poupe tempo lendo apenas as respostas consideradas mais relevantes?"
       enable: 'Sumarize este tópico'
       disable: 'Mostrar todas as mensagens'
     private_message_info:
@@ -337,9 +321,6 @@ pt:
     created: 'Criado'
     trust_level: 'Nível de confiança'
     create_account:
-      title: "Criar Conta"
-      action: "Criar uma agora!"
-      invite: "Ainda sem conta?"
       failed: "Houve um erro, talvez este email já esteja registado, tente usar o link Esqueci-me da Palavra-chave."
     forgot_password:
       title: "Esqueci-me da Palavra-chave"
@@ -349,9 +330,9 @@ pt:
     login:
       username: "Utilizador"
       password: "Palavra-chave"
+      email_placeholder: "email ou nome de utilizador"
       error: "Erro desconhecido"
       reset_password: 'Recuperar palavra-chave'
-      logging_in: "A Entrar..."
       or: "Ou"
       authenticating: "A autenticar..."
       awaiting_confirmation: "A sua conta está a aguardar ativação. Utilize o link 'Esqueci a Palavra-chave' para pedir um novo link para ativar o email"
@@ -385,6 +366,8 @@ pt:
       min_length:
         need_more_for_title: "{{n}} no título"
         need_more_for_reply: "{{n}} para chegar à mensagem"
+      error:
+        title_missing: "O Título é obrigatório"
       save_edit: "Guardar alterações"
       reply_original: "Responder no Tópico original"
       reply_here: "Responda Aqui"
@@ -446,13 +429,8 @@ pt:
       hint: "(poderá também arrastar o ficheiro para o editor para fazer o upload)"
       uploading: "A enviar"
     search:
-      title: "procurar por tópicos, posts, utilizadores, ou categorias"
-      placeholder: "escreva aqui o seu termo de busca"
       no_results: "Não foi encontrado nenhum resultado."
       searching: "A procurar..."
-      prefer:
-        user: "a busca vai dar preferência a resultados de @{{username}}"
-        category: "a busca vai dar preferência a resultados de {{category}}"
     site_map: "ir para outra lista de tópicos ou categorias"
     go_back: 'voltar atrás'
     current_user: 'ir para a sua página de utilizador'
@@ -486,6 +464,7 @@ pt:
         one: '1 tópico não lido'
         other: '{{count}} tópicos não lidos'
       title: 'Tópico'
+      loading_more: "Carregando mais tópicos..."
       loading: 'A Carregar tópico...'
       invalid_access:
         title: "Tópico é particular"
@@ -533,10 +512,10 @@ pt:
           '2_4': 'Receberá notificações porque inseriu uma resposta neste tópico.'
           '2_2': 'Receberá notificações porque está a monitorizar este tópico.'
           '2': 'Receberá notificações porque <a href="/users/{{username}}/preferences">leu este tópico</a>.'
-          '1': 'Receberá notificações apenas se alguém mencionar o seu @nome ou responder à sua mensagem.'
           '1_2': 'Receberá notificações apenas se alguém mencionar o seu @nome ou responder à sua mensagem.'
-          '0': 'Está a ignorar todas as notificações para este tópico.'
+          '1': 'Receberá notificações apenas se alguém mencionar o seu @nome ou responder à sua mensagem.'
           '0_2': 'Está a ignorar todas as notificações para este tópico.'
+          '0': 'Está a ignorar todas as notificações para este tópico.'
         watching:
           title: "Observar"
         tracking:
@@ -558,7 +537,6 @@ pt:
         invisible: "Tornar Invisível"
         visible: "Tornar Visível"
         reset_read: "Repor Data de Leitura"
-        convert_to_topic: "Converter para Tópico Regular"
       reply:
         title: 'Responder'
         help: 'começa a compor uma resposta a este tópico'
@@ -758,7 +736,6 @@ pt:
       none: '(sem categoria)'
       choose: 'Selecione uma category&hellip;'
       edit: 'editar'
-      edit_long: "Editar Categoria"
       view: 'Visualizar Tópicos na Categoria'
       general: 'Geral'
       settings: 'Configurações'
@@ -778,7 +755,6 @@ pt:
       delete_confirm: "Tem certeza que quer apagar esta categoria?"
       delete_error: "Houve um erro ao apagar a categoria."
       list: "Lista de Categorias"
-      no_description: "Não há descrição para esta categoria, edite a definição do tópico."
       change_in_category_topic: "Editar Descrição"
       already_used: 'Esta cor já foi usada para outra categoria'
       security: "Segurança"
@@ -791,6 +767,7 @@ pt:
     flagging:
       action: 'Sinalizar Postagem'
       take_action: "Tomar Atitude"
+      notify_action: 'Mensagem privada'
       delete_spammer: "Apagar Spammer"
       delete_confirm: "Vai apagar <b>%{posts}</b> mensagens e <b>%{topics}</b> tópicos deste utilizador, remover a sua conta, bloquear acessos do seu endereço IP <b>%{ip_address}</b>, e adicionar o seu endereço de email <b>%{email}</b> a uma lista negra. Tem a certeza que este utilizador é de facto um spammer?"
       yes_delete_spammer: "Sim, Apagar Spammer"
@@ -824,6 +801,8 @@ pt:
       hot:
         title: "Quente"
         help: "uma seleção dos tópicos mais quentes"
+      starred:
+        title: "Favoritos"
       read:
         title: "Lido"
         help: "tópicos que leu"
@@ -956,6 +935,11 @@ pt:
         info_html: "A sua chave de API permitirá a criação e edição de tópicos usando requests JSON."
         all_users: "Todos os Utilizadores"
         note_html: "Guarde esta chave <strong>secretamente</strong>, todos os utilizadores que tiverem acesso a ela poderão criar mensagens arbitrárias no fórum como qualquer utilizador."
+      backups:
+        title: "Backups"
+        menu:
+          backups: "Backups"
+          logs: "Logs"
       customize:
         title: "Personalizar"
         long_title: "Personalizações do Site"
@@ -972,7 +956,6 @@ pt:
         new_style: "Novo Estilo"
         delete: "Apagar"
         delete_confirm: "Apagar esta personalização?"
-        about: "Personalizações do Site permitem que modifique as folhas de estilo e os cabeçalhos do site. Escolha um ou crie um e comece a editar."
       email:
         title: "Email"
         settings: "Configurações"
@@ -1163,7 +1146,6 @@ pt:
       site_settings:
         show_overriden: 'Apenas mostrar valores alterados'
         title: 'Configurações do Site'
-        reset: 'restaurar valores padrão'
         none: 'nenhum'
         no_results: "Não foi encontrado nenhum resultado."
         categories:

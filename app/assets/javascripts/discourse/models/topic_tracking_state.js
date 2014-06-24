@@ -17,6 +17,13 @@ Discourse.TopicTrackingState = Discourse.Model.extend({
         tracker.incrementMessageCount();
       }
 
+      if (data.message_type === "new_topic"){
+        var ignored_categories = Discourse.User.currentProp("muted_category_ids");
+        if(_.include(ignored_categories, data.payload.category_id)){
+          return;
+        }
+      }
+
       if (data.message_type === "new_topic" || data.message_type === "unread" || data.message_type === "read") {
         tracker.notify(data);
         var old = tracker.states["t" + data.topic_id];
@@ -134,7 +141,8 @@ Discourse.TopicTrackingState = Discourse.Model.extend({
     return _.chain(this.states)
       .where({last_read_post_number: null})
       .where(function(topic) {
-        return topic.notification_level === null ||
+        // !0 is true
+        return (topic.notification_level !== 0 && !topic.notification_level) ||
                topic.notification_level >= Discourse.Topic.NotificationLevel.TRACKING;
       })
       .where(function(topic){ return topic.category_name === category_name || !category_name;})

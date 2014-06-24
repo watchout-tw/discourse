@@ -42,12 +42,20 @@ module SiteSettingExtension
     @lists ||= []
   end
 
+  def choices
+    @choices ||= {}
+  end
+
   def hidden_settings
     @hidden_settings ||= []
   end
 
   def refresh_settings
     @refresh_settings ||= []
+  end
+
+  def validators
+    @validators ||= {}
   end
 
   def setting(name_arg, default = nil, opts = {})
@@ -60,7 +68,12 @@ module SiteSettingExtension
         enum = opts[:enum]
         enums[name] = enum.is_a?(String) ? enum.constantize : enum
       end
-      if opts[:list]
+      if opts[:choices]
+        choices.has_key?(name) ?
+          choices[name].concat(opts[:choices]) :
+          choices[name] = opts[:choices]
+      end
+      if opts[:type] == 'list'
         lists << name
       end
       if opts[:hidden]
@@ -68,6 +81,10 @@ module SiteSettingExtension
       end
       if opts[:refresh]
         refresh_settings << name
+      end
+
+      if validator_type = validator_for(opts[:type] || get_data_type(name, defaults[name]))
+        validators[name] = {class: validator_type, opts: opts}
       end
 
       current[name] = current_value
@@ -111,12 +128,17 @@ module SiteSettingExtension
       .map do |s, v|
         value = send(s)
         type = types[get_data_type(s, value)]
-        {setting: s,
-         description: description(s),
-         default: v,
-         type: type.to_s,
-         value: value.to_s,
-         category: categories[s]}.merge( type == :enum ? {valid_values: enum_class(s).values, translate_names: enum_class(s).translate_names?} : {})
+        opts = {
+          setting: s,
+          description: description(s),
+          default: v,
+          type: type.to_s,
+          value: value.to_s,
+          category: categories[s]
+        }
+        opts.merge!({valid_values: enum_class(s).values, translate_names: enum_class(s).translate_names?}) if type == :enum
+        opts[:choices] = choices[s] if choices.has_key? s
+        opts
       end
   end
 
@@ -218,6 +240,13 @@ module SiteSettingExtension
       raise Discourse::InvalidParameters.new(:value) unless enum_class(name).valid_value?(val)
     end
 
+    if v = validators[name]
+      validator = v[:class].new(v[:opts])
+      unless validator.valid_value?(val)
+        raise Discourse::InvalidParameters.new(validator.error_message)
+      end
+    end
+
     provider.save(name, val, type)
     current[name] = convert(val, type)
     clear_cache!
@@ -295,6 +324,16 @@ module SiteSettingExtension
     else
       raise ArgumentError.new :type
     end
+  end
+
+  def validator_for(type_name)
+    @validator_mapping ||= {
+      'email'        => EmailSettingValidator,
+      'username'     => UsernameSettingValidator,
+      types[:fixnum] => IntegerSettingValidator,
+      types[:string] => StringSettingValidator
+    }
+    @validator_mapping[type_name]
   end
 
 

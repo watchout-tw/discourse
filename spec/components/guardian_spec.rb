@@ -232,6 +232,12 @@ describe Guardian do
       Guardian.new(user).can_invite_to_forum?.should be_false
     end
 
+    it 'returns false when the local logins are disabled' do
+      SiteSetting.stubs(:enable_local_logins).returns(false)
+      Guardian.new(user).can_invite_to_forum?.should be_false
+      Guardian.new(moderator).can_invite_to_forum?.should be_false
+    end
+
   end
 
   describe 'can_invite_to?' do
@@ -254,6 +260,12 @@ describe Guardian do
     it 'returns false when the site requires approving users and is regular' do
       SiteSetting.expects(:must_approve_users?).returns(true)
       Guardian.new(coding_horror).can_invite_to?(topic).should be_false
+    end
+
+    it 'returns false when local logins are disabled' do
+      SiteSetting.stubs(:enable_local_logins).returns(false)
+      Guardian.new(moderator).can_invite_to?(topic).should be_false
+      Guardian.new(user).can_invite_to?(topic).should be_false
     end
 
   end
@@ -300,6 +312,15 @@ describe Guardian do
         group.save
 
         Guardian.new(user).can_see?(topic).should be_true
+      end
+
+      it "restricts private topics" do
+        user.save!
+        private_topic = Fabricate(:private_message_topic, user: user)
+        Guardian.new(private_topic.user).can_see?(private_topic).should be_true
+        Guardian.new(build(:user)).can_see?(private_topic).should be_false
+        Guardian.new(moderator).can_see?(private_topic).should be_false
+        Guardian.new(admin).can_see?(private_topic).should be_true
       end
     end
 
@@ -405,6 +426,8 @@ describe Guardian do
         SiteSetting.stubs(:min_trust_to_create_topic).returns(1)
         Guardian.new(build(:user, trust_level: 1)).can_create?(Topic,Fabricate(:category)).should be_true
         Guardian.new(build(:user, trust_level: 2)).can_create?(Topic,Fabricate(:category)).should be_true
+        Guardian.new(build(:admin, trust_level: 0)).can_create?(Topic,Fabricate(:category)).should be_true
+        Guardian.new(build(:moderator, trust_level: 0)).can_create?(Topic,Fabricate(:category)).should be_true
       end
     end
 
@@ -608,7 +631,30 @@ describe Guardian do
         Guardian.new.can_edit?(post).should be_false
       end
 
+      it 'returns false when not logged in also for wiki post' do
+        post.wiki = true
+        Guardian.new.can_edit?(post).should be_false
+      end
+
       it 'returns true if you want to edit your own post' do
+        Guardian.new(post.user).can_edit?(post).should be_true
+      end
+
+      it "returns false if the post is hidden due to flagging and it's too soon" do
+        post.hidden = true
+        post.hidden_at = Time.now
+        Guardian.new(post.user).can_edit?(post).should be_false
+      end
+
+      it "returns true if the post is hidden due to flagging and it been enough time" do
+        post.hidden = true
+        post.hidden_at = (SiteSetting.cooldown_minutes_after_hiding_posts + 1).minutes.ago
+        Guardian.new(post.user).can_edit?(post).should be_true
+      end
+
+      it "returns true if the post is hidden due to flagging and it's got a nil `hidden_at`" do
+        post.hidden = true
+        post.hidden_at = nil
         Guardian.new(post.user).can_edit?(post).should be_true
       end
 
@@ -617,13 +663,30 @@ describe Guardian do
         Guardian.new(post.user).can_edit?(post).should be_false
       end
 
+      it 'returns false if another regular user tries to edit a soft deleted wiki post' do
+        post.wiki = true
+        post.user_deleted = true
+        Guardian.new(coding_horror).can_edit?(post).should be_false
+      end
+
       it 'returns false if you are trying to edit a deleted post' do
         post.deleted_at = 1.day.ago
         Guardian.new(post.user).can_edit?(post).should be_false
       end
 
+      it 'returns false if another regular user tries to edit a deleted wiki post' do
+        post.wiki = true
+        post.deleted_at = 1.day.ago
+        Guardian.new(coding_horror).can_edit?(post).should be_false
+      end
+
       it 'returns false if another regular user tries to edit your post' do
         Guardian.new(coding_horror).can_edit?(post).should be_false
+      end
+
+      it 'returns true if another regular user tries to edit wiki post' do
+        post.wiki = true
+        Guardian.new(coding_horror).can_edit?(post).should be_true
       end
 
       it 'returns true as a moderator' do
@@ -658,6 +721,35 @@ describe Guardian do
 
         it 'returns false for another regular user trying to edit your post' do
           Guardian.new(coding_horror).can_edit?(old_post).should == false
+        end
+
+        it 'returns true for another regular user trying to edit a wiki post' do
+          old_post.wiki = true
+          Guardian.new(coding_horror).can_edit?(old_post).should be_true
+        end
+
+        it 'returns false when another user has too low trust level to edit wiki post' do
+          SiteSetting.stubs(:min_trust_to_edit_wiki_post).returns(2)
+          post.wiki = true
+          coding_horror.trust_level = 1
+
+          Guardian.new(coding_horror).can_edit?(post).should be_false
+        end
+
+        it 'returns true when another user has adequate trust level to edit wiki post' do
+          SiteSetting.stubs(:min_trust_to_edit_wiki_post).returns(2)
+          post.wiki = true
+          coding_horror.trust_level = 2
+
+          Guardian.new(coding_horror).can_edit?(post).should be_true
+        end
+
+        it 'returns true for post author even when he has too low trust level to edit wiki post' do
+          SiteSetting.stubs(:min_trust_to_edit_wiki_post).returns(2)
+          post.wiki = true
+          post.user.trust_level = 1
+
+          Guardian.new(post.user).can_edit?(post).should be_true
         end
       end
     end
@@ -1648,6 +1740,20 @@ describe Guardian do
           end
         end
       end
+    end
+  end
+
+  describe 'can_wiki?' do
+    it 'returns false for regular user' do
+      Guardian.new(coding_horror).can_wiki?.should be_false
+    end
+
+    it 'returns true for admin user' do
+      Guardian.new(admin).can_wiki?.should be_true
+    end
+
+    it 'returns true for elder user' do
+      Guardian.new(elder).can_wiki?.should be_true
     end
   end
 end

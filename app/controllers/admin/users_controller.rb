@@ -1,12 +1,12 @@
 require_dependency 'user_destroyer'
 require_dependency 'admin_user_index_query'
-require_dependency 'boost_trust_level'
 
 class Admin::UsersController < Admin::AdminController
 
   before_filter :fetch_user, only: [:suspend,
                                     :unsuspend,
                                     :refresh_browsers,
+                                    :log_out,
                                     :revoke_admin,
                                     :grant_admin,
                                     :revoke_moderation,
@@ -53,6 +53,12 @@ class Admin::UsersController < Admin::AdminController
     @user.suspended_at = nil
     @user.save!
     StaffActionLogger.new(current_user).log_user_unsuspend(@user)
+    render nothing: true
+  end
+
+  def log_out
+    @user.auth_token = nil
+    @user.save!
     render nothing: true
   end
 
@@ -104,8 +110,9 @@ class Admin::UsersController < Admin::AdminController
 
   def trust_level
     guardian.ensure_can_change_trust_level!(@user)
-    logger = StaffActionLogger.new(current_user)
-    BoostTrustLevel.new(user: @user, level: params[:level], logger: logger).save!
+    level = TrustLevel.levels[params[:level].to_i]
+    @user.change_trust_level!(level, log_action_for: current_user)
+
     render_serialized(@user, AdminUserSerializer)
   end
 

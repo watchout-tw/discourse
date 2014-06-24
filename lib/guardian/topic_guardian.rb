@@ -7,9 +7,10 @@ module TopicGuardian
 
   # Creating Methods
   def can_create_topic?(parent)
-    user &&
-    user.trust_level >= SiteSetting.min_trust_to_create_topic.to_i &&
-    can_create_post?(parent)
+    is_staff? ||
+    (user &&
+      user.trust_level >= SiteSetting.min_trust_to_create_topic.to_i &&
+      can_create_post?(parent))
   end
 
   def can_create_topic_on_category?(category)
@@ -45,20 +46,18 @@ module TopicGuardian
   end
 
   def can_see_topic?(topic)
-    if topic
-      is_staff? ||
+    return false unless topic
+    return true if is_admin?
+    return false if topic.deleted_at
 
-      topic.deleted_at.nil? &&
+    # NOTE
+    # At the moment staff can see PMs, there is some talk of restricting this, however
+    # we still need to allow staff to join PMs for the case of flagging ones
 
-      # not secure, or I can see it
-      (not(topic.read_restricted_category?) || can_see_category?(topic.category)) &&
+    # not secure, or I can see it
+    (not(topic.read_restricted_category?) || can_see_category?(topic.category)) &&
+    # not private, or I am allowed (or is staff)
+    (not(topic.private_message?) || (authenticated? && (is_admin? || topic.all_allowed_users.where(id: @user.id).exists?)))
 
-      # NOTE
-      # At the moment staff can see PMs, there is some talk of restricting this, however
-      # we still need to allow staff to join PMs for the case of flagging ones
-
-      # not private, or I am allowed (or is staff)
-      (not(topic.private_message?) || authenticated? && (topic.all_allowed_users.where(id: @user.id).exists? || is_staff?))
-    end
   end
 end

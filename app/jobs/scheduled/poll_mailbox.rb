@@ -8,7 +8,7 @@ require_dependency 'email/message_builder'
 
 module Jobs
   class PollMailbox < Jobs::Scheduled
-    every 5.minutes
+    every SiteSetting.pop3s_polling_period_mins.minutes
     sidekiq_options retry: false
     include Email::BuildEmailHelper
 
@@ -27,8 +27,10 @@ module Jobs
         message = Mail::Message.new(mail_string)
         client_message = RejectionMailer.send_trust_level(message.from, message.body)
         Email::Sender.new(client_message, :email_reject_trust_level).send
-      rescue Email::Receiver::ProcessingError
-        # all other ProcessingErrors are ok to be dropped
+      rescue Email::Receiver::ProcessingError => e
+        # inform admins about the error
+        data = { limit_once_per: false, message_params: { source: mail, error: e }}
+        GroupMessage.create(Group[:admins].name, :email_error_notification, data)
       rescue StandardError => e
         # inform admins about the error
         data = { limit_once_per: false, message_params: { source: mail, error: e }}
@@ -39,7 +41,9 @@ module Jobs
     end
 
     def poll_pop3s
-      Net::POP3.enable_ssl(OpenSSL::SSL::VERIFY_NONE)
+      if !SiteSetting.pop3s_polling_insecure
+        Net::POP3.enable_ssl(OpenSSL::SSL::VERIFY_NONE)
+      end
       Net::POP3.start(SiteSetting.pop3s_polling_host,
                       SiteSetting.pop3s_polling_port,
                       SiteSetting.pop3s_polling_username,

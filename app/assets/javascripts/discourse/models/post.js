@@ -65,20 +65,34 @@ Discourse.Post = Discourse.Model.extend({
   postElementId: Discourse.computed.fmt('post_number', 'post_%@'),
 
   bookmarkedChanged: function() {
-    Discourse.ajax("/posts/" + this.get('id') + "/bookmark", {
+    Discourse.Post.bookmark(this.get('id'), this.get('bookmarked'))
+             .then(null, function (error) {
+               if (error && error.responseText) {
+                 bootbox.alert($.parseJSON(error.responseText).errors[0]);
+               } else {
+                 bootbox.alert(I18n.t('generic_error'));
+               }
+             });
+  }.observes('bookmarked'),
+
+  wikiChanged: function() {
+    var self = this;
+
+    Discourse.ajax('/posts/' + this.get('id') + '/wiki', {
       type: 'PUT',
       data: {
-        bookmarked: this.get('bookmarked') ? true : false
+        wiki: this.get('wiki') ? true : false
       }
-    }).then(null, function (error) {
+    }).then(function() {
+      self.incrementProperty('version');
+    }, function(error) {
       if (error && error.responseText) {
         bootbox.alert($.parseJSON(error.responseText).errors[0]);
       } else {
         bootbox.alert(I18n.t('generic_error'));
       }
     });
-
-  }.observes('bookmarked'),
+  }.observes('wiki'),
 
   internalLinks: function() {
     if (this.blank('link_counts')) return null;
@@ -284,7 +298,8 @@ Discourse.Post = Discourse.Model.extend({
     var post = this;
     Object.keys(otherPost).forEach(function (key) {
       var value = otherPost[key];
-      var oldValue = post.get(key);
+      // optimisation
+      var oldValue = post[key];
 
       if(!value) {
         value = null;
@@ -299,8 +314,8 @@ Discourse.Post = Discourse.Model.extend({
       if (typeof value !== "function" && oldValue !== value) {
 
         // wishing for an identity map
-        if(key === "reply_to_user") {
-          skip = Em.get(value, "username") === Em.get(oldValue, "username");
+        if(key === "reply_to_user" && value && oldValue) {
+          skip = value.username === oldValue.username || Em.get(value, "username") === Em.get(oldValue, "username");
         }
 
         if(!skip) {
@@ -381,7 +396,17 @@ Discourse.Post = Discourse.Model.extend({
     var topic = this.get('topic');
     return !topic.isReplyDirectlyBelow(this);
 
-  }.property('reply_count')
+  }.property('reply_count'),
+
+  expandHidden: function() {
+    var self = this;
+    return Discourse.ajax("/posts/" + this.get('id') + "/cooked.json").then(function (result) {
+      self.setProperties({
+        cooked: result.cooked,
+        cooked_hidden: false
+      });
+    });
+  }
 });
 
 Discourse.Post.reopenClass({
@@ -389,11 +414,12 @@ Discourse.Post.reopenClass({
   createActionSummary: function(result) {
     if (result.actions_summary) {
       var lookup = Em.Object.create();
+      // this area should be optimized, it is creating way too many objects per post
       result.actions_summary = result.actions_summary.map(function(a) {
         a.post = result;
         a.actionType = Discourse.Site.current().postActionTypeById(a.id);
         var actionSummary = Discourse.ActionSummary.create(a);
-        lookup.set(a.actionType.get('name_key'), actionSummary);
+        lookup[a.actionType.name_key] = actionSummary;
         return actionSummary;
       });
       result.set('actionByName', lookup);
@@ -436,8 +462,10 @@ Discourse.Post.reopenClass({
     return Discourse.ajax("/posts/" + postId + ".json").then(function (result) {
       return Discourse.Post.create(result);
     });
+  },
+
+  bookmark: function(postId, bookmarked) {
+    return Discourse.ajax("/posts/" + postId + "/bookmark", { type: 'PUT', data: { bookmarked: bookmarked } });
   }
 
 });
-
-

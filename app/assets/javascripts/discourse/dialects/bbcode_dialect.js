@@ -105,8 +105,10 @@ replaceBBCodeParams("size", function(param, contents) {
 Discourse.Dialect.replaceBlock({
   start: /(\[code\])([\s\S]*)/igm,
   stop: '[/code]',
+  rawContents: true,
 
   emitter: function(blockContents) {
-    return ['p', ['pre'].concat(blockContents.join("\n"))];
+    var inner = blockContents.join("\n").replace(/^\s+/,'');
+    return ['p', ['pre', ['code', {'class': Discourse.SiteSettings.default_code_lang}, inner]]];
   }
 });

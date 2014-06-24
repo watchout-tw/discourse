@@ -16,13 +16,19 @@
 //= require ./discourse/models/model
 //= require ./discourse/models/user_action
 //= require ./discourse/models/composer
+//= require ./discourse/models/topic
 //= require ./discourse/controllers/controller
 //= require ./discourse/controllers/object_controller
+//= require ./discourse/controllers/navigation/default
+//= require ./discourse/views/text-field
 //= require ./discourse/views/modal/modal_body_view
 //= require ./discourse/views/modal/flag_view
-//= require ./discourse/views/combobox_view
-//= require ./discourse/views/buttons/button_view
-//= require ./discourse/views/buttons/dropdown_button_view
+//= require ./discourse/views/combo-box
+//= require ./discourse/views/button
+//= require ./discourse/views/dropdown-button
+//= require ./discourse/views/notifications-button
+//= require ./discourse/views/topic-notifications-button
+//= require ./discourse/views/pagedown-preview
 //= require ./discourse/routes/discourse_route
 //= require ./discourse/routes/discourse_restricted_user_route
 

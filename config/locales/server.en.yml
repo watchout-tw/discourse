@@ -39,6 +39,9 @@ en:
     embed:
       load_from_remote: "There was an error loading that post."
 
+  bulk_invite:
+    file_should_be_csv: "The uploaded file should be of csv format."
+
   backup:
     operation_already_running: "An operation is currently running. Can't start a new job right now."
     backup_file_should_be_tar_gz: "The backup file should be a .tar.gz archive."
@@ -52,8 +55,8 @@ en:
     other: "We're sorry, but new users are temporarily limited to %{count} replies in the same topic."
 
   embed:
-    start_discussion: "Begin the Discussion"
-    continue: "Continue the Discussion"
+    start_discussion: "Start Discussion"
+    continue: "Continue Discussion"
     more_replies:
       one: "1 more reply"
       other: "%{count} more replies"
@@ -61,7 +64,7 @@ en:
     loading: "Loading Discussion..."
     permalink: "Permalink"
     imported_from: "This is a companion discussion topic for the original entry at %{link}"
-    in_reply_to: "reply to %{username}"
+    in_reply_to: "▶ %{username}"
     replies:
       one: "1 reply"
       other: "%{count} replies"
@@ -211,6 +214,10 @@ en:
               common: "is one of the 10000 most common passwords. Please use a more secure password."
             ip_address:
               signup_not_allowed: "Signup is not allowed from this account."
+        color_scheme_color:
+          attributes:
+            hex:
+              invalid: "is not a valid color"
 
   user_profile:
     no_info_me: "<div class='missing-profile'>the About Me field of your profile is currently blank, <a href='/users/%{username_lower}/preferences/about-me'>would you like to fill it out?</a></div>"
@@ -416,6 +423,10 @@ en:
   archetypes:
     regular:
       title: "Regular Topic"
+    banner:
+      message:
+        make: "This topic is now a banner topic. It will appear at the top of every page until it is dismissed by the user."
+        remove: "This topic is not a banner topic anymore. It will no longer appear at the top of every page."
 
   unsubscribed:
     title: 'Unsubscribed'
@@ -514,6 +525,9 @@ en:
     sidekiq_warning: 'Sidekiq is not running. Many tasks, like sending emails, are executed asynchronously by sidekiq. Please ensure at least one sidekiq process is running. <a href="https://github.com/mperham/sidekiq" target="_blank">Learn about Sidekiq here</a>.'
     queue_size_warning: 'The number of queued jobs is %{queue_size}, which is high. This could indicate a problem with the Sidekiq process(es), or you may need to add more Sidekiq workers.'
     memory_warning: 'Your server is running with less than 1 GB of total memory. At least 1 GB of memory is recommended.'
+    enable_google_logins_warning: "You are using a deprecated version of Google's OpenID authentication. Google will be ending support for OpenID by April 20, 2015. Start using Google OAuth2 as soon as possible. <a href='https://meta.discourse.org/t/configuring-google-login-for-discourse/15858' target='_blank'>See this guide to learn more</a>"
+    both_googles_warning: "You have both enable_google_logins and enable_google_oauth2_logins checked in the site settings. Disable enable_google_logins."
+    google_oauth2_config_warning: 'The server is configured to allow signup and log in with Google OAuth2 (enable_google_oauth2_logins), but the client id and client secret values are not set. Go to <a href="/admin/site_settings">the Site Settings</a> and update the settings. <a href="https://meta.discourse.org/t/configuring-google-login-for-discourse/15858" target="_blank">See this guide to learn more</a>.'
     facebook_config_warning: 'The server is configured to allow signup and log in with Facebook (enable_facebook_logins), but the app id and app secret values are not set. Go to <a href="/admin/site_settings">the Site Settings</a> and update the settings. <a href="https://meta.discourse.org/t/configuring-facebook-login-for-discourse/13394" target="_blank">See this guide to learn more</a>.'
     twitter_config_warning: 'The server is configured to allow signup and log in with Twitter (enable_twitter_logins), but the key and secret values are not set. Go to <a href="/admin/site_settings">the Site Settings</a> and update the settings. <a href="https://meta.discourse.org/t/configuring-twitter-login-for-discourse/13395" target="_blank">See this guide to learn more</a>.'
     github_config_warning: 'The server is configured to allow signup and log in with GitHub (enable_github_logins), but the client id and secret values are not set. Go to <a href="/admin/site_settings">the Site Settings</a> and update the settings. <a href="https://meta.discourse.org/t/configuring-github-login-for-discourse/13745" target="_blank">See this guide to learn more</a>.'
@@ -578,6 +592,9 @@ en:
     tos_signup_form_message:
       title: "Signup Form: Terms of Service Message"
       description: "The message that will appear beside a checkbox on the signup form if the tos_accept_required site setting is enabled."
+    notification_email_top:
+      title: "Notification Email Top"
+      description: "A message that will be displayed at the top of all notification emails."
 
   site_settings:
     default_locale: "The default language of this Discourse instance (ISO 639-1 Code)"
@@ -613,6 +630,7 @@ en:
     max_image_width: "Maximum allowed width of images in a post"
     max_image_height: "Maximum allowed height of images in a post"
     category_featured_topics: "Number of topics displayed per category on the /categories page. After changing this value, it takes up to 15 minutes for the categories page to update."
+    fixed_category_positions: "If checked, you will be able to arrange categories into a fixed order. If unchecked, categories are listed in order of activity."
     add_rel_nofollow_to_user_content: "Add rel nofollow to all submitted user content, except for internal links (including parent domains) changing this requires you update all your baked markdown with: \"rake posts:rebake\""
     exclude_rel_nofollow_domains: "A pipe-delimited list of domains where nofollow is not added (tld.com will automatically allow sub.tld.com as well)"
 
@@ -625,6 +643,7 @@ en:
     digest_logo_url: "The logo used in your site's email digest. If left blank `logo_url` will be used. eg: http://example.com/logo.png"
     logo_small_url: "The small logo for your site used when scrolling down on topics eg: http://example.com/logo-small.png"
     favicon_url: "A favicon for your site, see http://en.wikipedia.org/wiki/Favicon"
+    mobile_logo_url: "The logo used for mobile browsers. If left blank, `logo_url` will be used. eg: http://example.com/uploads/default/logo.png"
     apple_touch_icon_url: "Icon used for Apple touch devices. Recommended size is 144px by 144px."
 
     notification_email: "The return email address used when sending system emails such as notifying users of lost passwords, new accounts etc"
@@ -657,7 +676,7 @@ en:
 
     traditional_markdown_linebreaks: "Use traditional linebreaks in Markdown, which require two trailing spaces for a linebreak"
     post_undo_action_window_mins: "Number of seconds users are allowed to reverse actions on a post (like, flag, etc)"
-    must_approve_users: "Admins must approve all users before they gain access"
+    must_approve_users: "Admins must approve all new user signups before they gain access"
     ga_tracking_code: "Google analytics (ga.js) tracking code code, eg: UA-12345678-9; see http://google.com/analytics"
     ga_domain_name: "Google analytics (ga.js) domain name, eg: mysite.com; see http://google.com/analytics"
     ga_universal_tracking_code: "Google Universal Analytics (analytics.js) tracking code code, eg: UA-12345678-9; see http://google.com/analytics"
@@ -667,7 +686,8 @@ en:
     allow_moderators_to_create_categories: "Allow moderators to create new categories"
     top_menu: "Determine which items appear in the homepage navigation, and in what order. Example latest|new|unread|starred|categories|top|read|posted"
     post_menu: "Determine which items appear on the post menu, and in what order. Example like|edit|flag|delete|share|bookmark|reply"
-    share_links: "Determine which items appear on the share dialog, and in what order. Example twitter|facebook|google+|email"
+    post_menu_hidden_items: "The menu items to hide by default in the post menu unless an ellipsis is clicked on."
+    share_links: "Determine which items appear on the share dialog, and in what order."
     track_external_right_clicks: "Track external links that are right clicked (eg: open in new tab) disabled by default because it rewrites URLs"
     topics_per_page: "How many topics loaded by default on the topics list page, and when loading more topics"
     posts_per_page: "How many posts loaded by default on a topic page, and when loading more posts"
@@ -700,6 +720,7 @@ en:
     login_required: "Require authentication to read posts"
 
     min_username_length: "Minimum username length. (Does not apply if global nickname uniqueness is forced)"
+    max_username_length: "Maximum username length. (Does not apply if global nickname uniqueness is forced)"
 
     min_password_length: "Minimum password length."
     block_common_passwords: "Don't allow passwords that are in the 10000 most common passwords."
@@ -712,8 +733,12 @@ en:
     sso_overrides_name: "Overrides local name with external site name from SSO payload (WARNING: discrepancies can occur due to normalization of local names)"
 
     enable_local_logins: "Enable traditional, local username and password authentication"
-    enable_google_logins: "Enable Google authentication"
+    enable_google_logins: "(deprecated) Enable Google authentication. This is the OpenID method of authentication which Google has deprecated. New installs will NOT work with this. Use Google Oauth2 instead. Existing installs must move to Google Oauth2 by April 20, 2015."
     enable_yahoo_logins: "Enable Yahoo authentication"
+
+    enable_google_oauth2_logins: "Enable Google Oauth2 authentication. This is the method of authentication that Google currently supports. Requires key and secret."
+    google_oauth2_client_id: "Client ID of your Google application."
+    google_oauth2_client_secret: "Client secret of your Google application."
 
     enable_twitter_logins: "Enable Twitter authentication, requires twitter_consumer_key and twitter_consumer_secret"
     twitter_consumer_key: "Consumer key for Twitter authentication, registered at http://dev.twitter.com"
@@ -727,7 +752,7 @@ en:
     github_client_id: "Client id for Github authentication, registered at https://github.com/settings/applications"
     github_client_secret: "Client secret for Github authentication, registered at https://github.com/settings/applications"
 
-    allow_restore: "Allow restore, which can replace ALL site data! Leave false unless you plan to do restore a backup"
+    allow_restore: "Allow restore, which can replace ALL site data! Leave false unless you plan to restore a backup"
     maximum_backups: "The maximum amount of backups to keep on disk. Older backups are automatically deleted"
     backup_daily: "Automatically create a site backup once a day"
     enable_s3_backups: "Upload backups to S3 when complete. Make sure you have filled in your s3 credentials."
@@ -748,6 +773,7 @@ en:
     max_private_messages_per_day: "The maximum amount of private messages users can create per day"
 
     suggested_topics: "Number of suggested topics shown at the bottom of a topic"
+    limit_suggested_to_category: "Only show topics from the current category in suggested topics"
 
     clean_up_uploads: "Remove orphaned uploads to prevent illegal hosting. WARNING: you might want to make a backup of your /uploads directory before enabled this setting."
     clean_orphan_uploads_grace_period_hours: "Grace period (in hours) before an orphan upload is removed."
@@ -776,6 +802,8 @@ en:
     regular_requires_topic_reply_count: "How many topics a basic user must reply to before promotion to regular (2) trust level"
 
     min_trust_to_create_topic: "The minimum trust level required to create a new topic."
+
+    min_trust_to_edit_wiki_post: "The minimum trust level required to edit post marked as wiki."
 
     newuser_max_links: "How many links a new user can add to a post"
     newuser_max_images: "How many images a new user can add to a post"
@@ -825,6 +853,8 @@ en:
     reply_by_email_address: "Template for reply by email incoming email address, for example: %{reply_key}@reply.example.com or replies+%{reply_key}@example.com"
 
     pop3s_polling_enabled: "Poll via POP3S for email replies"
+    pop3s_polling_insecure: "Poll using plain text POP3 without SSL"
+    pop3s_polling_period_mins: "The period in minutes between checking the POP3S account for email. NOTE: requires restart."
     pop3s_polling_port: "The port to poll a POP3S account on"
     pop3s_polling_host: "The host to poll for email via POP3S"
     pop3s_polling_username: "The username for the POP3S account to poll for email"
@@ -845,6 +875,7 @@ en:
 
     allow_uploaded_avatars: "Allow users to upload their custom avatars"
     allow_animated_avatars: "Allow users to use animated gif for avatars. WARNING: it is highly recommended to run the avatars:regenerate rake task after changing that setting."
+    automatically_download_gravatars: "Download gravatars for users upon account creation or email change"
     digest_topics: "The maximum amount of topics to display in an email digest"
     digest_min_excerpt_length: "How many characters we're aiming for for each post in the email digest"
     default_digest_email_frequency: "How often users receive digest emails by default. They can change this setting in their preferences."
@@ -852,6 +883,7 @@ en:
 
     detect_custom_avatars: "Whether or not to check that users have uploaded custom avatars"
     max_daily_gravatar_crawls: "The maximum amount of times Discourse will check gravatar for custom avatars in a day"
+    public_user_custom_fields: "A whitelist of custom fields for a user that can be shown publically."
 
     allow_profile_backgrounds: "Allows users to upload profile backgrounds"
 
@@ -861,9 +893,10 @@ en:
 
     dominating_topic_minimum_percent: "What percentage of posts a user has to make in a topic before we consider it dominating."
     suppress_uncategorized_badge: "Don't show the badge for uncategorized topics in topic lists"
-    min_posts_for_search_in_topic: "Disable search within topic if topics have less than minimum number posts"
 
     global_notice: "Display an URGENT, EMERGENCY global banner notice to all visitors, change to blank to hide it (HTML allowed)."
+
+    disable_edit_notifications: "Used to disable edit notifications when you activate the 'download_remote_images_to_local' site setting."
 
     enable_names: "Allow users to show their full names"
     display_name_on_posts: "Also show a user's full name on their posts"
@@ -874,16 +907,32 @@ en:
     autohighlight_all_code: "Apply code highlighting to all preformatted code blocks even when they didn't specify the language"
 
     embeddable_host: "Host that can embed the comments from this Discourse forum"
-    feed_polling_enabled: "Whether to import a RSS/ATOM feed as posts"
-    feed_polling_url: "URL of RSS/ATOM feed to import"
-    embed_by_username: "Discourse username of the user who creates the topics"
-    embed_truncate: "Truncate the imported posts"
-    embed_category: "Category of created topics"
+    feed_polling_enabled: "EMBEDDING ONLY: Whether to embed a RSS/ATOM feed as posts"
+    feed_polling_url: "EMBEDDING ONLY: URL of RSS/ATOM feed to embed"
+    embed_by_username: "Discourse username of the user who creates the embedded topics"
+    embed_username_key_from_feed: "Key to pull discourse username from feed"
+    embed_truncate: "Truncate the embedded posts"
+    embed_category: "Category of embedded topics"
     embed_post_limit: "Maximum number of posts to embed"
     embed_whitelist_selector: "css selector for elements that are allowed in embeds"
     embed_blacklist_selector: "css selector for elements that are removed from embeds"
     tos_accept_required: "If enabled, users will need to check a box on the signup form to confirm that they accept the terms of service. Edit 'Signup Form: Terms of Service Message' in the Content tab to change the message."
     notify_about_flags_after: "If there are flags that haven't been handled after this many hours, send an email to the contact_email. Set to 0 to disable."
+    enable_cdn_js_debugging: "Allow /logs to display proper errors by adding crossorigin permissions on all js includes"
+    show_create_topics_notice: "If the site has fewer than 5 public topics, show a notice asking admins to create some topics."
+
+    errors:
+      invalid_email: "Invalid email address."
+      invalid_username: "There's no user with that username."
+      invalid_integer_min_max: "Value must be between %{min} and %{max}."
+      invalid_integer_min: "Value must be %{min} or greater."
+      invalid_integer_max: "Value cannot be higher than %{max}."
+      invalid_integer: "Value must be an integer."
+      regex_mismatch: "Value doesn't match the required format."
+      invalid_string: "Invalid value."
+      invalid_string_min_max: "Must be between %{min} and %{max} characters."
+      invalid_string_min: "Must be at least %{min} characters."
+      invalid_string_max: "Must be no more than %{max} characters."
 
   notification_types:
     mentioned: "%{display_username} mentioned you in %{link}"
@@ -903,7 +952,7 @@ en:
     within_post: "#%{post_number} by %{username}: %{excerpt}"
     types:
       category: 'Categories'
-      topic: 'Topics'
+      topic: 'Results'
       user: 'Users'
 
   original_poster: "Original Poster"
@@ -912,7 +961,7 @@ en:
   frequent_poster: "Frequent Poster"
 
   redirected_to_top_reasons:
-    new_user: "Welcome! As a new visitor, this will be your homepage until you've had time to look around. Here's some of the most popular topics from the past."
+    new_user: "Welcome to our community! Here are our most popular recent topics."
     not_seen_in_a_month: "Welcome back! We haven't seen you in a while. These are the top discussion topics since you've been away."
 
   move_posts:
@@ -946,7 +995,6 @@ en:
     autoclosed_disabled: "This topic is now opened. New replies are allowed."
     pinned_enabled: "This topic is now pinned. It will appear at the top of its category until it is unpinned by staff for everyone, or by individual users for themselves."
     pinned_disabled: "This topic is now unpinned. It will no longer appear at the top of its category."
-
     pinned_globally_enabled: "This topic is now pinned globally. It will appear at the top of its category and all topic lists until it is unpinned by staff for everyone, or by individual users for themselves."
     pinned_globally_disabled: "This topic is now unpinned. It will no longer appear at the top of its category."
     visible_enabled: "This topic is now visible. It will be displayed in topic lists."
@@ -969,8 +1017,8 @@ en:
 
   user:
     username:
-      short: "must be longer than %{min} characters"
-      long: "must be shorter than %{max} characters"
+      short: "must be at least %{min} characters"
+      long: "must be no more than %{max} characters"
       characters: "must only include numbers, letters and underscores"
       unique: "must be unique"
       blank: "must be present"
@@ -982,30 +1030,38 @@ en:
       blocked: "is blocked."
 
   invite_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} invited you to join a discussion on %{site_name}"
+    subject_template: "[%{site_name}] %{invitee_name} invited you to join a discussion"
     text_body_template: |
-      %{invitee_name} invited you to the topic "%{topic_title}" at %{site_name}.
+      %{invitee_name} invited you to a discussion
 
-      If you're interested, click the link below to visit the discussion:
+      > %{topic_title}
 
-      [Visit %{site_name}][1]
+      at
 
-      You were invited by a trusted user, so you'll be able to post a reply immediately, without needing to log in.
+      > **%{site_title}**
+      >
+      > %{site_description}
 
-      [1]: %{invite_link}
+      If you're interested, click the link below:
+
+      %{invite_link}
+
+      This is an invitation from a trusted user, so you can reply to the discussion immediately.
 
   invite_forum_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} invited you to join %{site_name}"
+    subject_template: "[%{site_name}] %{invitee_name} invited you to join"
     text_body_template: |
-      %{invitee_name} invited you to %{site_name}.
+      %{invitee_name} invited you to join
 
-      If you're interested, click the link below to join:
+      > **%{site_title}**
+      >
+      > %{site_description}
 
-      [Visit %{site_name}][1]
+      If you're interested, click the link below:
 
-      You were invited by a trusted user, so you'll be able to join immediately, without needing to log in.
+      %{invite_link}
 
-      [1]: %{invite_link}
+      This invitation is from a trusted user, so you won't need to log in.
 
   test_mailer:
     subject_template: "[%{site_name}] Email Deliverability Test"
@@ -1057,6 +1113,7 @@ en:
       New version: **%{new_version}**
 
       You may want to:
+
       - See what's new in the [GitHub changelog](https://github.com/discourse/discourse/commits/master).
 
       - Upgrade by visiting [%{base_url}/admin/docker](%{base_url}/admin/docker) and pressing the "Upgrade" button.
@@ -1072,6 +1129,7 @@ en:
       New version: **%{new_version}**
 
       You may want to:
+
       - See what's new in the [GitHub changelog](https://github.com/discourse/discourse/commits/master).
 
       - Upgrade by visiting [%{base_url}/admin/docker](%{base_url}/admin/docker), and pressing the "Upgrade" button.
@@ -1097,6 +1155,7 @@ en:
     off_topic: "Your post was flagged as **off-topic**: the community thinks it does not fit into the topic, as currently defined by the title and the first post."
     inappropriate: "Your post was flagged as **inappropriate**: the community thinks it is offensive, abusive, or a violation of [the community guidelines](/faq)."
     spam: "Your post was flagged as **spam**: the community thinks it is an advertisement, not useful or relevant to the topic, but promotional in nature."
+    notify_moderators: "Your post was flagged **for moderator attention**: the community thinks something about the post requires moderator intervention."
 
   system_messages:
     post_hidden:
@@ -1112,9 +1171,9 @@ en:
 
         %{flag_reason}
 
-        Keep in mind that multiple community members flagged this post before it was hidden, so **please consider how you might revise your post to reflect their feedback.** You can edit your post after %{edit_delay} minutes, and it will be automatically unhidden. This will increase your trust level.
+        Multiple community members flagged this post before it was hidden, so **please consider how you might revise your post to reflect their feedback.** You can edit your post after %{edit_delay} minutes, and it will be automatically unhidden. This will increase your trust level.
 
-        However, if the post is hidden by the community a second time, the moderators will be notified -- and there may be further action, including the possible suspension of your account.
+        However, if the post is hidden by the community a second time, the moderators will be notified – and there may be further action, including the possible suspension of your account.
 
         For additional guidance, please refer to our [FAQ](%{base_url}/faq).
 
@@ -1178,9 +1237,9 @@ en:
 
         We've automatically generated a username for you: **%{username}**, but you can change that any time by visiting [your user profile][prefs].
 
-        To log in again, either:
+        To sign in again, either:
 
-        1. Log in however you like -- but that login must resolve to the **same email address** that you received your original invitation email at. Otherwise we won't be able to tell it is you!
+        1. Sign in however you like -- but that login must resolve to the **same email address** that you received your original invitation email at. Otherwise we won't be able to tell it is you!
 
         2. Create a unique password for %{site_name} on [your user profile][prefs], then log in with that.
 
@@ -1224,14 +1283,29 @@ en:
         %{logs}
         ```
 
+    bulk_invite_succeeded:
+      subject_template: "Bulk Invite processed successfully!"
+      text_body_template: "The bulk invite has been processed, %{sent} invites sent."
+
+    bulk_invite_failed:
+      subject_template: "Bulk Invite processed with some errors!"
+      text_body_template: |
+        The bulk invite has been processed, %{sent} invites sent and %{failed} invites failed.
+
+        Here's the log:
+
+        ```
+        %{logs}
+        ```
+
     email_error_notification:
       subject_template: "Error parsing email"
       text_body_template: |
-        This is an automated message to inform you that parsing the following incoming email failed.
+        This is an automated message.
 
-        Please review the following message.
+        Parsing an incoming email failed. Please review the following Error:
 
-        Error - %{error}
+        `%{error}`
 
         %{source}
 
@@ -1263,22 +1337,26 @@ en:
         For additional guidance, please refer to our [FAQ](%{base_url}/faq).
 
     user_automatically_blocked:
-      subject_template: "New user %{username} blocked via flags"
+      subject_template: "New user %{username} blocked due to community flags"
       text_body_template: |
-        This is an automated message to inform you that the new user [%{username}](%{base_url}%{user_url}) was automatically blocked because multiple users flagged %{username}'s post(s).
+        This is an automated message.
+
+        The new user [%{username}](%{base_url}%{user_url}) was automatically blocked because multiple users flagged %{username}'s post(s).
 
         Please [review the flags](%{base_url}/admin/flags). If %{username} was incorrectly blocked from posting, click the unblock button on [the admin page for this user](%{base_url}%{user_url}).
 
         This threshold can be changed via the `block_new_user` site settings.
 
     spam_post_blocked:
-      subject_template: "New user %{username} posts blocked for repeated links"
+      subject_template: "New user %{username} posts blocked due to repeated links"
       text_body_template: |
-        This is an automated message to inform you that the new user [%{username}](%{base_url}%{user_url}) tried to create multiple posts with links to %{domains}, but those posts were blocked to avoid spam. The user is still able to create new posts that do not link to %{domains}.
+        This is an automated message.
+
+        The new user [%{username}](%{base_url}%{user_url}) tried to create multiple posts with links to %{domains}, but those posts were blocked to avoid spam. The user is still able to create new posts that do not link to %{domains}.
 
         Please [review the user](%{base_url}%{user_url}).
 
-        This threshold can be changed via the `newuser_spam_host_threshold` site setting.
+        This can be modified via the `newuser_spam_host_threshold` and `white_listed_spam_host_domains` site settings.
 
     unblocked:
       subject_template: "Account unblocked"
@@ -1382,8 +1460,8 @@ en:
       click_here: "click here"
       from: "%{site_name} digest"
       read_more: "Read More"
-      more_topics: "There were %{new_topics_since_seen} new topics posted since you last visited on %{last_seen_at}."
-      more_topics_category: "There were %{new_topics_since_seen} new topics posted in these categories since you last visited on %{last_seen_at}:"
+      more_topics: "There were %{new_topics_since_seen} other new topics posted since you last visited on %{last_seen_at}."
+      more_topics_category: "There were %{new_topics_since_seen} other new topics posted in these categories since you last visited on %{last_seen_at}:"
 
       posts:
         one: "1 post"
@@ -1483,7 +1561,7 @@ en:
 
   flag_reason:
     sockpuppet: "A new user created a topic, and another new user at the same IP address replied. See the flag_sockpuppets site setting."
-    spam_hosts: "This user tried to create multiple posts with links to the same domain. See the newuser_spam_host_threshold site setting."
+    spam_hosts: "This new user tried to create multiple posts with links to the same domain. See the newuser_spam_host_threshold site setting."
 
   email_log:
     no_user: "Can't find user with id %{user_id}"

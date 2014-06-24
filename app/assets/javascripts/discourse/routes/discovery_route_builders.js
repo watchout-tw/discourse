@@ -8,11 +8,12 @@ function buildTopicRoute(filter) {
   return Discourse.Route.extend({
     queryParams: {
       sort: { replace: true },
-      ascending: { replace: true }
+      ascending: { replace: true },
+      status: { replace: true }
     },
 
     beforeModel: function() {
-      this.controllerFor('navigationDefault').set('filterMode', filter);
+      this.controllerFor('navigation/default').set('filterMode', filter);
     },
 
     model: function(data, transaction) {
@@ -25,6 +26,7 @@ function buildTopicRoute(filter) {
       var findOpts = {};
       if (params && params.order) { findOpts.order = params.order; }
       if (params && params.ascending) { findOpts.ascending = params.ascending; }
+      if (params && params.status) { findOpts.status = params.status; }
 
 
       return Discourse.TopicList.list(filter, findOpts).then(function(list) {
@@ -73,7 +75,7 @@ function buildTopicRoute(filter) {
         }
       }
 
-      this.controllerFor('navigationDefault').set('canCreateTopic', model.get('can_create_topic'));
+      this.controllerFor('navigation/default').set('canCreateTopic', model.get('can_create_topic'));
     },
 
     renderTemplate: function() {
@@ -96,7 +98,12 @@ function buildCategoryRoute(filter, params) {
       return Discourse.Category.findBySlug(params.slug, params.parentSlug);
     },
 
-    afterModel: function(model) {
+    afterModel: function(model, transaction) {
+      if (!model) {
+        this.replaceWith('/404');
+        return;
+      }
+
       var self = this,
           noSubcategories = params && !!params.no_subcategories,
           filterMode = "category/" + Discourse.Category.slugFor(model) + (noSubcategories ? "/none" : "") + "/l/" + filter,
@@ -107,7 +114,16 @@ function buildCategoryRoute(filter, params) {
       var opts = { category: model, filterMode: filterMode };
       opts.noSubcategories = params && params.no_subcategories;
       opts.canEditCategory = Discourse.User.currentProp('staff');
-      this.controllerFor('navigationCategory').setProperties(opts);
+
+      opts.canChangeCategoryNotificationLevel = Discourse.User.current();
+      this.controllerFor('navigation/category').setProperties(opts);
+
+      var queryParams = transaction.queryParams;
+      params = params || {};
+
+      if (queryParams && queryParams.order) { params.order = queryParams.order; }
+      if (queryParams && queryParams.ascending) { params.ascending = queryParams.ascending; }
+      if (queryParams && queryParams.status) { params.status = queryParams.status; }
 
       return Discourse.TopicList.list(listFilter, params).then(function(list) {
         var tracking = Discourse.TopicTrackingState.current();
@@ -130,7 +146,7 @@ function buildCategoryRoute(filter, params) {
 
       Discourse.set('title', I18n.t('filters.with_category', { filter: filterText, category: model.get('name').capitalize() }));
 
-      this.controllerFor('navigationCategory').set('canCreateTopic', topics.get('can_create_topic'));
+      this.controllerFor('navigation/category').set('canCreateTopic', topics.get('can_create_topic'));
       this.controllerFor('discovery/topics').setProperties({
         model: topics,
         category: model,
@@ -150,6 +166,12 @@ function buildCategoryRoute(filter, params) {
     deactivate: function() {
       this._super();
       this.controllerFor('search').set('searchContext', null);
+    },
+
+    actions: {
+      setNotification: function(notification_level){
+        this.currentModel.setNotification(notification_level);
+      }
     }
   });
 }
@@ -157,6 +179,7 @@ function buildCategoryRoute(filter, params) {
 // Finally, build all the routes with the helpers we created
 Discourse.addInitializer(function() {
   Discourse.DiscoveryCategoryRoute = buildCategoryRoute('latest');
+  Discourse.DiscoveryParentCategoryRoute = buildCategoryRoute('latest');
   Discourse.DiscoveryCategoryNoneRoute = buildCategoryRoute('latest', {no_subcategories: true});
 
   Discourse.Site.currentProp('filters').forEach(function(filter) {

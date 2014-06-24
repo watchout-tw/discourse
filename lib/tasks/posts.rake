@@ -9,25 +9,12 @@ task 'posts:refresh_oneboxes' => :environment do
 end
 
 def rebake_post(post,opts)
-  cooked = post.cook(
-    post.raw,
-    topic_id: post.topic_id,
-    invalidate_oneboxes: opts.fetch(:invalidate_oneboxes, false)
-  )
-
-  if cooked != post.cooked
-    Post.exec_sql('update posts set cooked = ? where id = ?', cooked, post.id)
-    post.cooked = cooked
+  changed = post.rebake!(opts)
+  if changed
     putc "#"
   else
     putc "."
   end
-
-  # Extracts urls from the body
-  TopicLink.extract_from post
-  # make sure we trigger the post process
-  post.trigger_post_process(true)
-
 rescue => e
   puts "\n\nFailed to bake topic_id #{post.topic_id} post_id #{post.id} #{e}\n#{e.backtrace.join("\n")} \n\n"
 end
@@ -48,4 +35,25 @@ def rebake_posts(opts = {})
   end
 
   puts "\n\n#{total} posts done!\n#{'-' * 50}\n"
+end
+
+
+desc 'normalize all markdown so <pre><code> is not used and instead backticks'
+task 'posts:normalize_code' => :environment do
+  lang = ENV['CODE_LANG'] || ''
+  require 'import/normalize'
+
+  puts "Normalizing"
+  i = 0
+  Post.where("raw like '%<pre>%<code>%'").each do |p|
+    normalized = Import::Normalize.normalize_code_blocks(p.raw, lang)
+    if normalized != p.raw
+      p.revise(Discourse.system_user, normalized)
+      putc "."
+      i += 1
+    end
+  end
+
+  puts
+  puts "#{i} posts normalized!"
 end

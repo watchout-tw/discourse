@@ -1,5 +1,7 @@
 task 'assets:precompile:before' do
 
+  require 'uglifier'
+
   unless %w{profile production}.include? Rails.env
     raise "rake assets:precompile should only be run in RAILS_ENV=production, you are risking unminified assets"
   end
@@ -44,4 +46,20 @@ task 'assets:precompile:before' do
 
 end
 
-task 'assets:precompile' => 'assets:precompile:before'
+task 'assets:precompile:css' => 'environment' do
+  RailsMultisite::ConnectionManagement.each_connection do |db|
+    # Heroku precompiles assets before db migration, so tables may not exist.
+    # css will get precompiled during first request instead in that case.
+    if ActiveRecord::Base.connection.table_exists?(ColorScheme.table_name)
+      puts "Compiling css for #{db}"
+      [:desktop, :mobile].each do |target|
+        puts DiscourseStylesheets.compile(target, force: true)
+      end
+    end
+  end
+end
+
+task 'assets:precompile' => 'assets:precompile:before' do
+  # Run after assets:precompile
+  Rake::Task["assets:precompile:css"].invoke
+end

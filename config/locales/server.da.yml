@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 da:
   dates:
@@ -28,8 +28,6 @@ da:
     one: "Beklager, men nye brugere kan kun skrive 1 svar i hvert emne til at starte med."
     other: "Beklager, men nye brugere kan kun skrive %{count} svar i hvert emne til at starte med."
   embed:
-    start_discussion: "Begynd diskussionen"
-    continue: "Fortsæt diskussionen"
     more_replies:
       one: "1 svar til"
       other: "%{count} svar til"
@@ -541,14 +539,12 @@ da:
     flag_sockpuppets: "Hvis en en bruger (dvs. én der har oprettet sig indenfor de sidste 24 timer) som starter et emne og en ny bruger, som svarer i det samme emne, kommer fra den samme IP-adresse, bliver begge deres indlæg automatisk markeret som spam."
     traditional_markdown_linebreaks: "Brug traditionelle linjeskift i Markdown, som normalt bruger to mellemrum i slutningen af linjen for at indikere et linjeskift"
     post_undo_action_window_mins: "Antal sekunder en bruger har mulighed for at omgøre handlinger på et indlæg (like, flag, etc.)."
-    must_approve_users: "Admins skal godkende alle brugere før de får adgang"
     ga_tracking_code: "Google analytics sporingskode, f.eks.: UA-12345678-9; se http://google.com/analytics."
     ga_domain_name: "Google analytics domænenavn, f.eks.: example.com; se http://google.com/analytics."
     enable_escaped_fragments: "Aktivér workaround som kan hjælpe ældre webcrawlers med at indeksere sitet."
     enable_noscript_support: "Aktivér standard webcrawler søgemaskineunderstøttelse vha. noscript-tagget"
     top_menu: "Angiv hvilke elementer der skal vises i hjemmesidenavigationen, og i hvilken rækkefølge. Eksempel: latest|new|unread|starred|categories|top|read|posted."
     post_menu: "Angiv hvilke elementer der skal vises i indlægsmenuen, og i hvilken rækkefølge. Eksempel: like|edit|flag|delete|share|bookmark|reply."
-    share_links: "Angiv hvilke elementer der skal vises i “del“-dialogboksen og i hvilken rækkefølge. Eksempel twitter|facebook|google+|email."
     track_external_right_clicks: "Spor højreklik på eksterne links (f.eks.: åbn i ny tab); deaktiveret som standard fordi den omskriver URLer"
     topics_per_page: "Hvor mange emner der automatisk indlæses på emneoversigten."
     posts_per_page: "Hvor mange indlæg der indlæses som standard på en emneside og når der indlæses flere indlæg."
@@ -569,7 +565,6 @@ da:
     login_required: "Kræv godkendelse for at læse indlæg"
     min_password_length: "Mindste adgangskodelængde."
     enable_local_logins: "Aktivér traditionel, lokal godkendelse med brugernavn og adgangskode"
-    enable_google_logins: "Aktivér Google-login"
     enable_yahoo_logins: "Aktivér Yahoo-login"
     enable_twitter_logins: "Aktivér Twitter-login, kræver twitter_consumer_key og twitter_consumer_secret"
     twitter_consumer_key: "Consumer key til Twitter-login, oprettes på http://dev.twitter.com."
@@ -580,7 +575,6 @@ da:
     enable_github_logins: "Aktivér Github-login, kræver github_client_id og github_client_secret"
     github_client_id: "Client id til Github-login, oprettes på https://github.com/settings/applications."
     github_client_secret: "Client secret til Github-login, oprettes på at https://github.com/settings/applications."
-    allow_restore: "Tillad import, som kan erstatte ALLE sitets data; slå fra med mindre du planlægger at importere data"
     active_user_rate_limit_secs: "Hvor ofte vi opdaterer feltet 'last_seen_at', i sekunder."
     previous_visit_timeout_hours: "Hvor lang tid et besøg varer før vi regner det med i det 'forrige' besøg, i timer."
     rate_limit_create_topic: "Efter at have oprettet et emne skal brugerne vente dette antal sekunder før de kan oprette et ny emne."
@@ -689,7 +683,6 @@ da:
   search:
     types:
       category: 'Kategorier'
-      topic: 'Emner'
       user: 'Brugere'
   original_poster: "Oprindelig forfatter"
   most_posts: "Flest indlæg"
@@ -739,8 +732,6 @@ da:
     omniauth_error_unknown: "Noget gik galt ved behandlingen af dit login, prøv venligst igen."
   user:
     username:
-      short: "skal være længere end %{min} tegn"
-      long: "skal være kortere end %{max} tegn"
       characters: "må kun indeholde bogstaver og tal"
       unique: "skal være unik"
       blank: "skal udfyldes"
@@ -750,30 +741,6 @@ da:
       blocked: "er ikke tilladt."
     ip_address:
       blocked: "er blokeret."
-  invite_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} inviterede dig til at deltage i en debat på %{site_name}"
-    text_body_template: |
-      %{invitee_name} inviterede dig til emnet "%{topic_title}" på %{site_name}.
-
-      Hvis du er interesseret, så klik på linket herunder for at se debatten:
-
-      [Besøg %{site_name}][1]
-
-      Du blev inviteret af en bruger vi har tillid til, så du kan svare med det samme, uden at skulle logge ind.
-
-      [1]: %{invite_link}
-  invite_forum_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} inviterede dig til %{site_name}"
-    text_body_template: |
-      %{invitee_name} inviterede dig til  %{site_name}.
-
-      Hvis du er interesseret, så klik på linket herunder for at tilmelde dig:
-
-      [Visit %{site_name}][1]
-
-      Du blev inviteret af en bruger vi har tillid til, så du kan tilmelde dig med det samme, uden at skulle logge ind.
-
-      [1]: %{invite_link}
   test_mailer:
     subject_template: "[%{site_name}] test af e-mail-udsendelse"
     text_body_template: |
@@ -811,8 +778,6 @@ da:
       ----
 
       <small>Der skal være en footer i hver e-mail du sender, som gør det muligt at afmelde sig, så lad os lave én. Denne e-mail blev sendt af Firmanavn, Algade 42, 9999 Tappernøje. [Klik her hvis du ikke ønsket at modtage flere e-mails][5].</small>
-  new_version_mailer:
-    subject_template: "[%{site_name}] Opdateringer er tilgængelige"
   new_version_mailer_with_notes:
     subject_template: "[%{site_name}] Opdateringer er tilgængelige"
   system_messages:
@@ -870,26 +835,6 @@ da:
         Nyd dit ophold!
     welcome_invite:
       subject_template: "Velkommen til %{site_name}!"
-      text_body_template: |
-        Du har accepteret en invitation til %{site_name}, velkommen til vores debatforum!
-
-        Vi har automatisk genereret et brugernavn for dig: **%{username}**, men du kan ændre det når som helst ved at gå til [din brugerprofil][prefs].
-
-        For at logge ind igen kan du enten enten:
-
-        1. Bruge Facebook, Google, Twitter eller andre login-metoder -- men den login-metode skal sende **den samme e-mail-adresse**, som den din invitation blev sendt til. Ellers kan vi ikke se, at det er dig!
-
-        2. Lav et unikt kodeord for %{site_name} på [din brugerprofil][prefs], og så logge ind med det.
-
-        %{site_password}
-
-        %{new_user_tips}
-
-        Vi går ind for [civiliseret debatkultur](%{base_url}/faq) til enhver tid.
-
-        Nyd dit ophold!
-
-        [prefs]: %{user_preferences_url}
     export_succeeded:
       subject_template: "Eksport lykkedes"
       text_body_template: "Eksporten lykkedes."
@@ -915,22 +860,6 @@ da:
         Dette er en automatisk besked fra %{site_name} for at informere dig om at din konto er blevet blokeret af en administrator.
 
         Se venligst vores [FAQ](%{base_url}/faq) for yderligere vejledning.
-    user_automatically_blocked:
-      subject_template: "Ny bruger %{username} blokeret via flag"
-      text_body_template: |
-        Dette er en automatisk besked for at informere dig om at den nye bruger [%{username}](%{base_url}%{user_url}) blev blokeret automatisk fordi flere brugere har flaget %{username}'s indlæg/
-
-        [Gennemse venligst flagene](%{base_url}/admin/flags). Hvis %{username} blev blokeret uretmæssigt kan du klikke på knappen Fjern markering på [brugerens administrationsside](%{base_url}%{user_url}).
-
-        Denne grænse kan ændres via indstillingen `block_new_user`.
-    spam_post_blocked:
-      subject_template: "Ny bruger %{username}'s indlæg blokeret pga. gentagne links"
-      text_body_template: |
-        Dette er en automatisk besked for at informere dig om at den nye bruger [%{username}](%{base_url}%{user_url}) forsøgte at oprette flere indlæg med links til %{domains}, men de pågældende indlæg blev blokeret for at undgå spam. Brugeren kan stadig oprette nye indlæg som ikke linker til %{domains}.
-
-        [Vurdér venligst brugeren](%{base_url}%{user_url}).
-
-        Denne grænse kan ændres via indstillingen `newuser_spam_host_threshold`.
     unblocked:
       subject_template: "Blokering af konto fjernet"
       text_body_template: |
@@ -1073,4 +1002,3 @@ da:
       size_not_found: "Beklager, men vi kunne ikke fastslå billedets størrelse. Måske er dit billede ødelagt?"
   flag_reason:
     sockpuppet: "En ny bruger oprettede et emne, og en anden ny bruger med den samme IP-adresse svarede på det. Se indstillingen af flag_sockpuppets."
-    spam_hosts: "Denne bruger forsøgte at oprette flere indlæg med links til det samme domæne. Se indstillinge af newuser_spam_host_threshold."

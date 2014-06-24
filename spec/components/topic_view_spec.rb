@@ -19,10 +19,10 @@ describe TopicView do
   end
 
   it "handles deleted topics" do
-    topic.trash!(coding_horror)
-    lambda { TopicView.new(topic.id, coding_horror) }.should raise_error(Discourse::NotFound)
-    coding_horror.stubs(:staff?).returns(true)
-    lambda { TopicView.new(topic.id, coding_horror) }.should_not raise_error
+    admin = Fabricate(:admin)
+    topic.trash!(admin)
+    lambda { TopicView.new(topic.id, Fabricate(:user)) }.should raise_error(Discourse::NotFound)
+    lambda { TopicView.new(topic.id, admin) }.should_not raise_error
   end
 
 
@@ -169,8 +169,8 @@ describe TopicView do
 
     context '.read?' do
       it 'tracks correctly' do
-        # anon has nothing
-        TopicView.new(topic.id).read?(1).should be_false
+        # anon is assumed to have read everything
+        TopicView.new(topic.id).read?(1).should be_true
 
         # random user has nothing
         topic_view.read?(1).should be_false
@@ -221,7 +221,7 @@ describe TopicView do
     let!(:p3) { Fabricate(:post, topic: topic, user: first_poster)}
 
     before do
-      SiteSetting.stubs(:posts_per_page).returns(3)
+      SiteSetting.posts_per_page = 3
 
       # Update them to the sort order we're checking for
       [p1, p2, p3, p4, p5, p6].each_with_index do |p, idx|
@@ -233,21 +233,33 @@ describe TopicView do
     end
 
     describe "contains_gaps?" do
-      it "does not contain contains_gaps with default filtering" do
+      it "works" do
+        # does not contain contains_gaps with default filtering
         topic_view.contains_gaps?.should be_false
-      end
-
-      it "contains contains_gaps when filtered by username" do
+        # contains contains_gaps when filtered by username" do
         TopicView.new(topic.id, coding_horror, username_filters: ['eviltrout']).contains_gaps?.should be_true
-      end
-
-      it "contains contains_gaps when filtered by summary" do
+        # contains contains_gaps when filtered by summary
         TopicView.new(topic.id, coding_horror, filter: 'summary').contains_gaps?.should be_true
-      end
-
-      it "contains contains_gaps when filtered by best" do
+        # contains contains_gaps when filtered by best
         TopicView.new(topic.id, coding_horror, best: 5).contains_gaps?.should be_true
       end
+    end
+
+    it "#restricts to correct topic" do
+      t2 = Fabricate(:topic)
+
+      category = Fabricate(:category, name: "my test")
+      category.set_permissions(Group[:admins] => :full)
+      category.save
+
+      topic.category_id = category.id
+      topic.save!
+
+      expect{
+        TopicView.new(topic.id, coding_horror).posts.count
+      }.to raise_error(Discourse::InvalidAccess)
+
+      TopicView.new(t2.id, coding_horror, post_ids: [p1.id,p2.id]).posts.count.should == 0
 
     end
 

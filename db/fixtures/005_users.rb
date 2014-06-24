@@ -1,6 +1,5 @@
 # kind of odd, but we need it, we also need to nuke usage of User from inside migrations
 #  very poor form
-User.reset_column_information
 user = User.find_by("id <> -1 and username_lower = 'system'")
 if user
   user.username = UserNameSuggester.suggest("system")
@@ -14,8 +13,6 @@ User.seed do |u|
   u.username_lower = "system"
   u.email = "no_email"
   u.password = SecureRandom.hex
-  # TODO localize this, its going to require a series of hacks
-  u.bio_raw = "Not a real person. A global user for system notifications and other system tasks."
   u.active = true
   u.admin = true
   u.moderator = true
@@ -24,3 +21,5 @@ User.seed do |u|
   u.email_private_messages = false
   u.trust_level = TrustLevel.levels[:elder]
 end
+
+Group.user_trust_level_change!(-1 ,TrustLevel.levels[:elder])

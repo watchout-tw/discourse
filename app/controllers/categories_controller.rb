@@ -50,19 +50,19 @@ class CategoriesController < ApplicationController
   def create
     guardian.ensure_can_create!(Category)
 
+    position = category_params.delete(:position)
+
     @category = Category.create(category_params.merge(user: current_user))
     return render_json_error(@category) unless @category.save
 
-    @category.move_to(category_params[:position].to_i) if category_params[:position]
+    @category.move_to(position.to_i) if position
     render_serialized(@category, CategorySerializer)
   end
 
   def update
     guardian.ensure_can_edit!(@category)
     json_result(@category, serializer: CategorySerializer) { |cat|
-      if category_params[:position]
-        category_params[:position] == 'default' ? cat.use_default_position : cat.move_to(category_params[:position].to_i)
-      end
+      cat.move_to(category_params[:position].to_i) if category_params[:position]
       if category_params.key? :email_in and category_params[:email_in].length == 0
         # properly null the value so the database constrain doesn't catch us
         category_params[:email_in] = nil
@@ -70,6 +70,14 @@ class CategoriesController < ApplicationController
       category_params.delete(:position)
       cat.update_attributes(category_params)
     }
+  end
+
+  def set_notifications
+    category_id = params[:category_id].to_i
+    notification_level = params[:notification_level].to_i
+
+    CategoryUser.set_notification_level_for_category(current_user, notification_level , category_id)
+    render json: success_json
   end
 
   def destroy

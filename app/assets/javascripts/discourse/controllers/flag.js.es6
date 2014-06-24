@@ -62,9 +62,9 @@ export default Discourse.ObjectController.extend(Discourse.ModalFunctionality, {
 
   submitText: function(){
     if (this.get('selected.is_custom_flag')) {
-      return I18n.t(this.get('flagTopic') ? "flagging_topic.notify_action" : "flagging.notify_action");
+      return "<i class='fa fa-envelope'></i>" + (I18n.t(this.get('flagTopic') ? "flagging_topic.notify_action" : "flagging.notify_action"));
     } else {
-      return I18n.t(this.get('flagTopic') ? "flagging_topic.action" : "flagging.action");
+      return "<i class='fa fa-flag'></i>" + (I18n.t(this.get('flagTopic') ? "flagging_topic.action" : "flagging.action"));
     }
   }.property('selected.is_custom_flag'),
 
@@ -90,8 +90,12 @@ export default Discourse.ObjectController.extend(Discourse.ModalFunctionality, {
       postAction.act(params).then(function() {
         self.send('closeModal');
       }, function(errors) {
-        self.send('showModal');
-        self.displayErrors(errors);
+        self.send('closeModal');
+        if (errors && errors.responseText) {
+          bootbox.alert($.parseJSON(errors.responseText).errors);
+        } else {
+          bootbox.alert(I18n.t('generic_error'));
+        }
       });
     },
 

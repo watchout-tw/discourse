@@ -36,6 +36,7 @@ export default Discourse.Controller.extend(Discourse.ModalFunctionality, {
   },
 
   submitDisabled: function() {
+    if (!this.get('passwordRequired')) return false; // 3rd party auth
     if (this.get('formSubmitted')) return true;
     if (this.get('tosAcceptRequired') && !this.get('tosAccepted')) return true;
     if (this.get('nameValidation.failed')) return true;
@@ -43,7 +44,7 @@ export default Discourse.Controller.extend(Discourse.ModalFunctionality, {
     if (this.get('usernameValidation.failed')) return true;
     if (this.get('passwordValidation.failed')) return true;
     return false;
-  }.property('nameValidation.failed', 'emailValidation.failed', 'usernameValidation.failed', 'passwordValidation.failed', 'formSubmitted', 'tosAccepted'),
+  }.property('passwordRequired', 'nameValidation.failed', 'emailValidation.failed', 'usernameValidation.failed', 'passwordValidation.failed', 'formSubmitted', 'tosAccepted'),
 
   passwordRequired: function() {
     return this.blank('authOptions.auth_provider');
@@ -188,7 +189,7 @@ export default Discourse.Controller.extend(Discourse.ModalFunctionality, {
     }
 
     // If too short
-    if (this.get('accountUsername').length < 3) {
+    if (this.get('accountUsername').length < Discourse.SiteSettings.min_username_length) {
       return Discourse.InputValidation.create({
         failed: true,
         reason: I18n.t('user.username.too_short')
@@ -196,7 +197,7 @@ export default Discourse.Controller.extend(Discourse.ModalFunctionality, {
     }
 
     // If too long
-    if (this.get('accountUsername').length > 15) {
+    if (this.get('accountUsername').length > Discourse.SiteSettings.max_username_length) {
       return Discourse.InputValidation.create({
         failed: true,
         reason: I18n.t('user.username.too_long')

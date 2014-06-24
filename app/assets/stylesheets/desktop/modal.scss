@@ -16,8 +16,8 @@
   height: auto;
   margin: -250px 0 0 -305px;
   background-color: $secondary;
-  border: 1px solid scale-color($primary, $lightness: 90%);
-  border: 1px solid scale-color($primary, $lightness: 90%);
+  border: 1px solid scale-color-diff();
+  border: 1px solid scale-color-diff();
 
   box-shadow: 0 3px 7px rgba($primary, .8);
   background-clip: padding-box;
@@ -57,22 +57,22 @@ animation: modal .25s;
   margin-left: -1px;
 }
 .modal-header {
-  border-bottom: 1px solid scale-color($primary, $lightness: 90%);
+  border-bottom: 1px solid scale-color-diff();
   h3 {
-    color: $danger;
+    color: $quaternary;
     font-size: 20px;
     padding: 10px 15px 7px;
   }
-  .close {
-    float: right;
-    font-size: 20px;
-    margin: 10px 10px 0;
-    text-decoration: none;
-    color: scale-color($primary, $lightness: 35%);
-    cursor: pointer;
-    &:hover {
-      color: $primary;
-    }
+}
+.close {
+  float: right;
+  font-size: 20px;
+  margin: 10px 10px 0;
+  text-decoration: none;
+  color: scale-color($primary, $lightness: 35%);
+  cursor: pointer;
+  &:hover {
+    color: $primary;
   }
 }
 
@@ -80,16 +80,12 @@ animation: modal .25s;
   .category-combobox {
     width: 430px;
 
-    .chzn-drop {
+    .select2-drop {
       left: -9000px;
       width: 428px;
     }
-    .chzn-search input {
+    .select2-search input {
       width: 378px;
-    }
-
-    .chzn-search-icon {
-      margin-top: 8px;
     }
   }
 }
@@ -181,4 +177,12 @@ animation: modal .25s;
       }
     }
   }
+}
+
+.upload-options {
+  margin-left: 20px;
+  margin-top: 20px;
+}
+.uploaded-avatar {
+  margin-top: 20px;
 }

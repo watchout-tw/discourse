@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 uk:
   js:
@@ -61,12 +61,6 @@ uk:
     max: "max"
     suggested_topics:
       title: "Пропоновані теми"
-    bookmarks:
-      not_logged_in: "Даруйте, але щоб лишати закладки, необхідно увійти."
-      created: "Ви лишили закладку в цьому дописі."
-      not_bookmarked: "Ви прочитали цей допис; натисніть, щоб лишити тут закладку."
-      last_read: "Це - останній допис, який Ви прочитали; натисніть, щоб лишити тут закладку."
-    new_topics_inserted: "{{count}} нових тем."
     show_new_topics: "Натисніть, щоб показати."
     preview: "попередній перегляд"
     cancel: "скасувати"
@@ -120,8 +114,6 @@ uk:
       '13': "Вхідні"
     categories:
       all: "всі категорії"
-      all_subcategories: "всі підкатегорії"
-      no_subcategory: "без підкатегорії"
       category: "Категорія"
       posts: "Нові дописи"
       topics: "Нові теми"
@@ -152,10 +144,8 @@ uk:
       change: "змінити"
       moderator: "{{user}} є модератором"
       admin: "{{user}} є адміном"
-      deleted: "(видалено)"
       suspended_notice: "Цього користувача призупинено до {{date}}."
       suspended_reason: "Причина: "
-      mailing_list_mode: "Receive an email every time a post is made on the forum (unless you have muted the topic or category)"
       watched_categories: "Відслідковувані"
       watched_categories_instructions: "You will automatically watch all new topics in these categories. You will be notified of all new posts and topics, plus the count of unread and new posts will also appear next to the topic's listing."
       tracked_categories: "Відстежувані"
@@ -166,10 +156,6 @@ uk:
       delete_account_confirm: "Are you sure you want to permanently delete your account? This action cannot be undone!"
       deleted_yourself: "Your account has been deleted successfully."
       delete_yourself_not_allowed: "You cannot delete your account right now. Contact an admin to do delete your account for you."
-      unread_message_count:
-        one: "Messages (1)"
-        other: "Messages ({{count}})"
-        zero: "Messages"
       messages:
         all: "Всі"
         mine: "Мої"
@@ -196,13 +182,10 @@ uk:
       change_avatar:
         title: "Зміна аватарки"
         gravatar: "<a href='//gravatar.com/emails' target='_blank'>Gravatar</a>, враховуючи"
-        gravatar_title: "Змінити аватарку на сайті Gravatar"
         uploaded_avatar: "Інше зображення"
         uploaded_avatar_empty: "Додати інше зображення"
         upload_title: "Завантажити своє зображення"
         image_is_not_a_square: "Попередження: ми обрізали Ваше зображення, оскільки воно не квадратне."
-      change_profile_background:
-        title: "Change Profile Background"
       email:
         title: "Електронна пошта"
         instructions: "Ваша пошта не відображається публічно."
@@ -238,7 +221,6 @@ uk:
       last_emailed: "Останній електронний лист"
       last_seen: "Помічено востаннє"
       created: "Приєднався(лась)"
-      log_out: "Вийти"
       website: "Вебсайт"
       email_settings: "Електронна пошта"
       email_digests:
@@ -254,7 +236,6 @@ uk:
       new_topic_duration:
         label: "Вважати теми новими, якщо"
         not_viewed: "Ви їх ще не переглядали"
-        last_here: "їх було опубліковано після того, як Ви тут були востаннє"
       auto_track_topics: "Автоматично стежити за темами, які Ви відвідуєте"
       auto_track_options:
         never: "ніколи"
@@ -263,7 +244,6 @@ uk:
         search: "шукати запрошення..."
         title: "Запрошення"
         user: "Запрошений користувач"
-        none: "Запрошень не знайдено."
         truncated: "Показано перші {{count}} запрошень."
         redeemed: "Прийняті запрошення"
         redeemed_at: "Прийнято"
@@ -271,12 +251,10 @@ uk:
         topics_entered: "Тем переглянуто"
         posts_read_count: "Прочитано дописів"
         expired: "Термін дії цього запрошення сплив."
-        rescind: "Видалити запрошення"
         rescinded: "Запрошення видалено"
         time_read: "Час читання"
         days_visited: "Днів відвідано"
         account_age_days: "Вік облікового запису в днях"
-        create: "Запросити друзів на цей форум"
       password:
         title: "Пароль"
         too_short: "Ваш пароль надто короткий."
@@ -300,15 +278,11 @@ uk:
     close: "Закрити"
     assets_changed_confirm: "Discourse було оновлено, чи хочете Ви отримати останню версію?"
     read_only_mode:
-      enabled: "An administrator has enabled read-only mode. You can continue to browse the site but interactions won't work properly."
       login_disabled: "Login is disabled while the site is in read only mode."
     learn_more: "дізнатися більше..."
     year: 'рік'
-    year_desc: 'тем, опублікованих за останні 365 днів'
     month: 'місяць'
-    month_desc: 'тем, опублікованих за останні 30 днів'
     week: 'тиждень'
-    week_desc: 'тем, опублікованих за останні 7 днів'
     day: 'день'
     first_post: Перший допис
     mute: Mute
@@ -316,8 +290,6 @@ uk:
     last_post: Останній допис
     summary:
       enabled_description: "Ви переглядаєте підсумок цієї теми. Щоб знову побачити всі дописи, натисніть знизу."
-      description: "Є <b>{{count}}</b> відповідей. Заощадити час на читання, показавши тільки найбільш релевантні відповіді?"
-      description_time: "Є <b>{{count}}</b> відповідей, читання яких займе близько <b>{{readingTime}} хвилин</b>. Заощадити час на читання, показавши тільки найбільш релевантні відповіді?"
       enable: 'Підсумувати цю тему'
       disable: 'Показати всі дописи'
     private_message_info:
@@ -330,9 +302,6 @@ uk:
     created: 'Створено'
     trust_level: 'Рівень довіри'
     create_account:
-      title: "Створити обліковий запис"
-      action: "Створити зараз!"
-      invite: "Ще не маєте облікового запису?"
       failed: "Щось пішло не так; скоріше за все, цю електронну пошту вже зареєстровано, спробуйте посилання Забув пароль"
     forgot_password:
       title: "Забув(ла) пароль"
@@ -340,12 +309,10 @@ uk:
       invite: "Введіть своє ім'я користувача або адресу електронної скриньки, і ми надішлемо Вам лист для скинення пароля."
       reset: "Скинути пароль"
     login:
-      username: "Ім'я користувача"
       password: "Пароль"
       email_placeholder: "електронна скринька або ім'я користувача"
       error: "Невідома помилка"
       reset_password: 'Скинути пароль'
-      logging_in: "Входимо..."
       or: "Або"
       authenticating: "Автентифікуємося..."
       awaiting_confirmation: "Ваш обліковий запис очікує на активацію. Для отримання ще одного активаційного листа використайте посилання Забув пароль."
@@ -440,8 +407,6 @@ uk:
       liked: "<i title='вподобав(ла)' class='fa fa-heart'></i> {{username}} {{link}}"
       private_message: "<i class='fa fa-envelope-o' title='приватне повідомлення'></i> {{username}} {{link}}"
       invited_to_private_message: "<i class='fa fa-envelope-o' title='приватне повідомлення'></i> {{username}} {{link}}"
-      invitee_accepted: "<i title='прийняв(ла) Ваше запрошення' class='fa fa-sign-in'></i> {{username}} прийняв(ла) Ваше запрошення"
-      moved_post: "<i title='перемістив допис' class='fa fa-arrow-right'></i> {{username}} перемістив {{link}}"
       total_flagged: "всього дописів, на які поскаржилися"
     upload_selector:
       title: "Додати зображення"
@@ -455,13 +420,8 @@ uk:
       hint: "(Ви також можете перетягувати зображення в редактор, щоб їх завантажити)"
       uploading: "Завантаження"
     search:
-      title: "шукати в темах, дописах, користувачах та категоріях"
-      placeholder: "введіть слова для пошуку"
       no_results: "Нічого не знайдено."
       searching: "Пошук ..."
-      prefer:
-        user: "search will prefer results by @{{username}}"
-        category: "search will prefer results in {{category}}"
     site_map: "перейти до іншого переліку або категорії тем"
     go_back: 'повернутися назад'
     not_logged_in_user: 'сторінка користувача з підсумком поточної діяльності та налаштуваннями'
@@ -514,7 +474,6 @@ uk:
       invalid_access:
         title: "Тема є приватною."
         description: "Вибачте, у Вас немає доступу до цієї теми!"
-        login_required: "You need to log in to see that topic."
       server_error:
         title: "Тему не вдалося завантажити"
         description: "Даруйте, ми не змогли завантажити цю тему, ймовірно, через проблему зі з'єднанням. Будь ласка, спробуйте ще раз. Якщо проблема залишається, дайте нам знати."
@@ -541,8 +500,6 @@ uk:
       auto_close_remove: "Не закривати цю тему автоматично"
       progress:
         title: просування по темі
-        jump_top: перейти до першого допису (клавіша home)
-        jump_bottom: перейти до останнього допису (клавіша end)
         jump_bottom_with_number: "перейти до допису %{post_number}"
         total: всього дописів
         current: поточний допис
@@ -557,10 +514,10 @@ uk:
           '2_4': 'Ви будете отримувати сповіщення, бо Ви залишили відповідь в цій темі.'
           '2_2': 'Ви будете отримувати сповіщення, бо Ви стежите за цією темою.'
           '2': 'Ви будете отримувати сповіщення, бо Ви <a href="/users/{{username}}/preferences">читаєте цю тему</a>.'
-          '1': 'Ви будете отримувати сповіщення лише якщо хтось згадуватиме Ваше @Ім''я або відповідатиме на Ваш допис.'
           '1_2': 'Ви будете отримувати сповіщення лише якщо хтось згадуватиме Ваше @Ім''я або відповідатиме на Ваш допис.'
-          '0': 'Ви ігноруєте всі сповіщення з цієї теми.'
+          '1': 'Ви будете отримувати сповіщення лише якщо хтось згадуватиме Ваше @Ім''я або відповідатиме на Ваш допис.'
           '0_2': 'Ви ігноруєте всі сповіщення з цієї теми.'
+          '0': 'Ви ігноруєте всі сповіщення з цієї теми.'
         watching_pm:
           title: "Слідкувати"
           description: "Ви будете отримувати сповіщення про кожен новий допис у цій приватній переписці. Кількість непрочитаних та нових дописів буде відображатися навпроти теми."
@@ -596,7 +553,6 @@ uk:
         visible: "Зробити видимою"
         reset_read: "Скинути дані про прочитаність"
         multi_select: "Перемістити дописи"
-        convert_to_topic: "Перетворити на звичайну тему"
       reply:
         title: 'Відповісти'
         help: 'почати складати відповідь на цю тему'
@@ -748,7 +704,6 @@ uk:
       none: '(без категорії)'
       choose: 'Select a category&hellip;'
       edit: 'редагувати'
-      edit_long: "Редагувати категорію"
       view: 'Переглянути теми, що належать до категорії'
       general: 'Основне'
       settings: 'Налаштування'
@@ -769,7 +724,6 @@ uk:
       delete_confirm: "Ви впевнені, що хочете видалити цю категорію?"
       delete_error: "Під час видалення категорії трапилася помилка."
       list: "List Categories"
-      no_description: "Ця категорія не має опису, відредагуйте визначення теми."
       change_in_category_topic: "Редагувати опис"
       already_used: 'Цей колір вже використовується іншою категорією'
       security: "Безпека"
@@ -1047,7 +1001,6 @@ uk:
         new_style: "New Style"
         delete: "Delete"
         delete_confirm: "Delete this customization?"
-        about: "Site Customization allow you to modify stylesheets and headers on the site. Choose or add one to start editing."
       email:
         title: "Електронна пошта"
         settings: "Налаштування"
@@ -1258,7 +1211,6 @@ uk:
       site_settings:
         show_overriden: 'Показувати тільки перевизначені'
         title: 'Налаштування'
-        reset: 'за замовчуванням'
         none: 'none'
         no_results: "Не знайдено результатів."
         clear_filter: "Очистити"
@@ -1307,10 +1259,6 @@ uk:
       actions:
         title: 'Дії'
         star: '<b>f</b> Позначити тему зірочкою'
-        share_topic: '<b>s</b> Поширити тему'
-        share_post: '<b>shift s</b> Поширити допис'
-        reply_topic: '<b>r</b> Відповісти на тему'
-        reply_post: '<b>shift r</b> Відповісти на допис'
         like: '<b>l</b> Вподобати допис'
         flag: '<b>!</b> Поскаржитися на допис'
         bookmark: '<b>b</b> Лишити закладку в дописі'

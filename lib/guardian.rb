@@ -8,7 +8,7 @@ require_dependency 'guardian/user_guardian'
 class Guardian
   include EnsureMagic
   include CategoryGuardian
-  include PostGuardain
+  include PostGuardian
   include TopicGuardian
   include UserGuardian
 
@@ -23,6 +23,7 @@ class Guardian
     def has_trust_level?(level); false; end
     def email; nil; end
   end
+
   def initialize(user=nil)
     @user = user.presence || AnonymousUser.new
   end
@@ -190,6 +191,7 @@ class Guardian
   def can_invite_to_forum?(groups=nil)
     authenticated? &&
     !SiteSetting.enable_sso &&
+    SiteSetting.enable_local_logins &&
     (
       (!SiteSetting.must_approve_users? && @user.has_trust_level?(:regular)) ||
       is_staff?
@@ -201,6 +203,10 @@ class Guardian
     can_see?(object) &&
     can_invite_to_forum? &&
     ( group_ids.blank? || is_admin? )
+  end
+
+  def can_bulk_invite_to_forum?(user)
+    user.admin?
   end
 
   def can_see_private_messages?(user_id)

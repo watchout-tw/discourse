@@ -24,7 +24,7 @@ describe TopicsController do
       post = json['posts'][0]
       post['id'].should == p2.id
       post['username'].should == user.username
-      post['avatar_template'].should == user.avatar_template
+      post['avatar_template'].should == "#{Discourse.base_url_no_prefix}#{user.avatar_template}"
       post['name'].should == user.name
       post['created_at'].should be_present
       post['cooked'].should == p2.cooked
@@ -34,7 +34,7 @@ describe TopicsController do
       participant = json['participants'][0]
       participant['id'].should == user.id
       participant['username'].should == user.username
-      participant['avatar_template'].should == user.avatar_template
+      participant['avatar_template'].should == "#{Discourse.base_url_no_prefix}#{user.avatar_template}"
     end
   end
 
@@ -638,7 +638,7 @@ describe TopicsController do
     end
 
     context "when 'login required' site setting has been enabled" do
-      before { SiteSetting.stubs(:login_required?).returns(true) }
+      before { SiteSetting.login_required = true }
 
       context 'and the user is logged in' do
         before { log_in(:coding_horror) }
@@ -660,11 +660,14 @@ describe TopicsController do
         it 'shows the topic if valid api key is provided' do
           get :show, topic_id: topic.id, slug: topic.slug, api_key: api_key.key
           expect(response).to be_successful
+          topic.reload
+          # free test, only costs a reload
+          topic.views.should == 1
         end
 
-        it 'redirects to the login page if invalid key is provided' do
+        it 'returns 403 for an invalid key' do
           get :show, topic_id: topic.id, slug: topic.slug, api_key: "bad"
-          expect(response).to redirect_to login_path
+          expect(response.code.to_i).to be(403)
         end
       end
     end
@@ -840,6 +843,50 @@ describe TopicsController do
         Topic.any_instance.expects(:set_auto_close).with(nil, anything)
         xhr :put, :autoclose, topic_id: @topic.id, auto_close_time: nil
       end
+    end
+
+  end
+
+  describe 'make_banner' do
+
+    it 'needs you to be a staff member' do
+      log_in
+      xhr :put, :make_banner, topic_id: 99
+      response.should be_forbidden
+    end
+
+    describe 'when logged in' do
+
+      it "changes the topic archetype to 'banner'" do
+        topic = Fabricate(:topic, user: log_in(:admin))
+        Topic.any_instance.expects(:make_banner!)
+
+        xhr :put, :make_banner, topic_id: topic.id
+        response.should be_success
+      end
+
+    end
+
+  end
+
+  describe 'remove_banner' do
+
+    it 'needs you to be a staff member' do
+      log_in
+      xhr :put, :remove_banner, topic_id: 99
+      response.should be_forbidden
+    end
+
+    describe 'when logged in' do
+
+      it "resets the topic archetype" do
+        topic = Fabricate(:topic, user: log_in(:admin))
+        Topic.any_instance.expects(:remove_banner!)
+
+        xhr :put, :remove_banner, topic_id: topic.id
+        response.should be_success
+      end
+
     end
 
   end

@@ -22,6 +22,8 @@ class Topic < ActiveRecord::Base
   def_delegator :notifier, :muted!, :notify_muted!
   def_delegator :notifier, :toggle_mute, :toggle_mute
 
+  attr_accessor :allowed_user_ids
+
   def self.max_sort_order
     2**31 - 1
   end
@@ -103,6 +105,7 @@ class Topic < ActiveRecord::Base
   # When we want to temporarily attach some data to a forum topic (usually before serialization)
   attr_accessor :user_data
   attr_accessor :posters  # TODO: can replace with posters_summary once we remove old list code
+  attr_accessor :participants
   attr_accessor :topic_list
   attr_accessor :meta_data
   attr_accessor :include_last_poster
@@ -594,9 +597,12 @@ class Topic < ActiveRecord::Base
     end
   end
 
-
   def posters_summary(options = {})
     @posters_summary ||= TopicPostersSummary.new(self, options).summary
+  end
+
+  def participants_summary(options = {})
+    @participants_summary ||= TopicParticipantsSummary.new(self, options).summary
   end
 
   # Enable/disable the star on the topic
@@ -618,6 +624,35 @@ class Topic < ActiveRecord::Base
         StarLimiter.new(user).rollback!
       end
     end
+  end
+
+  def make_banner!(user)
+    # only one banner at the same time
+    previous_banner = Topic.where(archetype: Archetype.banner).first
+    previous_banner.remove_banner!(user) if previous_banner.present?
+
+    self.archetype = Archetype.banner
+    self.add_moderator_post(user, I18n.t("archetypes.banner.message.make"))
+    self.save
+
+    MessageBus.publish('/site/banner', banner)
+  end
+
+  def remove_banner!(user)
+    self.archetype = Archetype.default
+    self.add_moderator_post(user, I18n.t("archetypes.banner.message.remove"))
+    self.save
+
+    MessageBus.publish('/site/banner', nil)
+  end
+
+  def banner
+    post = self.posts.order(:post_number).limit(1).first
+
+    {
+      html: post.cooked,
+      key: self.id
+    }
   end
 
   def self.starred_counts_per_day(sinceDaysAgo=30)
@@ -800,8 +835,8 @@ end
 #  id                      :integer          not null, primary key
 #  title                   :string(255)      not null
 #  last_posted_at          :datetime
-#  created_at              :datetime         not null
-#  updated_at              :datetime         not null
+#  created_at              :datetime
+#  updated_at              :datetime
 #  views                   :integer          default(0), not null
 #  posts_count             :integer          default(0), not null
 #  user_id                 :integer
@@ -852,6 +887,6 @@ end
 #
 #  idx_topics_front_page              (deleted_at,visible,archetype,category_id,id)
 #  idx_topics_user_id_deleted_at      (user_id)
-#  index_forum_threads_on_bumped_at   (bumped_at)
+#  index_topics_on_bumped_at          (bumped_at)
 #  index_topics_on_id_and_deleted_at  (id,deleted_at)
 #

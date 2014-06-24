@@ -46,15 +46,35 @@ Discourse.Resolver = Ember.DefaultResolver.extend({
     return this._super(fullName);
   },
 
-  resolveController: function(parsedName) {
-    var moduleName = 'discourse/controllers/' + parsedName.fullNameWithoutType,
-        module = requirejs.entries[moduleName];
+  customResolve: function(parsedName) {
+    // If we end with the name we want, use it. This allows us to define components within plugins.
+    var suffix = parsedName.type + 's/' + parsedName.fullNameWithoutType,
+        moduleName = Ember.keys(requirejs.entries).find(function(e) {
+          return e.indexOf(suffix, e.length - suffix.length) !== -1;
+        });
 
-    if (module) {
+    var module;
+    if (moduleName) {
       module = require(moduleName, null, null, true /* force sync */);
       if (module && module['default']) { module = module['default']; }
     }
-    return module || this._super(parsedName);
+    return module;
+  },
+
+  resolveView: function(parsedName) {
+    return this.customResolve(parsedName) || this._super(parsedName);
+  },
+
+  resolveHelper: function(parsedName) {
+    return this.customResolve(parsedName) || this._super(parsedName);
+  },
+
+  resolveController: function(parsedName) {
+    return this.customResolve(parsedName) || this._super(parsedName);
+  },
+
+  resolveComponent: function(parsedName) {
+    return this.customResolve(parsedName) || this._super(parsedName);
   },
 
   /**

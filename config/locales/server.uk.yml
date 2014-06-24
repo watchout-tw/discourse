@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 uk:
   dates:
@@ -29,8 +29,6 @@ uk:
   not_logged_in: "You need to be logged in to do that."
   read_only_mode_enabled: "The site is in read only mode. Interactions are disabled."
   embed:
-    start_discussion: "Розпочати обговорення"
-    continue: "Продовжити обговорення"
     loading: "Завантаження обговорення..."
     permalink: "Постійне посилання"
     imported_from: "Discussion topic for the original blog entry at: %{link}"
@@ -159,11 +157,8 @@ uk:
   user_profile:
     no_info_me: "<div class='missing-profile'>the About Me field of your profile is currently blank, <a href='/users/%{username_lower}/preferences/about-me'>would you like to fill it out?</a></div>"
     no_info_other: "<div class='missing-profile'>%{name} hasn't entered anything in the About Me field of their profile yet</div>"
-  vip_category_name: "Lounge"
   vip_category_description: "A category exclusive to members with trust level 3 and higher."
-  meta_category_name: "Мета"
   meta_category_description: "Обговорення цього форуму, його організації, того, як він працює, і того, як ми можемо його покращити."
-  staff_category_name: "Staff"
   staff_category_description: "Private category for staff discussions. Topics are only visible to admins and moderators."
   category:
     topic_prefix: "Про категорію %{category}"
@@ -487,7 +482,6 @@ uk:
     flag_sockpuppets: "If a new user (i.e., registered in the last 24 hours) who started a topic and a new user who replies in that topic are at the same IP address, both their posts will automatically be flagged as spam."
     traditional_markdown_linebreaks: "Використовувати звичайний розрив рядка в Markdown, який вимагає двох пробілів в кінці для розриву рядка"
     post_undo_action_window_mins: "Кількість секунд, протягом яких користувачам дозволено скасувати дію над дописом (вподобання, скаргу тощо)"
-    must_approve_users: "Адмін має схвалити користувача перед тим, як той отримає доступ"
     ga_tracking_code: "Код відстеження Google аналітики (ga.js), напр.: UA-12345678-9; див. http://google.com/analytics"
     ga_domain_name: "Доменне ім'я Google аналітики (ga.js), напр.: mysite.com; див. http://google.com/analytics"
     ga_universal_tracking_code: "Код відстеження Google Universal Analytics (analytics.js), напр.: UA-12345678-9; див. http://google.com/analytics"
@@ -496,7 +490,6 @@ uk:
     enable_noscript_support: "Увімкнути стандартну підтримку пошукових роботів через теґ noscript"
     top_menu: "Визначає, які елементи з'являються в навігації головної сторінки, та в якому порядку. Наприклад, latest|new|unread|starred|categories|top|read|posted"
     post_menu: "Визначає, які елементи з'являються в меню допису, та в якому порядку. Наприклад, like|edit|flag|delete|share|bookmark|reply"
-    share_links: "Визначає, які елементи з'являються в діалозі поширення, та в якому порядку. Наприклад, twitter|facebook|google+|email"
     track_external_right_clicks: "Track external links that are right clicked (eg: open in new tab) disabled by default because it rewrites URLs"
     topics_per_page: "Скільки тем за замовчуванням завантажується на сторінці з переліком тем, а також під час підвантаження решти тем"
     posts_per_page: "Скільки дописів завантажується за замовчуванням на сторінці теми, а також під час підвантаження решти дописів"
@@ -525,7 +518,6 @@ uk:
     sso_overrides_username: "Overrides local username with external site username from SSO payload (WARNING: discrepancies can occur due to differences in username length/requirements)"
     sso_overrides_name: "Overrides local name with external site name from SSO payload (WARNING: discrepancies can occur due to normalization of local names)"
     enable_local_logins: "Увімкнути традиційний вхід за допомогою локальних імені користувача та пароля"
-    enable_google_logins: "Увімкнути вхід через Google"
     enable_yahoo_logins: "Увімкнути вхід через Yahoo"
     enable_twitter_logins: "Увімкнути вхід через Twitter; потребує twitter_consumer_key та twitter_consumer_secret"
     twitter_consumer_key: "Consumer key для входу через Twitter, зареєстрований на http://dev.twitter.com"
@@ -536,7 +528,6 @@ uk:
     enable_github_logins: "Увімкнути вхід через Github; потребує github_client_id та github_client_secret"
     github_client_id: "Client id для входу через Github, зареєстрований на https://github.com/settings/applications"
     github_client_secret: "Client secret для входу через Github, зареєстрований на https://github.com/settings/applications"
-    allow_restore: "Allow restore, which can replace ALL site data! Leave false unless you plan to do restore a backup"
     maximum_backups: "The maximum amount of backups to keep on disk. Older backups are automatically deleted"
     backup_daily: "Automatically create a site backup once a day"
     enable_s3_backups: "Upload backups to S3 when complete. Make sure you have filled in your s3 credentials."
@@ -632,7 +623,6 @@ uk:
     enable_mobile_theme: "Мобільні пристрої використовуватимуть тему, дружню для них, з можливістю перемикатися на повний сайт. Відключіть це, якщо хочете використовувати власну, повністю чутливу, таблицю стилів."
     dominating_topic_minimum_percent: "What percentage of posts a user has to make in a topic before we consider it dominating."
     suppress_uncategorized_badge: "Don't show the badge for uncategorized topics in topic lists"
-    min_posts_for_search_in_topic: "Disable search within topic if topics have less than minimum number posts"
     enable_names: "Дозволити користувачам показувати свої повні імена"
     display_name_on_posts: "Показувати також повне ім'я користувача в його дописах"
     invites_shown: "Максимум запрошень, показуваних на сторінці користувача"
@@ -661,14 +651,12 @@ uk:
     within_post: "#%{post_number} by %{username}: %{excerpt}"
     types:
       category: 'Categories'
-      topic: 'Topics'
       user: 'Users'
   original_poster: "Перший дописувач"
   most_posts: "Найбільше дописів"
   most_recent_poster: "Автор останнього допису"
   frequent_poster: "Частий дописувач"
   redirected_to_top_reasons:
-    new_user: "Welcome! As a new visitor, this will be your homepage until you've had some time to look around at the forum. Here's some of the most popular topics from the past."
     not_seen_in_a_month: "Welcome back! We haven't seen you in a while. These are the top discussion topics since you've been away."
   topic_statuses:
     archived_enabled: "Цю тему тепер заархівовано. Вона заморожена і її жодним чином не можна змінити."
@@ -704,8 +692,6 @@ uk:
     omniauth_error_unknown: "Something went wrong processing your log in, please try again."
   user:
     username:
-      short: "must be longer than %{min} characters"
-      long: "must be shorter than %{max} characters"
       characters: "must only include numbers, letters and underscores"
       unique: "must be unique"
       blank: "must be present"
@@ -715,30 +701,6 @@ uk:
       blocked: "is not allowed."
     ip_address:
       blocked: "is blocked."
-  invite_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} invited you to join a discussion on %{site_name}"
-    text_body_template: |
-      %{invitee_name} invited you to the topic "%{topic_title}" at %{site_name}.
-
-      If you're interested, click the link below to visit the discussion:
-
-      [Visit %{site_name}][1]
-
-      You were invited by a trusted user, so you'll be able to post a reply immediately, without needing to log in.
-
-      [1]: %{invite_link}
-  invite_forum_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} запросив(ла) Вас приєднатися до %{site_name}"
-    text_body_template: |
-      %{invitee_name} запросив(ла) Вас до сайта %{site_name}.
-
-      Якщо Вас це цікавить, перейдіть за посиланням, щоб приєднатися:
-
-      [Завітати до сайта %{site_name}][1]
-
-      Вас запросив довірений користувач, тому Ви матимете можливість приєднатися одразу, без входу до системи.
-
-      [1]: %{invite_link}
   test_mailer:
     subject_template: "[%{site_name}] Тест доставки електронної пошти"
     text_body_template: |
@@ -779,8 +741,6 @@ uk:
       ----
 
       <small>В кожному листі, який Ви надсилаєте, має бути нижній колонтитул з можливістю відписатися від розсилки, тому змакетуймо його. Цього листа було надіслано ТзОВ Паралелепіпедмоторз, вул. Центральна, 55, Всюдигород, Україна 12345. Якщо Ви бажаєте відмовитися від наших наступних листів, [натисніть, щоб відписатися][5].</small>
-  new_version_mailer:
-    subject_template: "[%{site_name}] update available"
   new_version_mailer_with_notes:
     subject_template: "[%{site_name}] update available"
   system_messages:
@@ -839,28 +799,6 @@ uk:
         Бажаємо приємного перебування на форумі!
     welcome_invite:
       subject_template: "Ласкаво просимо до сайта %{site_name}!"
-      text_body_template: |
-        Дякуємо за те, що Ви прийняли запрошення до %{site_name}, і вітаємо у нашому дискусійному форумі!
-
-        Ми автоматично згенерували для Вас ім'я користувача **%{username}**, але Ви можете його змінити в будь-який час, відвідавши [свій користувацький профіль][prefs].
-
-        Щоб знову ввійти наступного разу:
-
-        1. Використовуйте обліковий запис Facebook, Google, Twitter, або будь-якої іншої підтримуваної системи -- але будьте певні, що цей запис пов'язаний із **тією ж електронною скринькою**, на яку Ви отримали оригінальне запрошення. Інакше ми не знатимемо, що це Ви!
-
-        АБО
-
-        2. Створіть унікальний пароль для %{site_name} у [своєму профілі][prefs], і потім використайте його для входу.
-
-        %{site_password}
-
-        %{new_user_tips}
-
-        Ми завжди віримо у [цивілізовану поведінку у спільноті](%{base_url}/faq).
-
-        Бажаємо приємного перебування на форумі!
-
-        [prefs]: %{user_preferences_url}
     export_succeeded:
       subject_template: "Export completed successfully"
       text_body_template: "The export was successful."
@@ -869,14 +807,6 @@ uk:
       text_body_template: "The import was successful."
     email_error_notification:
       subject_template: "Error parsing email"
-      text_body_template: |
-        This is an automated message to inform you that parsing the following incoming email failed.
-
-        Please review the following message.
-
-        Error - %{error}
-
-        %{source}
     email_reject_trust_level:
       subject_template: "Message rejected"
       text_body_template: |
@@ -901,22 +831,6 @@ uk:
         Це - автоматичне повідомлення, надіслане сайтом %{site_name}, щоб повідомити Вас про те, що Ваш обліковий запис було заблоковано членом персоналу.
 
         Для додаткових настанов, будь ласка, зверніться до [Частих питань](%{base_url}/faq).
-    user_automatically_blocked:
-      subject_template: "New user %{username} blocked via flags"
-      text_body_template: |
-        This is an automated message to inform you that the new user [%{username}](%{base_url}%{user_url}) was automatically blocked because multiple users flagged %{username}'s post(s).
-
-        Please [review the flags](%{base_url}/admin/flags). If %{username} was incorrectly blocked from posting, click the unblock button on [the admin page for this user](%{base_url}%{user_url}).
-
-        This threshold can be changed via the `block_new_user` site settings.
-    spam_post_blocked:
-      subject_template: "New user %{username} posts blocked for repeated links"
-      text_body_template: |
-        This is an automated message to inform you that the new user [%{username}](%{base_url}%{user_url}) tried to create multiple posts with links to %{domains}, but those posts were blocked to avoid spam. The user is still able to create new posts that do not link to %{domains}.
-
-        Please [review the user](%{base_url}%{user_url}).
-
-        This threshold can be changed via the `newuser_spam_host_threshold` site setting.
     unblocked:
       subject_template: "Account unblocked"
       text_body_template: |
@@ -1078,7 +992,6 @@ uk:
       size_not_found: "Sorry, but we couldn't determine the size of the image. Maybe your image is corrupted?"
   flag_reason:
     sockpuppet: "A new user created a topic, and another new user at the same IP address replied. See the flag_sockpuppets site setting."
-    spam_hosts: "This user tried to create multiple posts with links to the same domain. See the newuser_spam_host_threshold site setting."
   email_log:
     no_user: "Can't find user with id %{user_id}"
     suspended_not_pm: "User is supsended and email is not a private message"

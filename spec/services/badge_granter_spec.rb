@@ -5,6 +5,10 @@ describe BadgeGranter do
   let(:badge) { Fabricate(:badge) }
   let(:user) { Fabricate(:user) }
 
+  before do
+    SiteSetting.enable_badges = true
+  end
+
   describe 'grant' do
 
     it 'grants a badge' do
@@ -64,6 +68,42 @@ describe BadgeGranter do
       user.reload.title.should == nil
     end
 
+  end
+
+  context "update_badges" do
+    let(:user) { Fabricate(:user) }
+    let(:liker) { Fabricate(:user) }
+
+    it "grants and revokes trust level badges" do
+      user.change_trust_level!(:elder)
+      UserBadge.where(user_id: user.id, badge_id: Badge.trust_level_badge_ids).count.should eq(4)
+      user.change_trust_level!(:basic)
+      UserBadge.where(user_id: user.id, badge_id: 1).first.should_not be_nil
+      UserBadge.where(user_id: user.id, badge_id: 2).first.should be_nil
+    end
+
+    it "grants system like badges" do
+      post = create_post(user: user)
+      # Welcome badge
+      PostAction.act(liker, post, PostActionType.types[:like])
+      UserBadge.find_by(user_id: user.id, badge_id: 5).should_not be_nil
+      # Nice post badge
+      post.update_attributes like_count: 10
+      BadgeGranter.update_badges(action: :post_like, post_id: post.id)
+      UserBadge.find_by(user_id: user.id, badge_id: 6).should_not be_nil
+      # Good post badge
+      post.update_attributes like_count: 25
+      BadgeGranter.update_badges(action: :post_like, post_id: post.id)
+      UserBadge.find_by(user_id: user.id, badge_id: 7).should_not be_nil
+      # Great post badge
+      post.update_attributes like_count: 100
+      BadgeGranter.update_badges(action: :post_like, post_id: post.id)
+      UserBadge.find_by(user_id: user.id, badge_id: 8).should_not be_nil
+      # Revoke badges on unlike
+      post.update_attributes like_count: 99
+      BadgeGranter.update_badges(action: :post_like, post_id: post.id)
+      UserBadge.find_by(user_id: user.id, badge_id: 8).should be_nil
+    end
   end
 
 end

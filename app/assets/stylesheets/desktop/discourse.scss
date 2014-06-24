@@ -9,15 +9,11 @@ body {
 }
 
 .container {
-  @extend .clearfix;
   max-width: $large-width;
-  margin-right: auto;
-  margin-left: auto;
 }
 
 .full-width {
   width: $large-width;
-  margin-left: 12px;
 }
 
 @include medium-width {
@@ -46,11 +42,6 @@ header {
 }
 
 body {
-
-  // tab focus in firefox
-  button:focus::-moz-focus-inner {
-  border: 1px dotted;
-  }
 
   .boxed {
     height: 100%;
@@ -113,22 +104,20 @@ body {
 
   .grippie {
     width: 100%;
-    border: 1px solid scale-color($primary, $lightness: 90%);
+    border: 1px solid scale-color-diff();
     border-width: 1px 0;
     cursor: row-resize;
     height: 11px;
     overflow: hidden;
-    background-color: scale-color($primary, $lightness: 95%);
+    background-color: scale-color-diff();
     display:block;
-    background: image-url("grippie.png") scale-color($primary, $lightness: 95%) no-repeat center 3px;
+    background: image-url("grippie.png") scale-color-diff() no-repeat center 3px;
   }
 }
 
 blockquote {
   /* 13px left is intentional here to properly align with post quotes */
   padding: 10px 4px 4px 13px;
-  background-color: scale-color($primary, $lightness: 95%);
-  border-left: 5px solid scale-color($primary, $lightness: 75%);
 }
 
 .topic-statuses {
@@ -154,7 +143,7 @@ body {
   }
 
   code, pre {
-    font-family: Consolas, Menlo, Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace, serif;
+    font-family: Consolas, Menlo, Monaco, "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -223,7 +212,7 @@ body {
     width: 210px;
     height: auto;
     background-color:$secondary;
-    border: 1px solid scale-color($primary, $lightness: 90%);
+    border: 1px solid scale-color-diff();
     border-radius: 3px;
     box-shadow: inset 0 1px 1px rgba($primary, .3);
     -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
@@ -232,7 +221,7 @@ body {
   input {
     &[type="text"], &[type="password"], &[type="datetime"], &[type="datetime-local"], &[type="date"], &[type="month"], &[type="time"], &[type="week"], &[type="number"], &[type="email"], &[type="url"], &[type="search"], &[type="tel"], &[type="color"] {
       background-color: $secondary;
-      border: 1px solid scale-color($primary, $lightness: 90%);
+      border: 1px solid scale-color-diff();
       border-radius: 3px;
     box-shadow: inset 0 1px 1px rgba($primary, .3);
       -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
@@ -269,7 +258,7 @@ body {
 
   select {
     width: 220px;
-    border: 1px solid scale-color($primary, $lightness: 90%);
+    border: 1px solid scale-color-diff();
     &[multiple], &[size] {
       height: auto;
     }
@@ -319,15 +308,19 @@ body {
   }
   input[disabled], select[disabled], textarea[disabled], input[readonly], select[readonly], textarea[readonly] {
     cursor: not-allowed;
-    background-color: scale-color($primary, $lightness: 90%);
-    border-color: scale-color($primary, $lightness: 90%);
+    background-color: scale-color-diff();
+    border-color: scale-color-diff();
   }
   input {
     &[type="radio"][disabled], &[type="checkbox"][disabled], &[type="radio"][readonly], &[type="checkbox"][readonly] {
       background-color: transparent;
     }
   }
+  .controls-dropdown {
+    margin-bottom: 10px;
+  }
   .control-group {
+    margin-bottom: 9px;
     &.warning {
       > label {
         color: $danger;
@@ -415,7 +408,7 @@ body {
     text-align: center;
     vertical-align: middle;
     background-color: $secondary;
-    border: 1px solid scale-color($primary, $lightness: 90%);
+    border: 1px solid scale-color-diff();
   }
   .input-prepend .add-on, .input-append .add-on, .input-prepend .btn, .input-append .btn {
     margin-left: -1px;
@@ -463,9 +456,6 @@ body {
     display: none;
   }
 
-  .control-group {
-    margin-bottom: 9px;
-  }
   .form-horizontal {
     .control-group {
       margin-bottom: 18px;
@@ -486,7 +476,6 @@ body {
     .control-label {
       float: left;
       width: 140px;
-      padding-top: 5px;
       text-align: right;
       font-weight: bold;
     }
@@ -500,27 +489,12 @@ body {
     margin-bottom: 18px;
     background-color: scale-color($danger, $lightness: 75%);
     color: #c09853;
-  }
-  .alert .close {
-    position: relative;
-    top: -2px;
-    right: -21px;
-    line-height: 18px;
-  }
-  .alert-success {
-    background-color:  scale-color($success, $lightness: 90%);
-    color: $success;
-  }
-  .alert-error {
-    background-color:  scale-color($danger, $lightness: 75%);
-    color: $danger;
-  }
-  .alert-info {
-    background-color: scale-color($tertiary, $lightness: 90%);
-    color: $primary;
-  }
-  .alert {
+
     .close {
+      position: relative;
+      top: -2px;
+      right: -21px;
+      line-height: 18px;
       float: right;
       font-size: 20px;
       font-weight: bold;
@@ -543,7 +517,20 @@ body {
       border: 0;
       -webkit-appearance: none;
     }
+    &.alert-success {
+      background-color:  scale-color($success, $lightness: 90%);
+      color: $success;
+    }
+    &.alert-error {
+      background-color:  scale-color($danger, $lightness: 75%);
+      color: $danger;
+    }
+    &.alert-info {
+      background-color: scale-color($tertiary, $lightness: 90%);
+      color: $primary;
+    }
   }
+
   .bootbox.modal {
     .modal-footer {
       a.btn-primary {
@@ -563,46 +550,36 @@ body {
 .row:after {
   clear: both;
 }
-[class*="span"] {
-  float: left;
-}
+
 .span24 {
   width: 1236px;
+  float: left;
 }
 .span15 {
   /* intentionally no width set here, do not add one */
   margin-left: 12px;
-}
-.span14 {
-  width: 716px;
+  float: left;
 }
 .span13 {
   width: 664px;
-}
-.span11 {
-  width: 560px;
+  float: left;
 }
 .span10 {
   width: 508px;
+  float: left;
 }
 .span8 {
   width: 404px;
+  float: left;
 }
 .span6 {
   width: 300px;
-}
-.span5 {
-  width: 248px;
+  float: left;
 }
 .span4 {
   width: 196px;
   margin-right: 12px;
-}
-.span3 {
-  width: 144px;
-}
-.span2 {
-  width: 92px;
+  float: left;
 }
 .offset2 {
   margin-left: 116px;

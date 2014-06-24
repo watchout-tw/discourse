@@ -23,31 +23,6 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
 
   postStream: Em.computed.alias('controller.postStream'),
 
-  updateBar: function() {
-    Em.run.scheduleOnce('afterRender', this, '_updateProgressBar');
-  }.observes('controller.streamPercentage'),
-
-  _updateProgressBar: function() {
-    var $topicProgress = this._topicProgress;
-
-    // cache lookup
-    if (!$topicProgress) {
-      $topicProgress = $('#topic-progress');
-      if (!$topicProgress.length) {
-        return;
-      }
-      this._topicProgress = $topicProgress;
-    }
-
-    // speeds up stuff, bypass jquery slowness and extra checks
-    var totalWidth = $topicProgress[0].offsetWidth,
-        progressWidth = this.get('controller.streamPercentage') * totalWidth;
-
-    $topicProgress.find('.bg')
-                  .css("border-right-width", (progressWidth === totalWidth) ? "0px" : "1px")
-                  .width(progressWidth);
-  },
-
   _updateTitle: function() {
     var title = this.get('topic.title');
     if (title) return Discourse.set('title', _.unescape(title));
@@ -60,8 +35,6 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
   }.observes('composer'),
 
   _enteredTopic: function() {
-    this._topicProgress = undefined;
-
     // Ember is supposed to only call observers when values change but something
     // in our view set up is firing this observer with the same value. This check
     // prevents scrolled from being called twice.
@@ -80,16 +53,12 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
       self.scrolled();
     });
 
-    // This get seems counter intuitive, but it's to trigger the observer on
-    // the streamPercentage for this view. Otherwise the process bar does not
-    // update.
-    this.get('controller.streamPercentage');
-
     this.$().on('mouseup.discourse-redirect', '.cooked a, a.track-link', function(e) {
       var $target = $(e.target);
       if ($target.hasClass('mention') || $target.parents('.expanded-embed').length) { return false; }
       return Discourse.ClickTrack.trackClick(e);
     });
+
   }.on('didInsertElement'),
 
   // This view is being removed. Shut down operations
@@ -104,6 +73,7 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
 
     // this happens after route exit, stuff could have trickled in
     this.set('controller.controllers.header.showExtraInfo', false);
+
   }.on('willDestroyElement'),
 
   debounceLoadSuggested: Discourse.debounce(function(){
@@ -145,13 +115,15 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
     this.set('docAt', false);
   },
 
+  offset: 0,
+  hasScrolled: Em.computed.gt("offset", 0),
+
   /**
     The user has scrolled the window, or it is finished rendering and ready for processing.
 
     @method scrolled
   **/
   scrolled: function(){
-
     var offset = window.pageYOffset || $('html').scrollTop();
     if (!this.get('docAt')) {
       var title = $('#topic-title');
@@ -159,6 +131,8 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
         this.set('docAt', title.offset().top);
       }
     }
+
+    this.set("offset", offset);
 
     var headerController = this.get('controller.controllers.header'),
         topic = this.get('controller.model');
@@ -168,14 +142,8 @@ Discourse.TopicView = Discourse.View.extend(Discourse.Scrolling, {
       headerController.set('showExtraInfo', topic.get('postStream.firstPostNotLoaded'));
     }
 
-    // Dock the counter if necessary
-    var $lastPost = $('article[data-post-id=' + topic.get('postStream.lastPostId') + "]");
-    var lastPostOffset = $lastPost.offset();
-    if (!lastPostOffset) {
-      this.set('controller.dockedCounter', false);
-      return;
-    }
-    this.set('controller.dockedCounter', (offset >= (lastPostOffset.top + $lastPost.height()) - $(window).height()));
+    // Trigger a scrolled event
+    this.appEvents.trigger('topic:scrolled', offset);
   },
 
   topicTrackingState: function() {

@@ -88,7 +88,10 @@ class SiteSetting < ActiveRecord::Base
 
   def self.has_enough_topics_to_redirect_to_top
     TopTopic.periods.each do |period|
-      return true if TopTopic.where("#{period}_score > 0").count >= SiteSetting.topics_per_period_in_top_page
+      topics_per_period = TopTopic.where("#{period}_score > 0")
+                                  .limit(SiteSetting.topics_per_period_in_top_page)
+                                  .count
+      return true if topics_per_period >= SiteSetting.topics_per_period_in_top_page
     end
     # nothing
     false
@@ -104,6 +107,6 @@ end
 #  name       :string(255)      not null
 #  data_type  :integer          not null
 #  value      :text
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  created_at :datetime
+#  updated_at :datetime
 #

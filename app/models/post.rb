@@ -15,6 +15,9 @@ class Post < ActiveRecord::Base
   include Trashable
   include HasCustomFields
 
+  # increase this number to force a system wide post rebake
+  BAKED_VERSION = 1
+
   rate_limit
   rate_limit :limit_posts_per_day
 
@@ -112,7 +115,7 @@ class Post < ActiveRecord::Base
 
   def raw_hash
     return if raw.blank?
-    Digest::SHA1.hexdigest(raw.gsub(/\s+/, ""))
+    Digest::SHA1.hexdigest(raw)
   end
 
   def self.white_listed_image_classes
@@ -310,6 +313,35 @@ class Post < ActiveRecord::Base
     PostRevisor.new(self).revise!(updated_by, new_raw, opts)
   end
 
+  def self.rebake_old(limit)
+    Post.where('baked_version IS NULL OR baked_version < ?', BAKED_VERSION)
+        .limit(limit).each do |p|
+      begin
+        p.rebake!
+      rescue => e
+        Discourse.handle_exception(e)
+      end
+    end
+  end
+
+  def rebake!(opts={})
+    new_cooked = cook(
+      raw,
+      topic_id: topic_id,
+      invalidate_oneboxes: opts.fetch(:invalidate_oneboxes, false)
+    )
+    old_cooked = cooked
+
+    update_columns(cooked: new_cooked, baked_at: Time.new, baked_version: BAKED_VERSION)
+
+    # Extracts urls from the body
+    TopicLink.extract_from self
+    # make sure we trigger the post process
+    trigger_post_process(true)
+
+    new_cooked != old_cooked
+  end
+
   def set_owner(new_user, actor)
     revise(actor, self.raw, {
         new_user: new_user,
@@ -357,6 +389,8 @@ class Post < ActiveRecord::Base
   before_save do
     self.last_editor_id ||= user_id
     self.cooked = cook(raw, topic_id: topic_id) unless new_record?
+    self.baked_at = Time.new
+    self.baked_version = BAKED_VERSION
   end
 
   after_save do
@@ -478,7 +512,7 @@ class Post < ActiveRecord::Base
   end
 
   def save_revision
-    modifications = changes.extract!(:raw, :cooked, :edit_reason, :user_id)
+    modifications = changes.extract!(:raw, :cooked, :edit_reason, :user_id, :wiki)
     # make sure cooked is always present (oneboxes might not change the cooked post)
     modifications["cooked"] = [self.cooked, self.cooked] unless modifications["cooked"].present?
     PostRevision.create!(
@@ -516,8 +550,8 @@ end
 #  post_number             :integer          not null
 #  raw                     :text             not null
 #  cooked                  :text             not null
-#  created_at              :datetime         not null
-#  updated_at              :datetime         not null
+#  created_at              :datetime
+#  updated_at              :datetime
 #  reply_to_post_number    :integer
 #  reply_count             :integer          default(0), not null
 #  quote_count             :integer          default(0), not null
@@ -550,11 +584,13 @@ end
 #  word_count              :integer
 #  version                 :integer          default(1), not null
 #  cook_method             :integer          default(1), not null
+#  wiki                    :boolean          default(FALSE), not null
+#  baked_at                :datetime
 #
 # Indexes
 #
 #  idx_posts_created_at_topic_id            (created_at,topic_id)
 #  idx_posts_user_id_deleted_at             (user_id)
 #  index_posts_on_reply_to_post_number      (reply_to_post_number)
-#  index_posts_on_topic_id_and_post_number  (topic_id,post_number) UNIQUE
+#  index_posts_on_topic_id_and_post_number  (topic_id,post_number)
 #

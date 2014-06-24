@@ -7,7 +7,7 @@ class UserBadgesController < ApplicationController
       user_badges = user.user_badges
     else
       badge = fetch_badge_from_params
-      user_badges = badge.user_badges.order('granted_at DESC').limit(100)
+      user_badges = badge.user_badges.order('granted_at DESC').limit(96)
     end
 
     if params[:granted_before]
@@ -15,6 +15,10 @@ class UserBadgesController < ApplicationController
     end
 
     user_badges = user_badges.includes(:user, :granted_by, badge: :badge_type)
+
+    if params[:grouped]
+      user_badges = user_badges.group(:badge_id).select(UserBadge.attribute_names.map {|x| "MAX(#{x}) as #{x}" }, 'COUNT(*) as count')
+    end
 
     render_serialized(user_badges, UserBadgeSerializer, root: "user_badges")
   end

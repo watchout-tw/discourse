@@ -9,6 +9,7 @@ class UserSerializer < BasicUserSerializer
              :created_at,
              :website,
              :profile_background,
+             :location,
              :can_edit,
              :can_edit_username,
              :can_edit_email,
@@ -22,6 +23,7 @@ class UserSerializer < BasicUserSerializer
              :title,
              :suspend_reason,
              :suspended_till,
+             :uploaded_avatar_id,
              :badge_count
 
   has_one :invited_by, embed: :object, serializer: BasicUserSerializer
@@ -39,7 +41,7 @@ class UserSerializer < BasicUserSerializer
 
   def bio_excerpt
     # If they have a bio return it
-    excerpt = object.bio_excerpt
+    excerpt = object.user_profile.bio_excerpt
     return excerpt if excerpt.present?
 
     # Without a bio, determine what message to show
@@ -63,15 +65,22 @@ class UserSerializer < BasicUserSerializer
                      :external_links_in_new_tab,
                      :dynamic_favicon,
                      :enable_quoting,
-                     :use_uploaded_avatar,
-                     :has_uploaded_avatar,
-                     :gravatar_template,
-                     :uploaded_avatar_template,
                      :muted_category_ids,
                      :tracked_category_ids,
                      :watched_category_ids,
-                     :private_messages_stats
+                     :private_messages_stats,
+                     :disable_jump_reply,
+                     :gravatar_avatar_upload_id,
+                     :custom_avatar_upload_id,
+                     :custom_fields
 
+  def gravatar_avatar_upload_id
+    object.user_avatar.try(:gravatar_upload_id)
+  end
+
+  def custom_avatar_upload_id
+    object.user_avatar.try(:custom_upload_id)
+  end
 
   def auto_track_topics_after_msecs
     object.auto_track_topics_after_msecs || SiteSetting.auto_track_topics_after
@@ -101,12 +110,33 @@ class UserSerializer < BasicUserSerializer
     scope.can_edit_name?(object)
   end
 
-  def stats
-    UserAction.stats(object.id, scope)
+  def location
+    object.user_profile.location
+  end
+  def include_location?
+    location.present?
   end
 
-  def gravatar_template
-    User.gravatar_template(object.email)
+  def website
+    object.user_profile.website
+  end
+  def include_website?
+    website.present?
+  end
+
+  def include_bio_raw?
+    bio_raw.present?
+  end
+  def bio_raw
+    object.user_profile.bio_raw
+  end
+
+  def bio_cooked
+    object.user_profile.bio_processed
+  end
+
+  def stats
+    UserAction.stats(object.id, scope)
   end
 
   def include_suspended?
@@ -135,9 +165,4 @@ class UserSerializer < BasicUserSerializer
   def private_messages_stats
     UserAction.private_messages_stats(object.id, scope)
   end
-
-  def bio_cooked
-    object.bio_processed
-  end
-
 end

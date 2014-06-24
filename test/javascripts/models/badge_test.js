@@ -13,16 +13,25 @@ test('displayName', function() {
 
   this.stub(I18n, "t").returnsArg(0);
   var badge2 = Discourse.Badge.create({id: 2, name: "Test Badge 2"});
-  equal(badge2.get('displayName'), "badges.test_badge_2.name", "uses translation when available");
+  equal(badge2.get('displayName'), "badges.badge.test_badge_2.name", "uses translation when available");
 });
 
 test('translatedDescription', function() {
-  var badge1 = Discourse.Badge.create({id: 1, name: "Test Badge 1"});
+  var badge1 = Discourse.Badge.create({id: 1, name: "Test Badge 1", description: "TEST"});
   equal(badge1.get('translatedDescription'), null, "returns null when no translation exists");
 
   var badge2 = Discourse.Badge.create({id: 2, name: "Test Badge 2 **"});
   this.stub(I18n, "t").returns("description translation");
   equal(badge2.get('translatedDescription'), "description translation", "users translated description");
+});
+
+test('displayDescription', function() {
+  var badge1 = Discourse.Badge.create({id: 1, name: "Test Badge 1", description: "TEST"});
+  equal(badge1.get('displayDescription'), "TEST", "returns original description when no translation exists");
+
+  var badge2 = Discourse.Badge.create({id: 2, name: "Test Badge 2 **"});
+  this.stub(I18n, "t").returns("description translation");
+  equal(badge2.get('displayDescription'), "description translation", "users translated description");
 });
 
 test('createFromJson array', function() {

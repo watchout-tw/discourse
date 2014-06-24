@@ -18,18 +18,18 @@
       <form>
         <section class='field'>
           <label>{{i18n category.name}}</label>
-          {{textField value=name placeholderKey="category.name_placeholder" maxlength="50"}}
+          {{text-field value=name placeholderKey="category.name_placeholder" maxlength="50"}}
         </section>
 
         <section class='field'>
           {{#if subCategories}}
             <label>{{i18n categories.subcategories}}</label>
             {{#each subCategories}}
-              {{categoryBadge this}}
+              {{category-badge this}}
             {{/each}}
           {{else}}
             <label>{{i18n category.parent}}</label>
-            {{categoryChooser valueAttribute="id" value=parent_category_id categories=parentCategories rootNone=true}}
+            {{category-chooser valueAttribute="id" value=parent_category_id categories=parentCategories rootNone=true}}
           {{/if}}
         </section>
 
@@ -44,7 +44,7 @@
             {{/if}}
             {{#if topic_url}}
               <br/>
-              <button class="btn btn-small" {{action showCategoryTopic}}>{{i18n category.change_in_category_topic}}</button>
+              <button class="btn btn-small" {{action showCategoryTopic}}><i class="fa fa-pencil"></i>{{i18n category.change_in_category_topic}}</button>
             {{/if}}
           </section>
         {{/if}}
@@ -56,13 +56,13 @@
 
             <div class='input-prepend input-append' style="margin-top: 10px;">
               <span class='color-title'>{{i18n category.background_color}}:</span>
-              <span class='add-on'>#</span>{{textField value=color placeholderKey="category.color_placeholder" maxlength="6"}}
+              <span class='add-on'>#</span>{{text-field value=color placeholderKey="category.color_placeholder" maxlength="6"}}
               {{colorPicker colors=backgroundColors usedColors=usedBackgroundColors value=color}}
             </div>
 
             <div class='input-prepend input-append'>
               <span class='color-title'>{{i18n category.foreground_color}}:</span>
-              <span class='add-on'>#</span>{{textField value=text_color placeholderKey="category.color_placeholder" maxlength="6"}}
+              <span class='add-on'>#</span>{{text-field value=text_color placeholderKey="category.color_placeholder" maxlength="6"}}
               {{colorPicker colors=foregroundColors value=text_color}}
             </div>
           </div>
@@ -99,7 +99,7 @@
             <div>
               <i class="fa fa-clock-o"></i>
               {{i18n category.auto_close_label}}
-              {{textField value=auto_close_hours}}
+              {{text-field value=auto_close_hours}}
               {{i18n category.auto_close_units}}
             </div>
           </div>
@@ -111,7 +111,7 @@
               <div>
                 <i class="fa fa-envelope-o"></i>
                 {{i18n category.email_in}}
-                {{textField value=email_in}}
+                {{text-field value=email_in}}
               </div>
               <div>
                 <label class="checkbox-label">
@@ -123,15 +123,14 @@
           </section>
         {{/if}}
 
-        <section class='field'>
-          <label>{{i18n category.position}}</label>
-          <span {{action disableDefaultPosition}}>{{textField value=position disabled=defaultPosition class="position-input"}}</span>
-          &nbsp;{{i18n or}}&nbsp;
-          <button {{bind-attr class=":btn defaultPosition:btn-primary"}} {{action toggleDefaultPosition}}>
-            <span {{bind-attr class="defaultPosition::hidden"}}><i class="fa fa-check"></i></span>
-            {{i18n category.default_position}}
-          </button>
-        </section>
+        {{#if showPositionInput}}
+          <section class='field'>
+            <label>{{i18n category.position}}</label>
+            {{text-field value=position class="position-input"}}
+          </section>
+        {{else}}
+          <p>{{i18n category.position_disabled}}</p>
+        {{/if}}
       </div>
     {{/unless}}
   </div>

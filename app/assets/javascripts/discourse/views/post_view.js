@@ -43,6 +43,12 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
     if (this.get('controller.multiSelect') && (e.metaKey || e.ctrlKey)) {
       this.get('controller').toggledSelectedPost(this.get('post'));
     }
+
+    var $adminMenu = this.get('adminMenu');
+    if ($adminMenu && !$(e.target).is($adminMenu) && $adminMenu.has($(e.target)).length === 0) {
+      $adminMenu.hide();
+      this.set('adminMenu', null);
+    }
   },
 
   selected: function() {
@@ -108,7 +114,13 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
       if ($aside.data('topic')) {
         topic_id = $aside.data('topic');
       }
-      Discourse.ajax("/posts/by_number/" + topic_id + "/" + $aside.data('post')).then(function (result) {
+
+      var post_id = $aside.data('post');
+
+      topic_id = parseInt(topic_id,10);
+      post_id = parseInt(post_id,10);
+
+      Discourse.ajax("/posts/by_number/" + topic_id + "/" + post_id).then(function (result) {
         var parsed = $(result.cooked);
         parsed.replaceText(originalText, "<span class='highlighted'>" + originalText + "</span>");
         $blockQuote.showHtml(parsed);
@@ -214,13 +226,58 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
   didInsertElement: function() {
     var $post = this.$(),
         post = this.get('post'),
-        postNumber = post.get('post_number'),
-        highlightNumber = this.get('controller.highlightOnInsert');
+        postNumber = post.get('post_number');
+
+    this.showLinkCounts();
+
+    // Track this post
+    Discourse.ScreenTrack.current().track(this.$().prop('id'), postNumber);
+
+    // Highlight the post if required
+    if (postNumber > 1) {
+      Discourse.PostView.considerHighlighting(this.get('controller'), postNumber);
+    }
+
+    // Add syntax highlighting
+    Discourse.SyntaxHighlighting.apply($post);
+    Discourse.Lightbox.apply($post);
+
+    this.trigger('postViewInserted', $post);
+
+    // Find all the quotes
+    Em.run.scheduleOnce('afterRender', this, 'insertQuoteControls');
+
+    this.applySearchHighlight();
+  },
+
+  applySearchHighlight: function(){
+    var highlight = this.get('controller.searchHighlight');
+    var cooked = this.$('.cooked');
+
+    if(!cooked){ return; }
+
+    if(highlight && highlight.length > 2){
+      if(this._highlighted){
+         cooked.unhighlight();
+      }
+      cooked.highlight(highlight);
+      this._highlighted = true;
+
+    } else if(this._highlighted){
+      cooked.unhighlight();
+      this._highlighted = false;
+    }
+  }.observes('controller.searchHighlight', 'cooked')
+});
+
+Discourse.PostView.reopenClass({
+  considerHighlighting: function(controller, postNumber) {
+    var highlightNumber = controller.get('highlightOnInsert');
 
     // If we're meant to highlight a post
-    if ((highlightNumber > 1) && (highlightNumber === postNumber)) {
-      this.set('controller.highlightOnInsert', null);
-      var $contents = $('.topic-body', $post),
+    if (highlightNumber === postNumber) {
+      controller.set('highlightOnInsert', null);
+      var $contents = $('#post_' + postNumber +' .topic-body'),
           origColor = $contents.data('orig-color') || $contents.css('backgroundColor');
 
       $contents.data("orig-color", origColor);
@@ -231,19 +288,5 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
           $contents.removeClass('highlighted');
         });
     }
-
-    this.showLinkCounts();
-
-    // Track this post
-    Discourse.ScreenTrack.current().track(this.$().prop('id'), postNumber);
-
-    // Add syntax highlighting
-    Discourse.SyntaxHighlighting.apply($post);
-    Discourse.Lightbox.apply($post);
-
-    this.trigger('postViewInserted', $post);
-
-    // Find all the quotes
-    Em.run.scheduleOnce('afterRender', this, 'insertQuoteControls');
   }
 });

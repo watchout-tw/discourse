@@ -47,10 +47,6 @@ class Search
     @include_blurbs = @opts[:include_blurbs] || false
     @limit = Search.per_facet * Search.facets.size
     @results = GroupedSearchResults.new(@opts[:type_filter])
-
-    if @search_context.is_a?(Topic) && @search_context.posts_count < SiteSetting.min_posts_for_search_in_topic
-      @search_context = nil
-    end
   end
 
   # Query a term
@@ -80,8 +76,10 @@ class Search
         send("#{@results.type_filter}_search")
       else
         @limit = Search.per_facet + 1
-        user_search
-        category_search
+        unless @search_context
+          user_search
+          category_search
+        end
         topic_search
       end
 
@@ -154,26 +152,28 @@ class Search
     end
 
     def posts_query(limit)
-
-      search_criteria = {:raw_or_topic_title_cont => @original_term.downcase}
-      search = Post.includes(:post_search_data, {:topic => :category}).search(search_criteria)
-      posts = search.result(:distinct => false).where("topics.deleted_at" => nil)
+      posts = Post.includes(:post_search_data, {:topic => :category})
+                  .where("topics.deleted_at" => nil)
                   .where("topics.visible")
                   .where("topics.archetype <> ?", Archetype.private_message)
                   .references(:post_search_data, {:topic => :category})
+
+      if @search_context.present? && @search_context.is_a?(Topic)
+        posts = posts.where("posts.raw ilike ?", "%#{@term}%")
+      else
+        posts = posts.where("post_search_data.search_data @@ #{ts_query}")
+      end
 
       # If we have a search context, prioritize those posts first
       if @search_context.present?
 
         if @search_context.is_a?(User)
-          # If the context is a user, prioritize that user's posts
-          posts = posts.order("CASE WHEN posts.user_id = #{@search_context.id} THEN 0 ELSE 1 END")
+          posts = posts.where("posts.user_id = #{@search_context.id}")
         elsif @search_context.is_a?(Category)
-          # If the context is a category, restrict posts to that category
-          posts = posts.order("CASE WHEN topics.category_id = #{@search_context.id} THEN 0 ELSE 1 END")
+          posts = posts.where("topics.category_id = #{@search_context.id}")
         elsif @search_context.is_a?(Topic)
-          posts = posts.order("CASE WHEN topics.id = #{@search_context.id} THEN 0 ELSE 1 END,
-                               CASE WHEN topics.id = #{@search_context.id} THEN posts.post_number ELSE 999999 END")
+          posts = posts.where("topics.id = #{@search_context.id}")
+                       .order("posts.post_number")
         end
 
       end

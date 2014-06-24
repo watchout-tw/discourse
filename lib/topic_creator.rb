@@ -19,16 +19,11 @@ class TopicCreator
     process_private_message
     save_topic
     watch_topic
-    auto_mute_topic
 
     @topic
   end
 
   private
-
-  def auto_mute_topic
-    CategoryUser.auto_mute_new_topic(@topic)
-  end
 
   def watch_topic
     unless @opts[:auto_track] == false
@@ -40,6 +35,7 @@ class TopicCreator
     end
 
     CategoryUser.auto_watch_new_topic(@topic)
+    CategoryUser.auto_track_new_topic(@topic)
   end
 
   def setup_topic_params

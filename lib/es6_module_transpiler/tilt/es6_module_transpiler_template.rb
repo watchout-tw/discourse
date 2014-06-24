@@ -64,6 +64,23 @@ module Tilt
       klass.protect do
         @output = klass.v8.eval(generate_source(scope))
       end
+
+      # For backwards compatibility with plugins, for now export the Global format too.
+      # We should eventually have an upgrade system for plugins to use ES6 or some other
+      # resolve based API.
+      if ENV['DISCOURSE_NO_CONSTANTS'].nil? && scope.logical_path =~ /discourse\/(controllers|components|views)\/(.*)/
+        type = Regexp.last_match[1]
+        file_name = Regexp.last_match[2].gsub(/[\-\/]/, '_')
+        class_name = file_name.classify
+
+        # Rails removes pluralization when calling classify
+        if file_name.end_with?('s') && (!class_name.end_with?('s'))
+          class_name << "s"
+        end
+        require_name = module_name(scope.root_path, scope.logical_path)
+        @output << "\n\nDiscourse.#{class_name}#{type.classify} = require('#{require_name}').default"
+      end
+
       @output
     end
 
@@ -74,13 +91,18 @@ module Tilt
     end
 
     def module_name(root_path, logical_path)
-      path = ''
-      if prefix = ES6ModuleTranspiler.lookup_prefix(File.join(root_path, logical_path))
-        path = File.join(prefix, logical_path)
-      else
-        path = logical_path
+      path = nil
+
+      root_base = File.basename(Rails.root)
+      # If the resource is a plugin, use the plugin name as a prefix
+      if root_path =~ /(.*\/#{root_base}\/plugins\/[^\/]+)\//
+        plugin_path = "#{Regexp.last_match[1]}/plugin.rb"
+
+        plugin = Discourse.plugins.find {|p| p.path == plugin_path }
+        path = "discourse/plugins/#{plugin.name}/#{logical_path.sub(/javascripts\//, '')}" if plugin
       end
 
+      path ||= logical_path
       if ES6ModuleTranspiler.transform
         path = ES6ModuleTranspiler.transform.call(path)
       end

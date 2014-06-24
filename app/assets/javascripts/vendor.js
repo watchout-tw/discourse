@@ -1,3 +1,4 @@
+//= require logster
 //= require ./env
 //= require ./discourse/lib/probes.js
 
@@ -17,7 +18,7 @@
 //= require bootstrap-dropdown.js
 //= require bootstrap-modal.js
 //= require bootstrap-transition.js
-//= require chosen.jquery.js
+//= require select2.js
 //= require favcount.js
 //= require jquery.ba-replacetext.js
 //= require jquery.ba-resize.min.js

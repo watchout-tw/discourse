@@ -25,9 +25,9 @@ test('invalid bbcode', function() {
 });
 
 test('code', function() {
-  format("[code]\nx++\n[/code]", "<pre>\nx++</pre>", "makes code into pre");
-  format("[code]\nx++\ny++\nz++\n[/code]", "<pre>\nx++\ny++\nz++</pre>", "makes code into pre");
-  format("[code]abc\n#def\n[/code]", '<pre>abc\n#def</pre>', 'it handles headings in a [code] block');
+  format("[code]\nx++\n[/code]", "<pre><code class=\"lang-auto\">x++</code></pre>", "makes code into pre");
+  format("[code]\nx++\ny++\nz++\n[/code]", "<pre><code class=\"lang-auto\">x++\ny++\nz++</code></pre>", "makes code into pre");
+  format("[code]abc\n#def\n[/code]", '<pre><code class=\"lang-auto\">abc\n#def</code></pre>', 'it handles headings in a [code] block');
 });
 
 test('spoiler', function() {
@@ -99,7 +99,7 @@ test("quotes", function() {
          "<aside class=\"quote\"><blockquote><p><em>test</em></p></blockquote></aside>",
          "it doesn't insert a new line for italics");
 
-  format("[quote,script='a'><script>alert('test');//':a][/quote]",
+  format("[quote=,script='a'><script>alert('test');//':a][/quote]",
          "<aside class=\"quote\" data-script=&#x27;a&#x27;&gt;&lt;script&gt;alert(&#x27;test&#x27;);//&#x27;=\"a\"><blockquote></blockquote></aside>",
          "It will not create a script tag within an attribute");
 });

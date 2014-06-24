@@ -17,13 +17,13 @@ Discourse.TopicRoute = Discourse.Route.extend({
   actions: {
     // Modals that can pop up within a topic
     showPosterExpansion: function(post) {
-      this.controllerFor('posterExpansion').show(post);
+      this.controllerFor('poster-expansion').show(post);
     },
 
     composePrivateMessage: function(user) {
       var self = this;
       this.transitionTo('userActivity', user).then(function () {
-        self.controllerFor('userActivity').send('composePrivateMessage');
+        self.controllerFor('user-activity').send('composePrivateMessage');
       });
     },
 
@@ -69,7 +69,7 @@ Discourse.TopicRoute = Discourse.Route.extend({
     },
 
     splitTopic: function() {
-      Discourse.Route.showModal(this, 'splitTopic', this.modelFor('topic'));
+      Discourse.Route.showModal(this, 'split-topic', this.modelFor('topic'));
     },
 
     changeOwner: function() {
@@ -79,7 +79,7 @@ Discourse.TopicRoute = Discourse.Route.extend({
     // Use replaceState to update the URL once it changes
     postChangedRoute: Discourse.debounce(function(currentPost) {
       // do nothing if we are transitioning to another route
-      if (this.get("isTransitioning")) { return; }
+      if (this.get("isTransitioning") || Discourse.TopicRoute.disableReplaceState) { return; }
 
       var topic = this.modelFor('topic');
       if (topic && currentPost) {
@@ -137,7 +137,7 @@ Discourse.TopicRoute = Discourse.Route.extend({
 
     // Clear the search context
     this.controllerFor('search').set('searchContext', null);
-    this.controllerFor('posterExpansion').set('visible', false);
+    this.controllerFor('poster-expansion').set('visible', false);
 
     var topicController = this.controllerFor('topic'),
         postStream = topicController.get('postStream');
@@ -156,6 +156,9 @@ Discourse.TopicRoute = Discourse.Route.extend({
   },
 
   setupController: function(controller, model) {
+    // In case we navigate from one topic directly to another
+    this.set("isTransitioning", false);
+
     if (Discourse.Mobile.mobileView) {
       // close the dropdowns on mobile
       $('.d-dropdown').hide();
@@ -179,8 +182,9 @@ Discourse.TopicRoute = Discourse.Route.extend({
     Discourse.TopicTrackingState.current().trackIncoming('all');
     controller.subscribe();
 
+    this.controllerFor('topic-progress').set('model', model);
     // We reset screen tracking every time a topic is entered
-    Discourse.ScreenTrack.current().start(model.get('id'));
+    Discourse.ScreenTrack.current().start(model.get('id'), controller);
   }
 
 });

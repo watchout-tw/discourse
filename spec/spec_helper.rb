@@ -33,6 +33,9 @@ Spork.prefork do
 
   # let's not run seed_fu every test
   SeedFu.quiet = true if SeedFu.respond_to? :quiet
+
+  SiteSetting.enable_system_avatars = false
+  SiteSetting.automatically_download_gravatars = false
   SeedFu.seed
 
   RSpec.configure do |config|
@@ -53,6 +56,9 @@ Spork.prefork do
     config.infer_base_class_for_anonymous_controllers = true
 
     config.before(:suite) do
+
+      # Ugly, but needed until we have a user creator
+      User.skip_callback(:create, :after, :ensure_in_trust_level_group)
 
       DiscoursePluginRegistry.clear if ENV['LOAD_PLUGINS'] != "1"
       Discourse.current_user_provider = TestCurrentUserProvider
@@ -78,6 +84,10 @@ Spork.prefork do
       SiteSetting.provider.all.each do |setting|
         SiteSetting.remove_override!(setting.name)
       end
+
+      # very expensive IO operations
+      SiteSetting.enable_system_avatars = false
+      SiteSetting.automatically_download_gravatars = false
 
     end
 

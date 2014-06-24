@@ -47,7 +47,7 @@ class ComposerMessagesFinder
     return unless @user.has_trust_level?(:basic)
 
     # We don't notify users who have avatars or who have been notified already.
-    return if @user.user_stat.has_custom_avatar? || UserHistory.exists_for_user?(@user, :notified_about_avatar)
+    return if @user.uploaded_avatar_id || UserHistory.exists_for_user?(@user, :notified_about_avatar)
 
     # Finally, we don't check users whose avatars haven't been examined
     return unless UserHistory.exists_for_user?(@user, :checked_for_custom_avatar)
@@ -133,6 +133,7 @@ class ComposerMessagesFinder
 
     return if topic.nil? ||
               SiteSetting.warn_reviving_old_topic_age < 1 ||
+              topic.last_posted_at.nil? ||
               topic.last_posted_at > SiteSetting.warn_reviving_old_topic_age.days.ago
 
     {templateName: 'composer/education',

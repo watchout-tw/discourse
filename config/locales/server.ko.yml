@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 ko:
   dates:
@@ -419,14 +419,12 @@ ko:
     flag_sockpuppets: "If a new user (i.e., registered in the last 24 hours) who started a topic and a new user who replies in that topic are at the same IP address, both their posts will automatically be flagged as spam."
     traditional_markdown_linebreaks: "Use traditional linebreaks in Markdown, which require two trailing spaces for a linebreak"
     post_undo_action_window_mins: "Number of seconds users are allowed to reverse actions on a post (like, flag, etc)"
-    must_approve_users: "Admins must approve all users before they gain access"
     ga_tracking_code: "Google analytics tracking code code, eg: UA-12345678-9; see http://google.com/analytics"
     ga_domain_name: "Google analytics domain name, eg: mysite.com; see http://google.com/analytics"
     enable_escaped_fragments: "당신의 사이트의 오래된 정보를 검색하기 위한 웹크롤러 Workaround 솔루션을 활성"
     enable_noscript_support: "당신의 사이트를 검색하기 위한 noscript 테그를 이용한 일반적인 웹 크롤러를 활성화"
     top_menu: "Determine which items appear in the homepage navigation, and in what order. Example latest|new|unread|starred|categories|top|read|posted"
     post_menu: "게시물 메뉴에 어떤 사항들이 무슨 순서로 올라올지 결정합니다. 예: 좋아요|수정|신고|삭제|공유|북마크|답글"
-    share_links: "Determine which items appear on the share dialog, and in what order. Example twitter|facebook|google+"
     track_external_right_clicks: "Track external links that are right clicked (eg: open in new tab) disabled by default because it rewrites URLs"
     topics_per_page: "How many topics are loaded by default on the topics list page"
     posts_per_page: "How many posts loaded by default on a topic page, and when loading more posts"
@@ -445,7 +443,6 @@ ko:
     invite_only: "공개 회원가입 비활성화, 새로운 사용자는 무조건 초대되어야 함"
     login_required: "게시글을 읽기 위해서 인증이 필요함"
     enable_local_logins: "전통적인 로컬 사용자이름과 패스워드 인증을 활성화"
-    enable_google_logins: "Enable Google authentication"
     enable_yahoo_logins: "Enable Yahoo authentication"
     enable_twitter_logins: "Enable Twitter authentication, requires twitter_consumer_key and twitter_consumer_secret"
     twitter_consumer_key: "Consumer key for Twitter authentication, registered at http://dev.twitter.com"
@@ -456,7 +453,6 @@ ko:
     enable_github_logins: "Enable Github authentication, requires github_client_id and github_client_secret"
     github_client_id: "Client id for Github authentication, registered at https://github.com/settings/applications"
     github_client_secret: "Client secret for Github authentication, registered at https://github.com/settings/applications"
-    allow_restore: "Allow import, which can replace ALL site data; leave false unless you plan to do data imports"
     active_user_rate_limit_secs: "How frequently we update the 'last_seen_at' field, in seconds"
     previous_visit_timeout_hours: "How long a visit lasts before we consider it the 'previous' visit, in hours"
     rate_limit_create_topic: "How many seconds, after creating a topic, before you can create another topic"
@@ -555,7 +551,6 @@ ko:
   search:
     types:
       category: '카테고리들'
-      topic: '토픽들'
       user: '사용자들'
   original_poster: "원본 게시자"
   most_posts: "최대 게시자"
@@ -586,8 +581,6 @@ ko:
     omniauth_error_unknown: "로그인에 문제가 있습니다. 다시 시도해주세요."
   user:
     username:
-      short: "%{min} 자보다 길어야 합니다."
-      long: "%{max} 자보다 짧아야합니다."
       characters: "문자나 숫자만 사용해야 합니다."
       unique: "이미 사용중입니다."
       blank: "공백이 없어야 합니다."
@@ -597,30 +590,6 @@ ko:
       blocked: "는 허용되지 않습니다"
     ip_address:
       blocked: "는 블락되었습니다."
-  invite_mailer:
-    subject_template: "[%{site_name}]의 %{invitee_name}님께서 당신을 초대하였습니다."
-    text_body_template: |
-      %{invitee_name}님께서 당신을 %{topic_title} 토픽에 초대하였습니다.
-
-      초대를 허락하시려면 아래 링크를 클릭하여 주세요.
-
-      [%{site_name} 방문하기][1]
-
-      당신은 %{site_name}에서 신뢰받는 사용자로부터 초대를 받으셨습니다. 그리하여 로그인이 필요없이 바로 답글을 게시하실 수 있습니다.
-
-      [1]: %{invite_link}
-  invite_forum_mailer:
-    subject_template: "[%{site_name}] 의 %{invitee_name} 사용자가 %{site_name} 사이트에 가입하도록 초대하였습니다."
-    text_body_template: |
-      %{invitee_name} 사용자가 당신을 %{site_name} 에 초대하였습니다.
-
-      초대를 허락하시려면 아래 링크를 클릭하여 주세요.
-
-      [%{site_name} 방문하기][1]
-
-      당신은 %{site_name}에서 신뢰받는 사용자로부터 초대를 받으셨습니다. 그래서 로그인 필요없이 바로 로그인 하실 수 있습니다.
-
-      [1]: %{invite_link}
   test_mailer:
     subject_template: "[%{site_name}] Email Deliverability Test"
     text_body_template: |
@@ -663,8 +632,6 @@ ko:
       ----
 
       <small>There should be an unsubscribe footer on every email you send, so let's mock one up. This email was sent by Name of Company, 55 Main Street, Anytown, USA 12345. If you would like to opt out of future emails, [click here to unsubscribe][5].</small>
-  new_version_mailer:
-    subject_template: "[%{site_name}] 는 업데이트 가능합니다."
   system_messages:
     post_hidden:
       subject_template: "포럼 신고로 인한 게시글 숨김"
@@ -715,26 +682,6 @@ ko:
         다시한번 환영합니다!
     welcome_invite:
       subject_template: "%{site_name} 사이트에 오신것을 환영합니다!"
-      text_body_template: |
-        %{site_name} 사이트 초대를 수락해주셔서 감사합니다!
-
-        사용자 이름이 자동 생성되었습니다: **%{username}**, [your user profile][prefs]에 가셔서 언제나 변경하실 수 있습니다.
-
-        다시 로그인을 하시려면:
-
-        1. 페이스북, 구글, 트위터, 등 다른 인증을 사용하세요. **반드시 다른 인증 이메일 주소가** 초대 받음 이메일 주소와 같아야 합니다!
-
-        2. [사용자 프로필][prefs]에 가셔서 %{site_name}에서 사용할 패스워드를 만드신 후 로그인 하세요.
-
-        %{site_password}
-
-        %{new_user_tips}
-
-        저희는 사용자님께서 [커뮤니티 행동 방침](%{base_url}/faq)을 잘 따라주실 것을 믿습니다.
-
-        다시한번 환영합니다!
-
-        [prefs]: %{user_preferences_url}
     export_succeeded:
       subject_template: "내보내기 성공"
       text_body_template: "내보내기가 성공하였습니다."
@@ -759,22 +706,6 @@ ko:
         이 메시지는 당신의 계정이 블락되었다는 것을 알리기 위해 %{site_name} 에서 자동으로 생성되었습니다.
 
         추가적인 정보를 얻기 위해서는 [FAQ](%{base_url}/faq) 를 방문하세요.
-    user_automatically_blocked:
-      subject_template: "새로운 사용자 %{username}는 신고에 의해 블락되었습니다."
-      text_body_template: |
-        이 메시지는 [%{username}](%{base_url}%{user_url}) 사용자가 블락되었다는 것을 알리기 위해 자동 생성 되었습니다. 다수의 유저가 %{username}의 게시물을 신고하였습니다.
-
-        [신고 리뷰보기](%{base_url}/admin/flags) 를 확인해주세요. 만약 %{username} 사용자 게시물에 의한 블락이 부정확하다면 [이 사용자에 대한 관리 페이지](%{base_url}%{user_url})를 확인해주세요.
-
-        사이트 설정에 `block_new_user` 값으로 임계치를 변경할 수 있습니다.
-    spam_post_blocked:
-      subject_template: "%{username} 사용자는 게시물들에 같은 링크를 반복 사용하여 블락되었습니다."
-      text_body_template: |
-        이 메시지는 새로운 사용자 [%{username}](%{base_url}%{user_url})가 %{domains} 링크를 사용하여 다수의 게시물을 생성했다는 것을 알리기 위해 자동 생성 되었습니다. 위 게시물들은 블락되었습니다. 사용자는 %{domains} 링크 없이 새로운 게시물들을 생성할 수 있습니다.
-
-        [사용자 리뷰](%{base_url}%{user_url}) 부탁드립니다.
-
-        임계치는 사이트 설정의 `newuser_spam_host_threshold`을 통해 변경할 수 있습니다.\n"
     unblocked:
       subject_template: "계정 블락 해제"
       text_body_template: |
@@ -911,4 +842,3 @@ ko:
       size_not_found: "죄송합니다. 이미지 사이즈가 잘못 되었습니다. 혹시 깨진 이미지가 아닌가요?"
   flag_reason:
     sockpuppet: "새로운 사용자가 토픽을 만들었습니다. 그리고 같은 IP를 사용하는 새 사용자가 답글을 달았습니다. 사이트 설정의 flag_sockpuppets를 확인하세요."
-    spam_hosts: "이 사용자가 같은 도메인으로 다중 게시을 작성하려고 하였습니다. 사이트 설정의 newuser_spam_host_threshold를 확인하세요."

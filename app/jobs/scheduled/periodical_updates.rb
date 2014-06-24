@@ -26,6 +26,11 @@ module Jobs
 
       # Automatically close stuff that we missed
       Topic.auto_close
+
+      # Forces rebake of old posts where needed, as long as no system avatars need updating
+      unless UserAvatar.where("last_gravatar_download_attempt IS NULL").limit(1).first
+        Post.rebake_old(250)
+      end
     end
 
   end

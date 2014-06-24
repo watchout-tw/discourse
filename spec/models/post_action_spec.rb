@@ -29,6 +29,14 @@ describe PostAction do
       action.related_post_id.should == posts[0].id.to_i
       posts[0].subtype.should == TopicSubtype.notify_moderators
 
+      # Moderators should be invited to the private topic, otherwise they're not permitted to see it
+      topic_user_ids = posts[0].topic.topic_users.map {|x| x.user_id}
+      topic_user_ids.should include(codinghorror.id)
+      topic_user_ids.should_not include(mod.id)
+
+      # invite the moderator
+      posts[0].topic.allowed_users << mod
+
       # reply to PM should clear flag
       p = PostCreator.new(mod, topic_id: posts[0].topic_id, raw: "This is my test reply to the user, it should clear flags")
       p.create
@@ -90,14 +98,17 @@ describe PostAction do
       admin = Fabricate(:admin)
       PostAction.act(codinghorror, post, PostActionType.types[:off_topic])
       post.hidden.should be_false
+      post.hidden_at.should be_blank
       PostAction.defer_flags!(post, admin.id)
       PostAction.flagged_posts_count.should == 0
       post.reload
       post.hidden.should be_false
+      post.hidden_at.should be_blank
 
       PostAction.hide_post!(post, PostActionType.types[:off_topic])
       post.reload
       post.hidden.should be_true
+      post.hidden_at.should be_present
     end
 
   end
@@ -245,6 +256,7 @@ describe PostAction do
 
       post.hidden.should.should be_true
       post.hidden_reason_id.should == Post.hidden_reasons[:flag_threshold_reached]
+      post.hidden_at.should be_present
       post.topic.visible.should be_false
 
       post.revise(post.user, post.raw + " ha I edited it ")
@@ -252,6 +264,7 @@ describe PostAction do
 
       post.hidden.should be_false
       post.hidden_reason_id.should be_nil
+      post.hidden_at.should be_blank
       post.topic.visible.should be_true
 
       PostAction.act(u1, post, PostActionType.types[:spam])
@@ -261,12 +274,14 @@ describe PostAction do
 
       post.hidden.should be_true
       post.hidden_reason_id.should == Post.hidden_reasons[:flag_threshold_reached_again]
+      post.hidden_at.should be_true
 
       post.revise(post.user, post.raw + " ha I edited it again ")
 
       post.reload
 
       post.hidden.should be_true
+      post.hidden_at.should be_true
       post.hidden_reason_id.should == Post.hidden_reasons[:flag_threshold_reached_again]
     end
 

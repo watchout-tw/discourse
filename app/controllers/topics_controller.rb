@@ -61,12 +61,21 @@ class TopicsController < ApplicationController
     perform_show_response
 
     canonical_url absolute_without_cdn(@topic_view.canonical_path)
+  rescue Discourse::InvalidAccess => ex
+
+    if current_user
+      # If the user can't see the topic, clean up notifications for it.
+      Notification.remove_for(current_user.id, params[:topic_id])
+    end
+
+    raise ex
   end
 
   def wordpress
     params.require(:best)
     params.require(:topic_id)
     params.permit(:min_trust_level, :min_score, :min_replies, :bypass_trust_level_score, :only_moderator_liked)
+
     opts = { best: params[:best].to_i,
       min_trust_level: params[:min_trust_level] ? 1 : params[:min_trust_level].to_i,
       min_score: params[:min_score].to_i,
@@ -97,13 +106,9 @@ class TopicsController < ApplicationController
 
   def update
     topic = Topic.find_by(id: params[:topic_id])
-    title, archetype = params[:title], params[:archetype]
     guardian.ensure_can_edit!(topic)
 
-    topic.title = params[:title] if title.present?
-    # TODO: we may need smarter rules about converting archetypes
-    topic.archetype = "regular" if current_user.admin? && archetype == 'regular'
-
+    topic.title = params[:title] if params[:title].present?
     topic.acting_user = current_user
 
     success = false
@@ -166,6 +171,24 @@ class TopicsController < ApplicationController
     else
       render_json_error(topic)
     end
+  end
+
+  def make_banner
+    topic = Topic.find_by(id: params[:topic_id].to_i)
+    guardian.ensure_can_moderate!(topic)
+
+    topic.make_banner!(current_user)
+
+    render nothing: true
+  end
+
+  def remove_banner
+    topic = Topic.find_by(id: params[:topic_id].to_i)
+    guardian.ensure_can_moderate!(topic)
+
+    topic.remove_banner!(current_user)
+
+    render nothing: true
   end
 
   def destroy
@@ -357,12 +380,17 @@ class TopicsController < ApplicationController
   end
 
   def track_visit_to_topic
-    Jobs.enqueue(:view_tracker,
-                    topic_id: @topic_view.topic.id,
-                    ip: request.remote_ip,
-                    user_id: (current_user.id if current_user),
-                    track_visit: should_track_visit_to_topic?
-                )
+    topic_id =  @topic_view.topic.id
+    ip = request.remote_ip
+    user_id = (current_user.id if current_user)
+    track_visit = should_track_visit_to_topic?
+
+    Scheduler::Defer.later do
+      View.create_for_parent(Topic, topic_id, ip, user_id)
+      if track_visit
+        TopicUser.track_visit! topic_id, user_id
+      end
+    end
 
   end
 

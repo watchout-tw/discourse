@@ -24,7 +24,7 @@ Replace `192.168.1.1` with the IP address of your Droplet.
 
 <img src="https://meta-discourse.r.worldssl.net/uploads/default/4442/ab4202454828b167.png" width="586" height="128"> 
 
-You will be asked for permission to connect, type `yes`, then enter the root password from the email Digital Ocean sent you when the Droplet was set up.
+You will be asked for permission to connect, type `yes`, then enter the root password from the email Digital Ocean sent you when the Droplet was set up. You may be prompted to change the root password, too.
 
 <img src="https://meta-discourse.r.worldssl.net/uploads/default/4443/48cc7135c89768bd.png" width="584" height="300"> 
 
@@ -86,9 +86,9 @@ We recommend Nano because it works like a typical GUI text editor, just use your
 
 After completing your edits, press <kbd>Ctrl</kbd><kbd>O</kbd> then <kbd>Enter</kbd> to save and <kbd>Ctrl</kbd><kbd>X</kbd> to exit.
 
-# Email
+# Email Is Important
 
-**Email is critical for account creation and notifications in Discourse. If you do not configure email before bootstrapping you will have a broken site!**
+**Email is CRITICAL for account creation and notifications in Discourse. If you do not properly configure email before bootstrapping YOU WILL HAVE A BROKEN SITE!**
 
 - Already have a mail server? Great. Use your existing mail server credentials.
 
@@ -98,7 +98,7 @@ After completing your edits, press <kbd>Ctrl</kbd><kbd>O</kbd> then <kbd>Enter</
 
 # Bootstrap Discourse
 
-Be sure to save the `app.yml` file, and begin bootstrapping Discourse:
+Save the `app.yml` file, and begin bootstrapping Discourse:
 
     ./launcher bootstrap app
 
@@ -118,11 +118,14 @@ It should be accessible via the domain name `discourse.example.com` you entered 
 
 # Register New Account and Become Admin
 
-There is a reminder at the top about `DISCOURSE_DEVELOPER_EMAILS`; be sure you register a new account via one of those email addresses, and your account will automatically be made an Admin.
+There is a reminder at the top about `DISCOURSE_DEVELOPER_EMAILS`; register a new account via one of those email addresses, and your account will automatically be made an Admin.
+
+(If you *don't* get any email from your install, and are unable to register a new admin account, please see our [Email Troubleshooting checklist](https://meta.discourse.org/t/troubleshooting-email-on-a-new-discourse-install/16326).)
 
 <img src="https://meta-discourse.r.worldssl.net/uploads/default/4513/459a7df42fb9ee83.png" width="690" height="350"> 
 
-You should see Staff topics and the Admin Quick Start Guide. Please read it!
+You should see Staff topics and the [Admin Quick Start Guide](https://github.com/discourse/discourse/blob/master/docs/ADMIN-QUICK-START-GUIDE.md). It contains the next steps for further configuring and customizing your Discourse install.
+
 
 # Post-Install Maintenance
 
@@ -146,6 +149,8 @@ Commands:
 # Other Awesome Stuff
 
 Do you want...
+
+- Users to log in via Google? (new Oauth2 authentication) [Configure Google logins](https://meta.discourse.org/t/configuring-google-login-for-discourse/15858).
 
 - Users to log in via Facebook? [Configure Facebook logins](https://meta.discourse.org/t/configuring-facebook-login-for-discourse/13394).
 

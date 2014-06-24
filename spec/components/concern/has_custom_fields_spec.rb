@@ -129,6 +129,18 @@ describe HasCustomFields do
 
     end
 
+    it "supportes type coersion" do
+      test_item = CustomFieldsTestItem.new
+      CustomFieldsTestItem.register_custom_field_type("bool", :boolean)
+      CustomFieldsTestItem.register_custom_field_type("int", :integer)
+
+      test_item.custom_fields = {"bool" => true, "int" => 1}
+      test_item.save
+      test_item.reload
+
+      test_item.custom_fields.should == {"bool" => true, "int" => 1}
+    end
+
     it "simple modifications don't interfere" do
       test_item = CustomFieldsTestItem.new
 
@@ -151,6 +163,22 @@ describe HasCustomFields do
 
       test_item.custom_fields.should == {"jack" => "black", "bob" => "marley"}
       test_item2.custom_fields.should == {"sixto" => "rodriguez", "de" => "la playa"}
+    end
+
+    it "supports bulk retrieval with a list of ids" do
+      item1 = CustomFieldsTestItem.new
+      item1.custom_fields = {"a" => ["b", "c", "d"], 'not_whitelisted' => 'secret'}
+      item1.save
+
+      item2 = CustomFieldsTestItem.new
+      item2.custom_fields = {"e" => 'hallo'}
+      item2.save
+
+      fields = CustomFieldsTestItem.custom_fields_for_ids([item1.id, item2.id], ['a', 'e'])
+      fields.should be_present
+      fields[item1.id]['a'].should =~ ['b', 'c', 'd']
+      fields[item1.id]['not_whitelisted'].should be_blank
+      fields[item2.id]['e'].should == 'hallo'
     end
   end
 end

@@ -16,13 +16,21 @@ display: none;
 
 
 #reply-control {
-  .toggle-preview, #draft-status, #file-uploading, .mobile-file-upload {
+  .composer-bottom-right {
     position: absolute;
     bottom: -37px;
+    right: 5px;
     margin-top: 0;
   }
-  .toggle-preview, .mobile-file-upload {
-    right: 5px;
+  .toggle-preview { display:none; }
+  .mobile-file-upload {
+    text-decoration: underline;
+  }
+  #draft-status, #file-uploading, .mobile-file-upload {
+    float: right;
+    margin-right: 8px;
+  }
+  .mobile-file-upload {
     text-decoration: underline;
   }
   #file-uploading {
@@ -31,7 +39,6 @@ display: none;
     color: scale-color($secondary, $lightness: 50%);
   }
   #draft-status {
-    right: 70px;
     color: scale-color($primary, $lightness: 75%);
     &.flash {
       color: $danger;
@@ -41,7 +48,7 @@ display: none;
   width: 100%;
   z-index: 1039;
   height: 0;
-  background-color: scale-color($primary, $lightness: 90%);
+  background-color: scale-color-diff();
   bottom: 0;
   font-size: 14px;
   position: fixed;
@@ -79,7 +86,7 @@ display: none;
   }
   // The various states
   &.open {
-    height: 300px;
+    height: 270px;
   }
   &.closed {
     height: 0 !important;
@@ -87,7 +94,7 @@ display: none;
   &.draft {
     height: 60px !important;
     cursor: pointer;
-    border-top: 1px solid scale-color($primary, $lightness: 90%);
+    border-top: 1px solid scale-color-diff();
     .draft-text {
       display: block;
           position: absolute;
@@ -102,7 +109,7 @@ display: none;
   }
   &.saving {
     height: 40px !important;
-    border-top: 1px solid scale-color($primary, $lightness: 90%);
+    border-top: 1px solid scale-color-diff();
     .saving-text {
       display: block;
     }
@@ -148,7 +155,7 @@ display: none;
   // a small screen mobile device
   &.edit-title {
     &.open {
-      height: 280px;
+      height: 250px;
     }
     .contents {
       input#reply-title {
@@ -165,7 +172,7 @@ display: none;
     padding: 10px 10px 0 10px;
     min-width: 1280px;
     .form-element {
-      .chzn-container {
+      .select2-container {
         width: 400px;
         margin-top: 6px;
         a {
@@ -181,17 +188,28 @@ display: none;
         @include medium-width { width: 285px; }
         @include small-width { width: 220px; }
 
-        .chzn-drop {
+        .select2-drop {
           left: -9000px;
           width: 428px;
           @include medium-width { width: 283px; }
           @include small-width { width: 218px; }
         }
-        .chzn-search input {
+        .select2-search input {
           width: 378px;
           @include medium-width { width: 233px; }
           @include small-width { width: 168px; }
         }
+      }
+    }
+    .edit-reason-input, .display-edit-reason {
+      display: none;
+    }
+    .edit-reason-input {
+      display: inline-block;
+      margin-left: 2px;
+      #edit-reason {
+        margin: 0;
+        padding: 2px;
       }
     }
     #reply-title {
@@ -216,7 +234,7 @@ display: none;
       }
     }
     #wmd-preview {
-      border: 1px dashed scale-color($primary, $lightness: 90%);
+      border: 1px dashed scale-color-diff();
       overflow: auto;
       visibility: visible;
       p {
@@ -354,10 +372,6 @@ display: none;
     }
   }
   #wmd-button-bar {
-    top: 0;
-    position: absolute;
-    border-bottom: 1px solid scale-color($primary, $lightness: 90%);
-    background-color: $secondary;
-    z-index: 100;
+    display: none;
   }
 }

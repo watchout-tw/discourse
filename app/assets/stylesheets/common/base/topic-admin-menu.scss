@@ -4,18 +4,18 @@
   position: fixed;
   top: 70px;
   right: 10px;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .topic-admin-menu {
   background-color: $secondary;
   width: 205px;
   padding: 10px;
-  border: 1px solid scale-color($primary, $lightness: 90%);
+  border: 1px solid scale-color-diff();
   position: fixed;
   top: 70px;
   right: 10px;
-  z-index: 1000;
+  z-index: 1001;
 
   ul {
     list-style: none;

@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 sv:
   dates:
@@ -19,7 +19,7 @@ sv:
   topics: "Trådar"
   posts: "inlägg"
   loading: "Laddar"
-  powered_by_html: 'Drivs av <a href="http://www.discourse.org">Discourse</a>, visas bäst med JavaScript påslaged'
+  powered_by_html: 'Drivs av <a href="http://www.discourse.org">Discourse</a>, visas bäst med JavaScript påslaget'
   via: "%{username} via %{site_name}"
   is_reserved: "är reserverat"
   too_many_mentions:
@@ -70,6 +70,9 @@ sv:
       trust_level_4: "trust_level_4"
       trust_level_5: "trust_level_5"
   education:
+    until_posts:
+      one: "1 inlägg"
+      other: "%{count} inlägg"
     new-topic: |
       Välkommen till %{site_name} &mdash; **tack för att du startar en ny konversation!**
 
@@ -217,6 +220,8 @@ sv:
   password_reset:
     no_token: "Tyvärr, din token har gått ut. Var god försök återställa ditt lösenord igen."
     choose_new: "Var god välj ett nytt lösenord"
+    update: 'Uppdatera Lösenord'
+    title: 'Återställ Lösenord'
     success: "Du har lyckats med att byta ditt lösenord och är nu inloggad."
     success_unapproved: "Du lyckades med att byta ditt lösenord."
     continue: "Continue to %{site_name}"
@@ -446,9 +451,7 @@ sv:
     notify_mods_when_user_blocked: "Om en användare blockeras automatiskt, skicka ett meddelande till alla moderatorer."
     traditional_markdown_linebreaks: "Use traditional linebreaks in Markdown, which require two trailing spaces for a linebreak"
     post_undo_action_window_mins: "Number of seconds users are allowed to reverse actions on a post (like, flag, etc)"
-    must_approve_users: "Admins must approve all users before they gain access"
     post_menu: "Determine which items appear on the post menu, and in what order. Example like|edit|flag|delete|share|bookmark|reply"
-    share_links: "Determine which items appear on the share dialog, and in what order. Example twitter|facebook|google+|email"
     track_external_right_clicks: "Track external links that are right clicked (eg: open in new tab) disabled by default because it rewrites URLs"
     posts_per_page: "How many posts are returned on a topic page"
     site_contact_username: "Username for the author of automated private messages sent by the forum"
@@ -466,7 +469,6 @@ sv:
     invite_only: "Allmän registrering är avstängt, nya användare måste ha en inbjudan."
     login_required: "Kräv autentisering för att läsa inlägg"
     enable_local_logins: "Aktivera traditionell autentisering med lokala användarnamn och lösenord"
-    enable_google_logins: "Enable Google authentication"
     enable_yahoo_logins: "Enable Yahoo authentication"
     enable_twitter_logins: "Enable Twitter authentication, requires twitter_consumer_key and twitter_consumer_secret"
     twitter_consumer_key: "Consumer key for Twitter authentication, registered at http://dev.twitter.com"
@@ -556,7 +558,6 @@ sv:
   search:
     types:
       category: 'Categories'
-      topic: 'Topics'
       user: 'Users'
   original_poster: "Original Poster"
   most_posts: "Most Posts"
@@ -591,8 +592,6 @@ sv:
     omniauth_error_unknown: "Something went wrong processing your log in, please try again."
   user:
     username:
-      short: "must be longer than %{min} characters"
-      long: "must be shorter than %{max} characters"
       unique: "must be unique"
       blank: "must be present"
       must_begin_with_alphanumeric: "must begin with a letter or number"
@@ -601,18 +600,6 @@ sv:
       blocked: "är inte tillåtet."
     ip_address:
       blocked: "är blockerad."
-  invite_mailer:
-    subject_template: "[%{site_name}] %{invitee_name} invited you to join a discussion on %{site_name}"
-    text_body_template: |
-      %{invitee_name} invited you to the topic "%{topic_title}" at %{site_name}.
-
-      If you're interested, click the link below to visit the discussion:
-
-      [Visit %{site_name}][1]
-
-      You were invited by a trusted user, so you'll be able to post a reply immediately, without needing to log in.
-
-      [1]: %{invite_link}
   test_mailer:
     subject_template: "[%{site_name}] Email Deliverability Test"
   system_messages:
@@ -640,8 +627,6 @@ sv:
         För mer information kring våra riktlinjer, besök vår [FAQ](%{base_url}/faq).⏎
     blocked_by_staff:
       subject_template: "Konto blockerat"
-    spam_post_blocked:
-      subject_template: "Inlägg från ny användare %{username} blockerade pga. upprepade länkar"
     unblocked:
       subject_template: "Konto avblockerat"
       text_body_template: |+
@@ -702,6 +687,8 @@ sv:
     digest:
       why: "Here's a brief summary of what happened on %{site_link} since we last saw you on %{last_seen_at}."
       new_activity: "New activity on your topics and posts:"
+      top_topics: "Populära inlägg"
+      other_new_topics: "Populära trådar"
       unsubscribe: "This summary email is sent as a courtesy notification from %{site_link} when we haven't seen you in a while. To unsubscribe %{unsubscribe_link}."
       click_here: "click here"
       from: "%{site_name} digest"

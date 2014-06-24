@@ -3,7 +3,7 @@
 # Never edit this file. It will be overwritten when translations are pulled from Transifex.
 #
 # To work with us on translations, join this project:
-# https://www.transifex.com/projects/p/discourse-pt-br/
+# https://www.transifex.com/projects/p/discourse-org/
 
 id:
   js:
@@ -56,7 +56,6 @@ id:
       other: "dalam {{count}} hari"
     suggested_topics:
       title: "Topik Terpilih"
-    new_topics_inserted: "{{count}} topik baru."
     show_new_topics: "Klik untuk menampilkan"
     cancel: "batal"
     save: "Simpan Perubahan"
@@ -84,8 +83,6 @@ id:
       private_messages: "Pesan"
       activity_stream: "Aktifitas"
       bio: "Tentang saya"
-      change_profile_background:
-        title: "Ganti Latar Profil"
       email:
         invalid: "Masukkan email yang valid."
       name:
@@ -116,10 +113,6 @@ id:
     week: 'minggu'
     last_seen: 'Terlihat'
     created: 'Dibuat'
-    create_account:
-      title: "Buat Akun"
-      action: "Buat sekarang!"
-      invite: "Tidak punya akun?"
     forgot_password:
       title: "Lupa Password"
       action: "Saya lupa password"
@@ -149,7 +142,6 @@ id:
       liked: "<i title='liked' class='fa fa-heart'></i> {{username}} {{link}}"
       private_message: "<i class='fa fa-envelope-o' title='private message'></i> {{username}} {{link}}"
       invited_to_private_message: "<i class='fa fa-envelope-o' title='private message'></i> {{username}} {{link}}"
-      invitee_accepted: "<i title='accepted your invitation' class='fa fa-sign-in'></i> {{username}} telah menerima undanganmu"
     topic:
       invalid_access:
         description: "Maaf,  kamu tidak berhak mengakses topik tersebut."
@@ -239,4 +231,3 @@ id:
         search: '<b>/</b> Cari'
       actions:
         title: 'Aksi'
-        share_topic: '<b>s</b> Share topic'

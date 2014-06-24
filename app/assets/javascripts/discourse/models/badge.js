@@ -35,24 +35,37 @@ Discourse.Badge = Discourse.Model.extend({
     @type {String}
   **/
   displayName: function() {
-    var i18nKey = "badges." + this.get('i18nNameKey') + ".name";
+    var i18nKey = "badges.badge." + this.get('i18nNameKey') + ".name";
     return I18n.t(i18nKey, {defaultValue: this.get('name')});
   }.property('name', 'i18nNameKey'),
 
   /**
-    The i18n translated description for this badge. `null` if no translation exists.
+    The i18n translated description for this badge. Returns the null if no
+    translation exists.
 
     @property translatedDescription
     @type {String}
   **/
   translatedDescription: function() {
-    var i18nKey = "badges." + this.get('i18nNameKey') + ".description",
+    var i18nKey = "badges.badge." + this.get('i18nNameKey') + ".description",
         translation = I18n.t(i18nKey);
     if (translation.indexOf(i18nKey) !== -1) {
       translation = null;
     }
     return translation;
   }.property('i18nNameKey'),
+
+  /**
+    Display-friendly description string. Returns either a translation or the
+    original description string.
+
+    @property displayDescription
+    @type {String}
+  **/
+  displayDescription: function() {
+    var translated = this.get('translatedDescription');
+    return translated === null ? this.get('description') : translated;
+  }.property('description', 'translatedDescription'),
 
   /**
     Update this badge with the response returned by the server on save.
@@ -102,7 +115,9 @@ Discourse.Badge = Discourse.Model.extend({
         name: this.get('name'),
         description: this.get('description'),
         badge_type_id: this.get('badge_type_id'),
-        allow_title: this.get('allow_title')
+        allow_title: !!this.get('allow_title'),
+        multiple_grant: !!this.get('multiple_grant'),
+        icon: this.get('icon')
       }
     }).then(function(json) {
       self.updateFromJson(json);

@@ -27,7 +27,8 @@ class TopicUser < ActiveRecord::Base
         :created_post,
         :auto_watch,
         :auto_watch_category,
-        :auto_mute_category
+        :auto_mute_category,
+        :auto_track_category
       )
     end
 
@@ -279,5 +280,5 @@ end
 #
 # Indexes
 #
-#  index_forum_thread_users_on_forum_thread_id_and_user_id  (topic_id,user_id) UNIQUE
+#  index_topic_users_on_topic_id_and_user_id  (topic_id,user_id) UNIQUE
 #

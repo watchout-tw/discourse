@@ -5,7 +5,7 @@ require_dependency 'distributed_memoizer'
 class PostsController < ApplicationController
 
   # Need to be logged in for all actions here
-  before_filter :ensure_logged_in, except: [:show, :replies, :by_number, :short_link, :reply_history, :revisions, :expand_embed]
+  before_filter :ensure_logged_in, except: [:show, :replies, :by_number, :short_link, :reply_history, :revisions, :expand_embed, :markdown, :raw, :cooked]
 
   skip_before_filter :store_incoming_links, only: [:short_link]
   skip_before_filter :check_xhr, only: [:markdown,:short_link]
@@ -17,6 +17,11 @@ class PostsController < ApplicationController
     else
       raise Discourse::NotFound
     end
+  end
+
+  def cooked
+    post = find_post_from_params
+    render json: {cooked: post.cooked}
   end
 
   def short_link
@@ -184,7 +189,6 @@ class PostsController < ApplicationController
 
   def revisions
     post_revision = find_post_revision_from_params
-    guardian.ensure_can_see!(post_revision)
     post_revision_serializer = PostRevisionSerializer.new(post_revision, scope: guardian, root: false)
     render_json_dump(post_revision_serializer)
   end
@@ -198,6 +202,17 @@ class PostsController < ApplicationController
         PostAction.remove_act(current_user, post, PostActionType.types[:bookmark])
       end
     end
+    render nothing: true
+  end
+
+  def wiki
+    guardian.ensure_can_wiki!
+
+    post = find_post_from_params
+    post.wiki = params[:wiki]
+    post.version += 1
+    post.save
+
     render nothing: true
   end
 
@@ -294,6 +309,8 @@ class PostsController < ApplicationController
     # Include deleted posts if the user is staff
     finder = finder.with_deleted if current_user.try(:staff?)
     post = finder.first
+    # load deleted topic
+    post.topic = Topic.with_deleted.find(post.topic_id) if current_user.try(:staff?)
     guardian.ensure_can_see!(post)
     post
   end

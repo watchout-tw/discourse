@@ -6,33 +6,31 @@
   </h1>
 
   <table class='badges-listing'>
-    <tr>
-      <td class='badge'>{{user-badge badge=this}}</td>
-      <td class='description'>{{description}}</td>
-      <td class='grant-count'>{{i18n badges.granted count=grant_count}}</td>
-    </tr>
+    <tbody>
+      <tr>
+        <td class='badge'>{{user-badge badge=this}}</td>
+        <td class='description'>{{displayDescription}}</td>
+        <td class='grant-count'>{{i18n badges.granted count=grant_count}}</td>
+      </tr>
+    </tbody>
   </table>
 
   {{#if userBadges}}
-    <h2>{{i18n users}}</h2>
-    <br>
     <div>
     {{#each userBadges}}
-        {{#link-to 'userActivity' user}}
+        {{#link-to 'user' user}}
           <div class="badge-user">
             {{avatar user imageSize="large"}}
             <div class="details">
               <span class="username">{{user.username}}</span>
-              {{unboundDate granted_at}}
+              {{date granted_at}}
             </div>
           </div>
         {{/link-to}}
       {{/each}}
     </div>
-    {{#if showMoreUsers}}
-      <button class="btn" {{action loadMore}}>
-        {{countI18n badges.more_badges count=moreUserCount}}
-      </button>
+    {{#if canLoadMore}}
+      <div class='spinner'>{{i18n loading}}</div>
     {{/if}}
   {{else}}
     {{#unless userBadgesLoaded}}

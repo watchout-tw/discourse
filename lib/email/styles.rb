@@ -20,6 +20,8 @@ module Email
     end
 
     def format_basic
+      uri = URI(Discourse.base_url)
+
       @fragment.css('img').each do |img|
 
         next if img['class'] == 'site-logo'
@@ -28,7 +30,7 @@ module Email
           img['width'] = 20
           img['height'] = 20
         else
-          add_styles(img, 'max-width: 694px;')
+          add_styles(img, 'max-width: 694px;') if img['style'] !~ /max-width/
         end
 
         # ensure all urls are absolute
@@ -38,14 +40,14 @@ module Email
 
         # ensure no schemaless urls
         if img['src'] && img['src'].starts_with?("//")
-          img['src'] = "http:" + img['src']
+          img['src'] = "#{uri.scheme}:#{img['src']}"
         end
       end
     end
 
     def format_notification
       style('.previous-discussion', 'font-size: 17px; color: #444;')
-      style('.date', "text-align:right;color:#999999;padding-right:5px;font-family:'lucida grande',tahoma,verdana,arial,sans-serif;font-size:11px")
+      style('.notification-date', "text-align:right;color:#999999;padding-right:5px;font-family:'lucida grande',tahoma,verdana,arial,sans-serif;font-size:11px")
       style('.username', "font-size:13px;font-family:'lucida grande',tahoma,verdana,arial,sans-serif;color:#3b5998;text-decoration:none;font-weight:bold")
       style('.post-wrapper', "margin-bottom:25px;max-width:761px")
       style('.user-avatar', 'vertical-align:top;width:55px;')
@@ -62,22 +64,27 @@ module Email
 
     def onebox_styles
       # Links to other topics
-      style('aside.quote', 'border-left: 5px solid #bebebe; background-color: #f1f1f1; padding: 12px;')
+      style('aside.quote', 'border-left: 5px solid #bebebe; background-color: #f1f1f1; padding: 12px 25px 2px 12px; margin-bottom: 10px;')
       style('aside.quote blockquote', 'border: 0px; padding: 0; margin: 7px 0')
       style('aside.quote div.info-line', 'color: #666; margin: 10px 0')
       style('aside.quote .avatar', 'margin-right: 5px')
 
       # Oneboxes
-      style('aside.onebox', "padding: 12px 25px 12px 12px; border-left: 5px solid #bebebe; background: #eee;")
-      style('aside.onebox img', "max-height: 80%; max-width: 25%; height: auto; float: left; margin-right: 10px;")
+      style('aside.onebox', "padding: 12px 25px 2px 12px; border-left: 5px solid #bebebe; background: #eee; margin-bottom: 10px;")
+      style('aside.onebox img', "max-height: 80%; max-width: 25%; height: auto; float: left; margin-right: 10px; margin-bottom: 10px")
       style('aside.onebox h3', "border-bottom: 0")
       style('aside.onebox .source', "margin-bottom: 8px")
       style('aside.onebox .source a[href]', "color: #333; font-weight: normal")
       style('aside.clearfix', "clear: both")
+
+      # Finally, convert all `aside` tags to `div`s
+      @fragment.css('aside, article, header').each do |n|
+        n.name = "div"
+      end
     end
 
     def format_html
-      style('h3', 'margin: 15px 0 20px 0; border-bottom: 1px solid #ddd;')
+      style('h3', 'margin: 15px 0 20px 0;')
       style('hr', 'background-color: #ddd; height: 1px; border: 1px;')
       style('a', 'text-decoration: none; font-weight: bold; color: #006699;')
       style('ul', 'margin: 0 0 0 10px; padding: 0 0 0 20px;')
@@ -96,6 +103,7 @@ module Email
 
     def to_html
       strip_classes_and_ids
+      replace_relative_urls
       @fragment.to_html.tap do |result|
         result.gsub!(/\[email-indent\]/, "<div style='margin-left: 15px'>")
         result.gsub!(/\[\/email-indent\]/, "</div>")
@@ -104,9 +112,22 @@ module Email
 
     private
 
+    def replace_relative_urls
+      forum_uri = URI(Discourse.base_url)
+      host = forum_uri.host
+      scheme = forum_uri.scheme
+
+      @fragment.css('[href]').each do |element|
+        href = element['href']
+        if href =~ /^\/\/#{host}/
+          element['href'] = "#{scheme}:#{href}"
+        end
+      end
+    end
+
     def correct_first_body_margin
       @fragment.css('.body p').each do |element|
-        element['style'] = "margin-top:0;"
+        element['style'] = "margin-top:0; border: 0;"
       end
     end
 

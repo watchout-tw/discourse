@@ -18,6 +18,7 @@ class PostCreator
   #                             topic.
   #   created_at              - Post creation time (optional)
   #   auto_track              - Automatically track this topic if needed (default true)
+  #   custom_fields           - Custom fields to be added to the post, Hash (default nil)
   #
   #   When replying to a topic:
   #     topic_id              - topic we're replying to
@@ -203,6 +204,10 @@ class PostCreator
     post.extract_quoted_post_numbers
     post.created_at = Time.zone.parse(@opts[:created_at].to_s) if @opts[:created_at].present?
 
+    if fields = @opts[:custom_fields]
+      post.custom_fields = fields
+    end
+
     @post = post
   end
 
@@ -264,13 +269,21 @@ class PostCreator
   def track_topic
     return if @opts[:auto_track] == false
 
-    TopicUser.auto_track(@user.id, @topic.id, TopicUser.notification_reasons[:created_post])
-    # Update topic user data
     TopicUser.change(@post.user.id,
                      @post.topic.id,
                      posted: true,
                      last_read_post_number: @post.post_number,
                      seen_post_count: @post.post_number)
+
+
+    # assume it took us 5 seconds of reading time to make a post
+    PostTiming.record_timing(topic_id: @post.topic_id,
+                             user_id: @post.user_id,
+                             post_number: @post.post_number,
+                             msecs: 5000)
+
+
+    TopicUser.auto_track(@user.id, @topic.id, TopicUser.notification_reasons[:created_post])
   end
 
   def enqueue_jobs

@@ -1,12 +1,7 @@
-/**
-  This controller handles general user actions
+import ObjectController from 'discourse/controllers/object';
+import CanCheckEmails from 'discourse/mixins/can-check-emails';
 
-  @class UserController
-  @extends Discourse.ObjectController
-  @namespace Discourse
-  @module Discourse
-**/
-export default Discourse.ObjectController.extend({
+export default ObjectController.extend(CanCheckEmails, {
 
   viewingSelf: function() {
     return this.get('content.username') === Discourse.User.currentProp('username');
@@ -14,9 +9,19 @@ export default Discourse.ObjectController.extend({
 
   collapsedInfo: Em.computed.not('indexStream'),
 
+  websiteName: function() {
+    var website = this.get('website');
+    if (Em.isEmpty(website)) { return; }
+    return this.get('website').split("/")[2];
+  }.property('website'),
+
+  linkWebsite: Em.computed.not('isBasic'),
+
   canSeePrivateMessages: function() {
     return this.get('viewingSelf') || Discourse.User.currentProp('admin');
   }.property('viewingSelf'),
+
+  canSeeNotificationHistory: Em.computed.alias('canSeePrivateMessages'),
 
   showBadges: function() {
     return Discourse.SiteSettings.enable_badges && (this.get('content.badge_count') > 0);
@@ -39,5 +44,4 @@ export default Discourse.ObjectController.extend({
   privateMessagesActive: Em.computed.equal('pmView', 'index'),
   privateMessagesMineActive: Em.computed.equal('pmView', 'mine'),
   privateMessagesUnreadActive: Em.computed.equal('pmView', 'unread')
-
 });

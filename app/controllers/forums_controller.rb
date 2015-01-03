@@ -13,7 +13,11 @@ class ForumsController < ApplicationController
   end
 
   def error
-    raise "WAT - #{Time.now.to_s}"
+    raise "WAT - #{Time.now}"
+  end
+
+  def home_redirect
+    redirect_to '/'
   end
 
 end

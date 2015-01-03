@@ -1,19 +1,16 @@
-/**
-  The controller for displaying a list of topics.
+import DiscoveryController from 'discourse/controllers/discovery';
+import { queryParams } from 'discourse/controllers/discovery-sortable';
 
-  @class DiscoveryTopicsController
-  @extends Discourse.Controller
-  @namespace Discourse
-  @module Discourse
-**/
-export default Discourse.DiscoveryController.extend({
+var controllerOpts = {
   needs: ['discovery'],
   bulkSelectEnabled: false,
   selected: [],
+  period: null,
+
+  redirectedReason: Em.computed.alias('currentUser.redirected_to_top_reason'),
 
   order: 'default',
   ascending: false,
-  status: null,
 
   actions: {
 
@@ -39,6 +36,8 @@ export default Discourse.DiscoveryController.extend({
     refresh: function() {
       var filter = this.get('model.filter'),
           self = this;
+
+      this.setProperties({ order: 'default', ascending: false });
 
       // Don't refresh if we're still loading
       if (this.get('controllers.discovery.loading')) { return; }
@@ -70,17 +69,23 @@ export default Discourse.DiscoveryController.extend({
       });
     },
 
-    dismissRead: function() {
+    dismissRead: function(operationType) {
       var self = this,
           selected = this.get('selected'),
-          operation = { type: 'change_notification_level',
+          operation;
+
+      if(operationType === "posts"){
+        operation = { type: 'dismiss_posts' };
+      } else {
+        operation = { type: 'change_notification_level',
                         notification_level_id: Discourse.Topic.NotificationLevel.REGULAR };
+      }
 
       var promise;
       if (selected.length > 0) {
         promise = Discourse.Topic.bulkOperation(selected, operation);
       } else {
-        promise = Discourse.Topic.bulkOperationByFilter(this.get('filter'), operation);
+        promise = Discourse.Topic.bulkOperationByFilter('unread', operation, this.get('category.id'));
       }
       promise.then(function(result) {
         if (result && result.topic_ids) {
@@ -100,19 +105,29 @@ export default Discourse.DiscoveryController.extend({
     return Discourse.TopicTrackingState.current();
   }.property(),
 
+  isFilterPage: function(filter, filterType) {
+    return filter.match(new RegExp(filterType + '$', 'gi')) ? true : false;
+  },
+
   showDismissRead: function() {
-    return this.get('filter') === 'unread' && this.get('topics.length') > 0;
+    return this.isFilterPage(this.get('filter'), 'unread') && this.get('topics.length') > 0;
   }.property('filter', 'topics.length'),
 
   showResetNew: function() {
     return this.get('filter') === 'new' && this.get('topics.length') > 0;
   }.property('filter', 'topics.length'),
 
+  showDismissAtTop: function() {
+    return (this.isFilterPage(this.get('filter'), 'new') ||
+           this.isFilterPage(this.get('filter'), 'unread')) &&
+           this.get('topics.length') >= 30;
+  }.property('filter', 'topics.length'),
+
   canBulkSelect: Em.computed.alias('currentUser.staff'),
   hasTopics: Em.computed.gt('topics.length', 0),
-  showTable: Em.computed.or('hasTopics', 'topicTrackingState.hasIncoming'),
   allLoaded: Em.computed.empty('more_topics_url'),
   latest: Discourse.computed.endWith('filter', 'latest'),
+  new: Discourse.computed.endWith('filter', 'new'),
   top: Em.computed.notEmpty('period'),
   yearly: Em.computed.equal('period', 'yearly'),
   monthly: Em.computed.equal('period', 'monthly'),
@@ -139,7 +154,28 @@ export default Discourse.DiscoveryController.extend({
     }
   }.property('allLoaded', 'topics.length'),
 
+  footerEducation: function() {
+    if (!this.get('allLoaded') || this.get('topics.length') > 0 || !Discourse.User.current()) { return; }
+
+    var split = this.get('filter').split('/');
+
+    if (split[0] !== 'new' && split[0] !== 'unread' && split[0] !== 'starred') { return; }
+
+    return I18n.t("topics.none.educate." + split[0], {
+      userPrefsUrl: Discourse.getURL("/users/") + (Discourse.User.currentProp("username_lower")) + "/preferences"
+    });
+  }.property('allLoaded', 'topics.length'),
+
   loadMoreTopics: function() {
     return this.get('model').loadMore();
   }
+};
+
+Ember.keys(queryParams).forEach(function(p) {
+  // If we don't have a default value, initialize it to null
+  if (typeof controllerOpts[p] === 'undefined') {
+    controllerOpts[p] = null;
+  }
 });
+
+export default DiscoveryController.extend(controllerOpts);

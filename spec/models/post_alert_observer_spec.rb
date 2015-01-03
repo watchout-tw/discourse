@@ -15,6 +15,7 @@ describe PostAlertObserver do
       it 'creates a notification' do
         lambda {
           PostAction.act(evil_trout, post, PostActionType.types[:like])
+          # one like (welcome badge deferred)
         }.should change(Notification, :count).by(1)
       end
     end
@@ -35,15 +36,27 @@ describe PostAlertObserver do
   context 'when editing a post' do
     it 'notifies a user of the revision' do
       lambda {
-        post.revise(evil_trout, "world is the new body of the message")
+        post.revise(evil_trout, { raw: "world is the new body of the message" })
       }.should change(post.user.notifications, :count).by(1)
     end
 
-    it 'does not notifiy a user of the revision when edit notifications are disabled' do
-      SiteSetting.stubs(:disable_edit_notifications).returns(true)
-      lambda {
-        post.revise(evil_trout, "world is the new body of the message")
-      }.should_not change(post.user.notifications, :count).by(1)
+    context "edit notifications are disabled" do
+
+      before { SiteSetting.stubs(:disable_edit_notifications).returns(true) }
+
+
+      it 'notifies a user of the revision made by another user' do
+        lambda {
+          post.revise(evil_trout, { raw: "world is the new body of the message" })
+        }.should change(post.user.notifications, :count).by(1)
+      end
+
+      it 'does not notifiy a user of the revision made by the system user' do
+        lambda {
+          post.revise(Discourse.system_user, { raw: "world is the new body of the message" })
+        }.should_not change(post.user.notifications, :count)
+      end
+
     end
 
   end
@@ -53,7 +66,7 @@ describe PostAlertObserver do
     let(:mention_post) { Fabricate(:post, user: user, raw: 'Hello @eviltrout')}
     let(:topic) do
       topic = mention_post.topic
-      topic.update_column :archetype, Archetype.private_message
+      topic.update_columns archetype: Archetype.private_message, category_id: nil
       topic
     end
 

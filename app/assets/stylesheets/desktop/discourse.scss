@@ -4,18 +4,6 @@
 
 html {font-size: 14px/19px;}
 
-body {
-  min-width: $large-width;
-}
-
-.container {
-  max-width: $large-width;
-}
-
-.full-width {
-  width: $large-width;
-}
-
 @include medium-width {
   body {
     min-width: $medium-width;
@@ -26,14 +14,14 @@ body {
   }
 }
 
-
-@include small-width {
+@media all
+and (max-width : 570px) {
   body {
-    min-width: $small-width;
+    min-width: 0;
   }
   .container,
   .full-width {
-    width: $small-width;
+    min-width: 0;
   }
 }
 
@@ -45,7 +33,6 @@ body {
 
   .boxed {
     height: 100%;
-    @include border-radius-all(5px);
     &.white {
       background-color: $secondary;
     }
@@ -55,7 +42,7 @@ body {
       color: $danger;
     }
     a.star {
-      color: scale-color($primary, $lightness: 75%);
+      color: dark-light-diff($secondary, $primary, 80%, -20%);
       &:before {
         font-family: "FontAwesome";
         content: "\f005";
@@ -115,11 +102,6 @@ body {
   }
 }
 
-blockquote {
-  /* 13px left is intentional here to properly align with post quotes */
-  padding: 10px 4px 4px 13px;
-}
-
 .topic-statuses {
   float: left;
   margin: 0 3px 0 0;
@@ -130,6 +112,10 @@ blockquote {
     i {
         font-size: 15px;
           }
+  }
+
+  i.fa-envelope {
+    color: $danger;
   }
 }
 
@@ -148,22 +134,26 @@ body {
 
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    font-family: inherit;
-    font-weight: bold;
-    color: inherit;
-    text-rendering: optimizelegibility;
   }
+
+  /* page not found styles */
 
   .page-not-found {
     margin: 20px 0 40px 0;
-
   }
 
   .page-not-found-search {
     margin-top: 20px;
   }
 
-  .popular-topics-title, .recent-topics-title {margin-bottom: 10px;}
+  .popular-topics-title, .recent-topics-title {
+    margin-bottom: 10px;
+  }
+
+  .page-not-found-topics .span8 {
+    line-height: 1.5em;
+    margin-right: 20px;
+  }
 
   // this removes the unwanted top margin on a paragraph under a heading
   h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
@@ -214,30 +204,30 @@ body {
     background-color:$secondary;
     border: 1px solid scale-color-diff();
     border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba($primary, .3);
-    -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
+    box-shadow: inset 0 1px 1px rgba(0,0,0, .3);
     transition: border linear 0.2s, box-shadow linear 0.2s;
+    -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
   }
   input {
     &[type="text"], &[type="password"], &[type="datetime"], &[type="datetime-local"], &[type="date"], &[type="month"], &[type="time"], &[type="week"], &[type="number"], &[type="email"], &[type="url"], &[type="search"], &[type="tel"], &[type="color"] {
       background-color: $secondary;
       border: 1px solid scale-color-diff();
       border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba($primary, .3);
-      -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
+      box-shadow: inset 0 1px 1px rgba(0,0,0, .3);
       transition: border linear 0.2s, box-shadow linear 0.2s;
+      -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
     }
   }
   textarea:focus {
     border-color: $tertiary;
     outline: 0;
-    box-shadow: inset 0 1px 1px rgba($primary, .3), 0 0 8px $tertiary;
+    box-shadow: inset 0 1px 1px rgba(0,0,0, .3), 0 0 8px $tertiary;
   }
   input {
     &[type="text"]:focus, &[type="password"]:focus, &[type="datetime"]:focus, &[type="datetime-local"]:focus, &[type="date"]:focus, &[type="month"]:focus, &[type="time"]:focus, &[type="week"]:focus, &[type="number"]:focus, &[type="email"]:focus, &[type="url"]:focus, &[type="search"]:focus, &[type="tel"]:focus, &[type="color"]:focus {
       border-color: $tertiary;
       outline: 0;
-      box-shadow: inset 0 1px 1px rgba($primary, .3), 0 0 8px $tertiary;
+      box-shadow: inset 0 1px 1px rgba(0,0,0, .3), 0 0 8px $tertiary;
     }
   }
 
@@ -484,53 +474,6 @@ body {
     }
   }
 
-  .alert {
-    padding: 8px 35px 8px 14px;
-    margin-bottom: 18px;
-    background-color: scale-color($danger, $lightness: 75%);
-    color: #c09853;
-
-    .close {
-      position: relative;
-      top: -2px;
-      right: -21px;
-      line-height: 18px;
-      float: right;
-      font-size: 20px;
-      font-weight: bold;
-      line-height: 18px;
-      color: $primary;
-      opacity: 0.2;
-      filter: alpha(opacity = 20);
-      @include hover {
-        color: $primary;
-        text-decoration: none;
-        cursor: pointer;
-        opacity: 0.4;
-        filter: alpha(opacity = 40);
-      }
-    }
-    button.close {
-      padding: 0;
-      cursor: pointer;
-      background: transparent;
-      border: 0;
-      -webkit-appearance: none;
-    }
-    &.alert-success {
-      background-color:  scale-color($success, $lightness: 90%);
-      color: $success;
-    }
-    &.alert-error {
-      background-color:  scale-color($danger, $lightness: 75%);
-      color: $danger;
-    }
-    &.alert-info {
-      background-color: scale-color($tertiary, $lightness: 90%);
-      color: $primary;
-    }
-  }
-
   .bootbox.modal {
     .modal-footer {
       a.btn-primary {
@@ -540,7 +483,7 @@ body {
   }
 }
 
-/* bootstrap colums */
+/* bootstrap columns */
 
 .row:before,
 .row:after {
@@ -561,7 +504,7 @@ body {
   float: left;
 }
 .span13 {
-  width: 664px;
+  width: 59.8198%;
   float: left;
 }
 .span10 {
@@ -573,7 +516,7 @@ body {
   float: left;
 }
 .span6 {
-  width: 300px;
+  width: 27.027%;
   float: left;
 }
 .span4 {

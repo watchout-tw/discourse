@@ -16,12 +16,17 @@
 #topic-title {
   margin-bottom: 20px;
   margin: 0 60px 10px 20px;
-
   h1 {
     font-size: 1.5em;
+    line-height: 1.25em;
     margin:0;
-    a.edit-topic {font-size: 15px;}
-    a {color: $primary;}
+    a {
+      color: $primary;
+      vertical-align: middle;
+    }
+  }
+  .title-category-wrapper {
+    margin-top:5px;
   }
   .private-message-glyph { display: none; }
 }
@@ -43,7 +48,7 @@
 }
 
 .docked #topic-progress {
-  box-shadow: 0 0 3px rbga($primary, .5);
+  box-shadow: 0 0 3px rbga(0,0,0, .5);
 }
 
 #topic-progress-wrapper {
@@ -52,7 +57,7 @@
   right: 0;
   bottom: 0;
   z-index: 500;
-  margin-right: 140px;
+  margin-right: 145px;
   outline: 1px solid transparent;
 }
 
@@ -60,11 +65,11 @@
   border: 1px solid scale-color-diff();
   padding: 5px;
   background: $secondary;
-  @include box-shadow(0 0px 2px rgba($primary, .2));
+  box-shadow: 0 0px 2px rgba(0,0,0, .2);
 
   position: absolute;
   bottom: 34px;
-  width: 118px;
+  width: 133px;
   padding: 5px;
 
   button.full {
@@ -83,6 +88,7 @@
       width: 45px;
       height: 20px;
       text-align: center;
+      font-size: 16px;
     }
     button.btn {
       float: right !important;
@@ -96,7 +102,7 @@
 }
 
 #topic-progress {
-  box-shadow: 0 0 3px rbga($primary, .7);
+  box-shadow: 0 0 3px rbga(0,0,0, .7);
   position: relative;
   &.hidden {
     display: none;
@@ -104,8 +110,12 @@
   border: none;
   background-color: scale-color-diff();
   color: $primary;
-  width: 130px;
+  width: 145px;
   height: 34px;
+
+  /* as a big ol' click target, don't let text inside be selected */
+  @include unselectable;
+
   .nums {
     position: relative;
     top: 9px;
@@ -134,6 +144,22 @@
   }
 }
 
+.topic-error {
+  padding: 18px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 24px;
+  line-height: 1.1em;
+
+  .topic-retry {
+    display: block;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 #topic-progress-wrapper.docked {
   position: absolute;
 }
@@ -143,3 +169,21 @@
 .heatmap-high {color: scale-color($danger, $lightness: -25%) !important;}
 .heatmap-med {color: $danger !important;}
 .heatmap-low {color: scale-color($danger, $lightness: 25%) !important;}
+
+sup sup, sub sup, sup sub, sub sub { top: 0; }
+
+// inline editing of title on mobile
+.title-wrapper {
+  input#edit-title {
+    width: 95%;
+    padding: 5px;
+  }
+  .btn-small {
+    padding: 8px 12px;
+    margin: 6px 6px 0 0;
+  }
+  .select2-container {
+    margin-top: 8px;
+    width: 95% !important;
+  }
+}

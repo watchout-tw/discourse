@@ -17,7 +17,7 @@
         line-height: 18px;
       }
       .description, .hint {
-        color: $primary;
+        color: scale-color($primary, $lightness: 50%);
       }
       .hint {
         font-style: italic;
@@ -28,4 +28,12 @@
   .radios:last-child {
     height: 20px;
   }
+}
+
+.uploaded-image-preview {
+  height: 270px;
+}
+
+.image-upload-controls {
+  padding: 10px;
 }

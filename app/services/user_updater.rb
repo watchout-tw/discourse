@@ -15,7 +15,8 @@ class UserUpdater
       :enable_quoting,
       :dynamic_favicon,
       :mailing_list_mode,
-      :disable_jump_reply
+      :disable_jump_reply,
+      :edit_history_public
   ]
 
   PROFILE_ATTR = [
@@ -57,21 +58,20 @@ class UserUpdater
 
     USER_ATTR.each do |attribute|
       if attributes[attribute].present?
-        user.send("#{attribute.to_s}=", attributes[attribute] == 'true')
+        user.send("#{attribute}=", attributes[attribute] == 'true')
       end
     end
 
-    PROFILE_ATTR.each do |attribute|
-      user_profile.send("#{attribute.to_s}=", attributes[attribute])
-    end
+    user_profile.location = attributes[:location]
+    user_profile.dismissed_banner_key = attributes[:dismissed_banner_key] if attributes[:dismissed_banner_key].present?
 
-    if fields = attributes[:custom_fields]
-      user.custom_fields = fields
+    fields = attributes[:custom_fields]
+    if fields.present?
+      user.custom_fields = user.custom_fields.merge(fields)
     end
 
     User.transaction do
-      user_profile.save
-      user.save
+      user_profile.save && user.save
     end
   end
 

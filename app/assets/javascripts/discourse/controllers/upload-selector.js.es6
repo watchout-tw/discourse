@@ -1,28 +1,21 @@
-/**
-  The modal for upload a file to a post
+import ModalFunctionality from 'discourse/mixins/modal-functionality';
 
-  @class UploadSelectorController
-  @extends Discourse.Controller
-  @namespace Discourse
-  @uses Discourse.ModalFunctionality
-  @module Discourse
-**/
-export default Discourse.Controller.extend(Discourse.ModalFunctionality, {
+import DiscourseController from 'discourse/controllers/controller';
+
+export default DiscourseController.extend(ModalFunctionality, {
   remote: Em.computed.not("local"),
   local: false,
   showMore: false,
 
-  init: function() {
-    this._super();
+  _initialize: function() {
     this.setProperties({
       local: this.get("allowLocal"),
       showMore: false
     });
-  },
+  }.on('init'),
 
-  allowLocal: function() {
-    return Discourse.SiteSettings.max_attachment_size_kb > 0;
-  }.property(),
+  maxSize: Discourse.computed.setting('max_attachment_size_kb'),
+  allowLocal: Em.computed.gt('maxSize', 0),
 
   actions: {
     useLocal: function() { this.setProperties({ local: true, showMore: false}); },

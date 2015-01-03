@@ -29,10 +29,6 @@ class SiteSetting < ActiveRecord::Base
     LocaleSiteSetting.values.map{ |e| e[:value] }.join('|')
   end
 
-  def self.call_discourse_hub?
-    self.enforce_global_nicknames? && self.discourse_org_access_key.present?
-  end
-
   def self.topic_title_length
     min_topic_title_length..max_topic_title_length
   end
@@ -107,6 +103,6 @@ end
 #  name       :string(255)      not null
 #  data_type  :integer          not null
 #  value      :text
-#  created_at :datetime
-#  updated_at :datetime
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
 #

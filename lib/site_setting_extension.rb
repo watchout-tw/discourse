@@ -105,7 +105,7 @@ module SiteSettingExtension
 
   def settings_hash
     result = {}
-    @defaults.each do |s, v|
+    @defaults.each do |s, _|
       result[s] = send(s).to_s
     end
     result
@@ -124,14 +124,14 @@ module SiteSettingExtension
   # Retrieve all settings
   def all_settings(include_hidden=false)
     @defaults
-      .reject{|s, v| hidden_settings.include?(s) || include_hidden}
+      .reject{|s, _| hidden_settings.include?(s) || include_hidden}
       .map do |s, v|
         value = send(s)
         type = types[get_data_type(s, value)]
         opts = {
           setting: s,
           description: description(s),
-          default: v,
+          default: v.to_s,
           type: type.to_s,
           value: value.to_s,
           category: categories[s]
@@ -264,8 +264,21 @@ module SiteSettingExtension
     refresh_settings.include?(name.to_sym)
   end
 
+  def filter_value(name, value)
+    # filter domain name
+    if %w[disabled_image_download_domains onebox_domains_whitelist exclude_rel_nofollow_domains email_domains_blacklist email_domains_whitelist white_listed_spam_host_domains].include? name
+      domain_array = []
+      value.split('|').each { |url|
+        domain_array.push(get_hostname(url))
+      }
+      value = domain_array.join("|")
+    end
+    return value
+  end
+
   def set(name, value)
     if has_setting?(name)
+      value = filter_value(name, value)
       self.send("#{name}=", value)
       Discourse.request_refresh! if requires_refresh?(name)
     else
@@ -304,6 +317,8 @@ module SiteSettingExtension
       types[:string]
     when Fixnum
       types[:fixnum]
+    when Float
+      types[:float]
     when TrueClass, FalseClass
       types[:bool]
     else
@@ -313,6 +328,8 @@ module SiteSettingExtension
 
   def convert(value, type)
     case type
+    when types[:float]
+      value.to_f
     when types[:fixnum]
       value.to_i
     when types[:string], types[:list], types[:enum]
@@ -363,6 +380,14 @@ module SiteSettingExtension
 
   def enum_class(name)
     enums[name]
+  end
+
+  def get_hostname(url)
+    unless (URI.parse(url).scheme rescue nil).nil?
+      url = "http://#{url}" if URI.parse(url).scheme.nil?
+      url = URI.parse(url).host
+    end
+    return url
   end
 
 end

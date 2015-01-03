@@ -2,12 +2,14 @@ require File.expand_path('../boot', __FILE__)
 require 'rails/all'
 
 # Plugin related stuff
+require_relative '../lib/discourse_event'
+require_relative '../lib/discourse_plugin'
 require_relative '../lib/discourse_plugin_registry'
 
 # Global config
 require_relative '../app/models/global_setting'
 
-require 'pry-rails' if Rails.env == "development"
+require 'pry-rails' if Rails.env.development?
 
 if defined?(Bundler)
   Bundler.require(*Rails.groups(assets: %w(development test profile)))
@@ -16,7 +18,7 @@ end
 module Discourse
   class Application < Rails::Application
     def config.database_configuration
-      if Rails.env == "production"
+      if Rails.env.production?
         GlobalSetting.database_config
       else
         super
@@ -49,7 +51,7 @@ module Discourse
     # :all can be used as a placeholder for all plugins not explicitly named.
     # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
 
-    config.assets.paths += %W(#{config.root}/config/locales)
+    config.assets.paths += %W(#{config.root}/config/locales #{config.root}/public/javascripts)
 
     # explicitly precompile any images in plugins ( /assets/images ) path
     config.assets.precompile += [lambda do |filename, path|
@@ -78,7 +80,7 @@ module Discourse
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
-    config.time_zone = 'Eastern Time (US & Canada)'
+    config.time_zone = 'UTC'
 
     # auto-load server locale in plugins
     config.i18n.load_path += Dir["#{Rails.root}/plugins/*/config/locales/server.*.yml"]
@@ -89,12 +91,11 @@ module Discourse
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [
         :password,
-        :pop3s_polling_password,
+        :pop3_polling_password,
         :s3_secret_access_key,
         :twitter_consumer_secret,
         :facebook_app_secret,
-        :github_client_secret,
-        :discourse_org_access_key,
+        :github_client_secret
     ]
 
     # Enable the asset pipeline
@@ -116,6 +117,11 @@ module Discourse
     # rack lock is nothing but trouble, get rid of it
     # for some reason still seeing it in Rails 4
     config.middleware.delete Rack::Lock
+
+    # ETags are pointless, we are dynamically compressing
+    # so nginx strips etags, may revisit when mainline nginx
+    # supports etags (post 1.7)
+    config.middleware.delete Rack::ETag
 
     # route all exceptions via our router
     config.exceptions_app = self.routes

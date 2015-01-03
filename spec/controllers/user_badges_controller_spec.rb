@@ -5,6 +5,20 @@ describe UserBadgesController do
   let(:badge) { Fabricate(:badge) }
 
   context 'index' do
+    it 'doest not leak private info' do
+      badge = Fabricate(:badge, target_posts: true, show_posts: false)
+      p = create_post
+      UserBadge.create(badge: badge, user: user, post_id: p.id, granted_by_id: -1, granted_at: Time.now)
+
+      xhr :get, :index, badge_id: badge.id
+      response.status.should == 200
+      parsed = JSON.parse(response.body)
+      parsed["topics"].should == nil
+      parsed["user_badges"][0]["post_id"].should == nil
+    end
+  end
+
+  context 'index' do
     let!(:user_badge) { UserBadge.create(badge: badge, user: user, granted_by: Discourse.system_user, granted_at: Time.now) }
 
     it 'requires username or badge_id to be specified' do
@@ -12,7 +26,7 @@ describe UserBadgesController do
     end
 
     it 'returns user_badges for a user' do
-      xhr :get, :index, username: user.username
+      xhr :get, :username, username: user.username
 
       response.status.should == 200
       parsed = JSON.parse(response.body)
@@ -28,11 +42,11 @@ describe UserBadgesController do
     end
 
     it 'includes counts when passed the aggregate argument' do
-      xhr :get, :index, username: user.username, grouped: true
+      xhr :get, :username, username: user.username, grouped: true
 
       response.status.should == 200
       parsed = JSON.parse(response.body)
-      parsed["user_badges"].first.has_key?('count').should be_true
+      parsed["user_badges"].first.has_key?('count').should == true
     end
   end
 
@@ -88,7 +102,7 @@ describe UserBadgesController do
       StaffActionLogger.any_instance.expects(:log_badge_revoke).once
       xhr :delete, :destroy, id: user_badge.id
       response.status.should == 200
-      UserBadge.find_by(id: user_badge.id).should be_nil
+      UserBadge.find_by(id: user_badge.id).should == nil
     end
   end
 end

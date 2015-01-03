@@ -1,14 +1,5 @@
-/**
-  This view renders a menu below a post. It uses buffered rendering for performance.
-
-  @class PostMenuView
-  @extends Discourse.View
-  @namespace Discourse
-  @module Discourse
-**/
-
 // Helper class for rendering a button
-var Button = function(action, label, icon, opts) {
+export var Button = function(action, label, icon, opts) {
   this.action = action;
   this.label = label;
 
@@ -21,13 +12,17 @@ var Button = function(action, label, icon, opts) {
 };
 
 Button.prototype.render = function(buffer) {
+  var opts = this.opts;
+
   buffer.push("<button title=\"" + I18n.t(this.label) + "\"");
-  if (this.opts.className) { buffer.push(" class=\"" + this.opts.className + "\""); }
-  if (this.opts.shareUrl) { buffer.push(" data-share-url=\"" + this.opts.shareUrl + "\""); }
+  if (opts.disabled) { buffer.push(" disabled"); }
+  if (opts.className) { buffer.push(" class=\"" + opts.className + "\""); }
+  if (opts.shareUrl) { buffer.push(" data-share-url=\"" + opts.shareUrl + "\""); }
+  if (opts.postNumber) { buffer.push(" data-post-number=\"" + opts.postNumber + "\""); }
   buffer.push(" data-action=\"" + this.action + "\">");
   if (this.icon) { buffer.push("<i class=\"fa fa-" + this.icon + "\"></i>"); }
-  if (this.opts.textLabel) { buffer.push(I18n.t(this.opts.textLabel)); }
-  if (this.opts.innerHTML) { buffer.push(this.opts.innerHTML); }
+  if (opts.textLabel) { buffer.push(I18n.t(opts.textLabel)); }
+  if (opts.innerHTML) { buffer.push(opts.innerHTML); }
   buffer.push("</button>");
 };
 
@@ -187,12 +182,20 @@ export default Discourse.View.extend({
 
   // Like button
   buttonForLike: function(post) {
-    if (!post.get('actionByName.like.can_act')) return;
-    return new Button('like', 'post.controls.like', 'heart', {className: 'like'});
+    var likeAction = post.get('actionByName.like');
+    if (!likeAction) { return; }
+
+    var className = likeAction.get('acted') ? 'has-like' : 'like';
+    if (likeAction.get('canToggle')) {
+      var descKey = likeAction.get('acted') ? 'post.controls.undo_like' : 'post.controls.like';
+      return new Button('like', descKey, 'heart', {className: className});
+    } else if (likeAction.get('acted')) {
+      return new Button('like', 'post.controls.has_liked', 'heart', {className: className, disabled: true});
+    }
   },
 
   clickLike: function(post) {
-    this.get('controller').send('likePost', post);
+    this.get('controller').send('toggleLike', post);
   },
 
   // Flag button
@@ -220,7 +223,12 @@ export default Discourse.View.extend({
 
   // Share button
   buttonForShare: function(post) {
-    return new Button('share', 'post.controls.share', 'link', {shareUrl: post.get('shareUrl')});
+    if (!Discourse.User.current()) return;
+    var options = {
+      shareUrl: post.get('shareUrl'),
+      postNumber: post.get('post_number')
+    };
+    return new Button('share', 'post.controls.share', 'link', options);
   },
 
   // Reply button
@@ -267,18 +275,57 @@ export default Discourse.View.extend({
 
   renderAdminPopup: function(post, buffer) {
     if (!Discourse.User.currentProp('canManageTopic')) { return; }
-    var wikiText = post.get('wiki') ? I18n.t('post.controls.unwiki') : I18n.t('post.controls.wiki');
-    buffer.push('<div class="post-admin-menu"><h3>' + I18n.t('admin_title') + '</h3><ul><li class="btn btn-admin" data-action="toggleWiki"><i class="fa fa-pencil-square-o"></i>' + wikiText +'</li></ul></div>');
+
+    var isWiki = post.get('wiki'),
+        wikiIcon = '<i class="fa fa-pencil-square-o"></i>',
+        wikiText = isWiki ? I18n.t('post.controls.unwiki') : I18n.t('post.controls.wiki');
+
+    var isModerator = post.get('post_type') === Discourse.Site.currentProp('post_types.moderator_action'),
+        postTypeIcon = '<i class="fa fa-shield"></i>',
+        postTypeText = isModerator ? I18n.t('post.controls.revert_to_regular') : I18n.t('post.controls.convert_to_moderator');
+
+    var rebakePostIcon = '<i class="fa fa-cog"></i>',
+        rebakePostText = I18n.t('post.controls.rebake');
+
+    var unhidePostIcon = '<i class="fa fa-eye"></i>',
+        unhidePostText = I18n.t('post.controls.unhide');
+
+    var html = '<div class="post-admin-menu">' +
+                 '<h3>' + I18n.t('admin_title') + '</h3>' +
+                 '<ul>' +
+                   '<li class="btn btn-admin" data-action="toggleWiki">' + wikiIcon + wikiText + '</li>' +
+                   '<li class="btn btn-admin" data-action="togglePostType">' + postTypeIcon + postTypeText + '</li>' +
+                   '<li class="btn btn-admin" data-action="rebakePost">' + rebakePostIcon + rebakePostText + '</li>' +
+                   (post.hidden ? '<li class="btn btn-admin" data-action="unhidePost">' + unhidePostIcon + unhidePostText + '</li>' : '') +
+                 '</ul>' +
+               '</div>';
+
+    buffer.push(html);
   },
 
   clickAdmin: function() {
-    var $adminMenu = this.$('.post-admin-menu');
-    this.set('adminMenu', $adminMenu);
-    $adminMenu.show();
+    var $postAdminMenu = this.$(".post-admin-menu");
+    $postAdminMenu.show();
+    $("html").on("mouseup.post-admin-menu", function() {
+      $postAdminMenu.hide();
+      $("html").off("mouseup.post-admin-menu");
+    });
   },
 
   clickToggleWiki: function() {
     this.get('controller').send('toggleWiki', this.get('post'));
+  },
+
+  clickTogglePostType: function () {
+    this.get("controller").send("togglePostType", this.get("post"));
+  },
+
+  clickRebakePost: function () {
+    this.get("controller").send("rebakePost", this.get("post"));
+  },
+
+  clickUnhidePost: function () {
+    this.get("controller").send("unhidePost", this.get("post"));
   },
 
   buttonForShowMoreActions: function() {

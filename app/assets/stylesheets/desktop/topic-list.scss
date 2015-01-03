@@ -33,16 +33,14 @@
 
   .badge-category {
     font-weight: normal;
-    text-transform: capitalize;
   }
 
 }
 
-
 // Base list
 // --------------------------------------------------
 
-#topic-list {
+.topic-list {
   margin: 0 0 10px;
   .fa-thumb-tack {color: $primary;}
   .fa-thumb-tack.unpinned {color: $primary;}
@@ -62,7 +60,17 @@
     button i.fa {color: scale-color($primary, $lightness: 50%);}
   }
 
-
+  > tbody > tr {
+    &:nth-child(even) {
+        background-color: darken($secondary, 3%);
+    }
+    &:nth-child(odd) {
+        background-color: $secondary;
+    }
+    &.highlighted {
+        background-color: dark-light-diff($tertiary, $secondary, 90%, -41%);
+    }
+  }
   button.bulk-select {
     padding: 0;
     background: transparent;
@@ -88,7 +96,12 @@
   .badge-notification {
     position: relative;
     top: -2px;
+    &.new-topic {
+      top: 0px;
+      padding-left: 5px;
+    }
   }
+
   .category {
     padding: 0 20px 0 20px;
     min-width: 80px;
@@ -109,15 +122,15 @@
     }
   }
   .avatar {
-    &.latest {
-      @include box-shadow(0 0 6px 1px desaturate(scale-color($tertiary, $lightness: 30%), 35%));
+    &.latest:not(.single) {
+      box-shadow: 0 0 6px 1px desaturate(scale-color($tertiary, $lightness: 30%), 35%);
     }
   }
 
   .sortable {
     cursor: pointer;
     &:hover {
-      background-color: scale-color-diff();
+      background-color: dark-light-diff($primary, $secondary, 90%, -75%);
     }
     @include unselectable;
   }
@@ -132,6 +145,9 @@
   }
   .activity {
     width: 60px;
+    span {
+      cursor: pointer;
+    }
   }
   .age {
     width: 60px;
@@ -143,23 +159,28 @@
 
 #list-area .top-lists h2 { margin: 5px 0 10px; }
 
-#topic-list tbody tr.has-excerpt .star {
+.topic-list tbody tr.has-excerpt .star {
   vertical-align: top;
   margin-top: 3px;
 }
 
-#topic-list.categories {
-  a.title {color: $tertiary;}
+.topic-list.categories {
+  a.title {
+    color: $tertiary;
+    font-size: 13px;
+  }
   a.title:visited:not(.badge-notification) {color: scale-color($tertiary, $lightness: 35%);}
 
   th.posts {
     position: relative;
   }
-  > tbody > tr:nth-child(odd) {
-    background-color: darken($secondary, 3%);
-  }
-  > tbody > tr:nth-child(even) {
-    background-color: $secondary;
+  > tbody > tr {
+    &:nth-child(odd) {
+        background-color: darken($secondary, 3%);
+      }
+    &:nth-child(even) {
+      background-color: $secondary;
+      }
   }
   th .toggle-admin {
     position: absolute;
@@ -220,32 +241,29 @@
   }
 
   .featured-topic {
-    margin: 6px 0;
+    margin: 10px 0 0;
+    font-size: 13px;
+    /* topic status glyphs */
+    i {
+      color: scale-color($primary, $lightness: 50%) !important;
+      font-size: 13px;
+    }
     a.last-posted-at, a.last-posted-at:visited {
       color: scale-color($primary, $lightness: 50%);
     }
+    .badge {
+      font-size: 10px;
+      top: -1px;
+    }
   }
 
-  .badge-category {
+  .category .badge-category {
     display: inline-block;
     margin-top: 1px;
   }
 }
 
-// Category list
-// --------------------------------------------------
-
-.category-list-item {
-  th .badge-category {
-    float: left;
-  }
-  .posters {
-    display: block;
-    width: 165px;
-  }
-}
-
-#topic-list-bottom {
+.topic-list-bottom {
   margin: 20px 0;
 }
 
@@ -261,7 +279,7 @@
 .category-dropdown-menu {
   max-height: 350px;
   margin-top: 30px;
-  min-width: 138px;
+  min-width: 152px;
 }
 
 #bulk-select {
@@ -274,6 +292,7 @@
 button.dismiss-read {
   float: right;
   margin-bottom: 5px;
+  margin-left: 10px;
 }
 
 .category-notification-menu .dropdown-menu {
@@ -281,4 +300,101 @@ button.dismiss-read {
   top: 30px;
   bottom: auto;
   left: auto;
+}
+
+.category-heading {
+  clear: both;
+  p {
+    line-height: 1.5em;
+    font-size: 1.5em;
+  }
+}
+.category-logo {
+  max-height: 150px;
+  float: left;
+  margin-bottom: 15px;
+  margin-right: 15px;
+}
+
+/* Tablet (portrait) ----------- */
+
+@media all
+and (max-width : 850px) {
+
+  .nav-pills {
+    > li > a {
+      font-size: 14px;
+      padding: 5px 10px ;
+      }
+  }
+
+  .list-controls {
+    padding: 0 5px;
+
+    .btn {
+        font-size: 14px
+      }
+
+    .category-dropdown-menu {
+        min-width: 139px;
+      }
+
+    a.badge-category {
+        font-size: 14px;
+      }
+
+  }
+
+  .topic-list {
+    .categories td.category {
+      padding-left: 10px;
+      }
+   td:first-of-type {
+     padding: 0;
+     }
+   th:first-of-type {
+     padding: 12px 5px;
+     }
+   th {
+     .btn .fa {
+       margin-right: 2px;
+       }
+     }
+   th, td {
+      padding: 12px 2px;
+      font-size: 13px;
+     }
+    .star {
+      padding: 12px 5px;
+      width: auto;
+      }
+    .main-link {
+      font-size: 15px;
+      padding: 12px 8px 12px 0px;
+      }
+
+    .likes {
+      width: auto;
+      }
+    .category {
+      min-width: 0;
+      padding: 0;
+      }
+    .topic-excerpt {
+      padding-right: 20px;
+      }
+    th.posters {
+      text-align: center;
+      }
+    .posters {
+       min-width: 0;
+       width: 50px;
+       a:not(.latest) {
+         display: none;
+         }
+       a.latest {
+         padding: 0 8px;
+         }
+       }
+  }
 }

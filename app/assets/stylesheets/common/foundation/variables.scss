@@ -5,7 +5,7 @@
 // Layout dimensions
 // --------------------------------------------------
 
-$small-width: 950px !default;
+$small-width: 800px !default;
 $medium-width: 995px !default;
 $large-width: 1110px !default;
 
@@ -30,6 +30,20 @@ $base-font-family: Helvetica, Arial, sans-serif !default;
 @import "theme_variables";
 @import "plugins_variables";
 
+
+@function brightness($color) {
+  @return ((red($color) * .299) + (green($color) * .587) + (blue($color) * .114)); //w3c definition of color brightness
+}
+
+@function dark-light-diff($adjusted-color, $comparison-color, $lightness, $darkness) {
+  @if brightness($adjusted-color) < brightness($comparison-color) {
+    @return scale-color($adjusted-color, $lightness: $lightness)
+  } @else {
+    @return scale-color($adjusted-color, $lightness: $darkness)
+  }
+}
+
+//phasing out scale-color-diff for dark-light-diff
 
 @function scale-color-diff() {
     @if lightness($primary) < lightness($secondary) {

@@ -53,12 +53,28 @@ describe InvitesController do
         response.should_not be_success
       end
 
+      it "fails for normal user if invite email already exists" do
+        user = log_in(:trust_level_4)
+        invite = Invite.invite_by_email("invite@example.com", user)
+        invite.reload
+        post :create, email: invite.email
+        response.should_not be_success
+      end
+
       it "allows admins to invite to groups" do
         group = Fabricate(:group)
         log_in(:admin)
         post :create, email: email, group_names: group.name
         response.should be_success
         Invite.find_by(email: email).invited_groups.count.should == 1
+      end
+
+      it "allows admin to send multiple invites to same email" do
+        user = log_in(:admin)
+        invite = Invite.invite_by_email("invite@example.com", user)
+        invite.reload
+        post :create, email: invite.email
+        response.should be_success
       end
     end
 
@@ -144,6 +160,154 @@ describe InvitesController do
 
         end
 
+      end
+
+    end
+
+    context 'new registrations are disabled' do
+      let(:topic) { Fabricate(:topic) }
+      let(:invite) { topic.invite_by_email(topic.user, "iceking@adventuretime.ooo") }
+      before { SiteSetting.stubs(:allow_new_registrations).returns(false) }
+
+      it "doesn't redeem the invite" do
+        Invite.any_instance.stubs(:redeem).never
+        get :show, id: invite.invite_key
+      end
+    end
+
+  end
+
+  context '.create_disposable_invite' do
+    it 'requires you to be logged in' do
+      lambda {
+        post :create, email: 'jake@adventuretime.ooo'
+      }.should raise_error(Discourse::NotLoggedIn)
+    end
+
+    context 'while logged in as normal user' do
+      let(:user) { Fabricate(:user) }
+
+      it "does not create disposable invitation" do
+        log_in
+        post :create_disposable_invite, email: user.email
+        response.should_not be_success
+      end
+    end
+
+    context 'while logged in as admin' do
+      before do
+        log_in(:admin)
+      end
+      let(:user) { Fabricate(:user) }
+
+      it "creates disposable invitation" do
+        post :create_disposable_invite, email: user.email
+        response.should be_success
+        Invite.where(invited_by_id: user.id).count.should == 1
+      end
+
+      it "creates multiple disposable invitations" do
+        post :create_disposable_invite, email: user.email, quantity: 10
+        response.should be_success
+        Invite.where(invited_by_id: user.id).count.should == 10
+      end
+
+      it "allows group invite" do
+        group = Fabricate(:group)
+        post :create_disposable_invite, email: user.email, group_names: group.name
+        response.should be_success
+        Invite.find_by(invited_by_id: user.id).invited_groups.count.should == 1
+      end
+
+      it "allows multiple group invite" do
+        group_1 = Fabricate(:group, name: "security")
+        group_2 = Fabricate(:group, name: "support")
+        post :create_disposable_invite, email: user.email, group_names: "security,support"
+        response.should be_success
+        Invite.find_by(invited_by_id: user.id).invited_groups.count.should == 2
+      end
+
+    end
+
+  end
+
+  context '.redeem_disposable_invite' do
+
+    context 'with an invalid invite token' do
+      before do
+        get :redeem_disposable_invite, email: "name@example.com", token: "doesn't exist"
+      end
+
+      it "redirects to the root" do
+        response.should redirect_to("/")
+      end
+
+      it "should not change the session" do
+        session[:current_user_id].should be_blank
+      end
+    end
+
+    context 'with a valid invite token' do
+      let(:topic) { Fabricate(:topic) }
+      let(:invitee) { Fabricate(:user) }
+      let(:invite) { Invite.create!(invited_by: invitee) }
+
+      it 'converts "space" to "+" in email parameter' do
+        Invite.expects(:redeem_from_token).with(invite.invite_key, "fname+lname@example.com", nil, nil, topic.id)
+        get :redeem_disposable_invite, email: "fname lname@example.com", token: invite.invite_key, topic: topic.id
+      end
+
+      it 'redeems the invite' do
+        Invite.expects(:redeem_from_token).with(invite.invite_key, "name@example.com", nil, nil, topic.id)
+        get :redeem_disposable_invite, email: "name@example.com", token: invite.invite_key, topic: topic.id
+      end
+
+      context 'when redeem returns a user' do
+        let(:user) { Fabricate(:user) }
+
+        before do
+          Invite.expects(:redeem_from_token).with(invite.invite_key, user.email, nil, nil, topic.id).returns(user)
+          get :redeem_disposable_invite, email: user.email, token: invite.invite_key, topic: topic.id
+        end
+
+        it 'logs in user' do
+          session[:current_user_id].should == user.id
+        end
+
+      end
+
+    end
+
+  end
+
+  context '.resend_invite' do
+
+    it 'requires you to be logged in' do
+      lambda {
+        delete :resend_invite, email: 'first_name@example.com'
+      }.should raise_error(Discourse::NotLoggedIn)
+    end
+
+    context 'while logged in' do
+      let!(:user) { log_in }
+      let!(:invite) { Fabricate(:invite, invited_by: user) }
+      let(:another_invite) { Fabricate(:invite, email: 'last_name@example.com') }
+
+      it 'raises an error when the email is missing' do
+        lambda { post :resend_invite }.should raise_error(ActionController::ParameterMissing)
+      end
+
+      it "raises an error when the email cannot be found" do
+        lambda { post :resend_invite, email: 'first_name@example.com' }.should raise_error(Discourse::InvalidParameters)
+      end
+
+      it 'raises an error when the invite is not yours' do
+        lambda { post :resend_invite, email: another_invite.email }.should raise_error(Discourse::InvalidParameters)
+      end
+
+      it "resends the invite" do
+        Invite.any_instance.expects(:resend_invite)
+        post :resend_invite, email: invite.email
       end
 
     end

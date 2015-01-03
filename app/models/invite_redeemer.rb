@@ -1,26 +1,36 @@
-InviteRedeemer = Struct.new(:invite) do
+InviteRedeemer = Struct.new(:invite, :username, :name) do
 
   def redeem
     Invite.transaction do
-      process_invitation if invite_was_redeemed?
+      if invite_was_redeemed?
+        process_invitation
+        return invited_user
+      end
     end
 
-    invited_user
+    # If `invite_passthrough_hours` is defined, allow them to re-use the invite link
+    # to login again.
+    if invite.redeemed_at && invite.redeemed_at >= SiteSetting.invite_passthrough_hours.hours.ago
+      return invited_user
+    end
+
+    nil
   end
 
   # extracted from User cause it is very specific to invites
-  def self.create_user_from_invite(invite)
-    username = UserNameSuggester.suggest(invite.email)
+  def self.create_user_from_invite(invite, username, name)
+    user_exists = User.find_by_email(invite.email)
+    return user if user_exists
 
-    DiscourseHub.username_operation do
-      match, available, suggestion = DiscourseHub.username_match?(username, invite.email)
-      username = suggestion unless match || available
+    if username && UsernameValidator.new(username).valid_format? && User.username_available?(username)
+      available_username = username
+    else
+      available_username = UserNameSuggester.suggest(invite.email)
     end
+    available_name = name || available_username
 
-    user = User.new(email: invite.email, username: username, name: username, active: true, trust_level: SiteSetting.default_invitee_trust_level)
+    user = User.new(email: invite.email, username: available_username, name: available_name, active: true, trust_level: SiteSetting.default_invitee_trust_level)
     user.save!
-
-    DiscourseHub.username_operation { DiscourseHub.register_username(username, invite.email) }
 
     user
   end
@@ -38,6 +48,7 @@ InviteRedeemer = Struct.new(:invite) do
     send_welcome_message
     approve_account_if_needed
     notify_invitee
+    send_password_instructions
   end
 
   def invite_was_redeemed?
@@ -52,7 +63,7 @@ InviteRedeemer = Struct.new(:invite) do
 
   def get_invited_user
     result = get_existing_user
-    result ||= InviteRedeemer.create_user_from_invite(invite)
+    result ||= InviteRedeemer.create_user_from_invite(invite, username, name)
     result.send_welcome_message = false
     result
   end
@@ -89,7 +100,13 @@ InviteRedeemer = Struct.new(:invite) do
   end
 
   def approve_account_if_needed
-    invited_user.approve(invite.invited_by_id, send_email=false)
+    invited_user.approve(invite.invited_by_id, false)
+  end
+
+  def send_password_instructions
+    if !SiteSetting.enable_sso && SiteSetting.enable_local_logins && !invited_user.has_password?
+      Jobs.enqueue(:invite_password_instructions_email, username: invited_user.username)
+    end
   end
 
   def notify_invitee

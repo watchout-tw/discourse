@@ -40,8 +40,17 @@ module Email
     end
 
     def subject
-      subject = @opts[:subject]
-      subject = I18n.t("#{@opts[:template]}.subject_template", template_args) if @opts[:template]
+      if @opts[:use_site_subject]
+        subject = String.new(SiteSetting.email_subject)
+        subject.gsub!("%{site_name}", @template_args[:site_name])
+        subject.gsub!("%{optional_re}", @opts[:add_re_to_subject] ? I18n.t('subject_re', template_args) : '')
+        subject.gsub!("%{optional_pm}", @opts[:private_reply] ? I18n.t('subject_pm', template_args) : '')
+        subject.gsub!("%{optional_cat}", @template_args[:show_category_in_subject] ? "[#{@template_args[:show_category_in_subject]}] " : '')
+        subject.gsub!("%{topic_title}", @template_args[:topic_title]) if @template_args[:topic_title] # must be last for safety
+      else
+        subject = @opts[:subject]
+        subject = I18n.t("#{@opts[:template]}.subject_template", template_args) if @opts[:template]
+      end
       subject
     end
 
@@ -147,7 +156,6 @@ module Email
       return @from_value if @from_value
       @from_value = @opts[:from] || SiteSetting.notification_email
       @from_value = alias_email(@from_value)
-      @from_value
     end
 
     def reply_by_email_address
@@ -161,17 +169,19 @@ module Email
                                 else
                                   site_alias_email(@reply_by_email_address)
                                 end
-
-      @reply_by_email_address
     end
 
     def alias_email(source)
-      return source if @opts[:from_alias].blank?
-      "#{@opts[:from_alias]} <#{source}>"
+      return source if @opts[:from_alias].blank? && SiteSetting.email_site_title.blank?
+      if !@opts[:from_alias].blank?
+        "#{Email.cleanup_alias(@opts[:from_alias])} <#{source}>"
+      else
+        "#{Email.cleanup_alias(SiteSetting.email_site_title)} <#{source}>"
+      end
     end
 
     def site_alias_email(source)
-      return "#{SiteSetting.title} <#{source}>"
+      "#{Email.cleanup_alias(SiteSetting.email_site_title.presence || SiteSetting.title)} <#{source}>"
     end
 
   end

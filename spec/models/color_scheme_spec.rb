@@ -40,6 +40,16 @@ describe ColorScheme do
       second.hex.should == base_colors[:second_one]
       third.hex.should == 'F00D33'
     end
+
+    context "hex_for_name without anything enabled" do
+      it "returns nil for a missing attribute" do
+        described_class.hex_for_name('undefined').should == nil
+      end
+
+      it "returns the base color for an attribute" do
+        described_class.hex_for_name('second_one').should == base_colors[:second_one]
+      end
+    end
   end
 
   describe "destroy" do
@@ -55,12 +65,14 @@ describe ColorScheme do
 
   describe "#enabled" do
     it "returns nil when there is no enabled record" do
-      described_class.enabled.should be_nil
+      described_class.enabled.should == nil
     end
 
     it "returns the enabled color scheme" do
+      described_class.hex_for_name('$primary_background_color').should == nil
       c = described_class.create(valid_params.merge(enabled: true))
       described_class.enabled.id.should == c.id
+      described_class.hex_for_name('$primary_background_color').should == "FFBB00"
     end
   end
 end

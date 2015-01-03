@@ -1,6 +1,10 @@
 class BadgeType < ActiveRecord::Base
-  has_many :badges
+  Gold = 1
+  Silver = 2
+  Bronze = 3
 
+
+  has_many :badges
   validates :name, presence: true, uniqueness: true
 end
 
@@ -10,8 +14,8 @@ end
 #
 #  id         :integer          not null, primary key
 #  name       :string(255)      not null
-#  created_at :datetime
-#  updated_at :datetime
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
 #
 # Indexes
 #

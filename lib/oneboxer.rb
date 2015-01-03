@@ -90,8 +90,7 @@ module Oneboxer
         # special logic to strip empty p elements
         if  element.parent &&
             element.parent.node_name.downcase == "p" &&
-            element.parent.children.count == 1 &&
-            parsed_onebox.children.first.name.downcase == "div"
+            element.parent.children.count == 1
           element = element.parent
         end
         changed = true
@@ -129,7 +128,7 @@ module Oneboxer
       }
     }
   rescue => e
-    Discourse.handle_exception(e, url: url)
+    Discourse.handle_exception(e, message: "While trying to onebox a URL", url: url)
     # return a blank hash, so rest of the code works
     {preview: "", onebox: ""}
   end

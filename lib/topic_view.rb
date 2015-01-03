@@ -11,8 +11,8 @@ class TopicView
 
   def initialize(topic_id, user=nil, options={})
     @user = user
-    @topic = find_topic(topic_id)
     @guardian = Guardian.new(@user)
+    @topic = find_topic(topic_id)
     check_and_raise_exceptions
 
     options.each do |key, value|
@@ -21,7 +21,7 @@ class TopicView
 
     @page = @page.to_i
     @page = 1 if @page.zero?
-    @limit ||= SiteSetting.posts_per_page
+    @limit ||= SiteSetting.posts_chunksize
 
     setup_filtered_posts
 
@@ -187,6 +187,13 @@ class TopicView
     read_posts_set.include?(post_number)
   end
 
+  def has_deleted?
+    @predelete_filtered_posts.with_deleted
+                             .where("posts.deleted_at IS NOT NULL")
+                             .where("posts.post_number > 1")
+                             .exists?
+  end
+
   def topic_user
     @topic_user ||= begin
       return nil if @user.blank?
@@ -195,7 +202,11 @@ class TopicView
   end
 
   def post_counts_by_user
-    @post_counts_by_user ||= Post.where(topic_id: @topic.id).group(:user_id).order('count_all desc').limit(24).count
+    @post_counts_by_user ||= Post.where(topic_id: @topic.id)
+                                 .group(:user_id)
+                                 .order("count_all DESC")
+                                 .limit(24)
+                                 .count
   end
 
   def participants
@@ -208,6 +219,10 @@ class TopicView
 
   def all_post_actions
     @all_post_actions ||= PostAction.counts_for(@posts, @user)
+  end
+
+  def all_active_flags
+    @all_active_flags ||= PostAction.active_flags_counts_for(@posts)
   end
 
   def links
@@ -278,10 +293,9 @@ class TopicView
   def filter_posts_by_ids(post_ids)
     # TODO: Sort might be off
     @posts = Post.where(id: post_ids, topic_id: @topic.id)
-                 .includes(:user)
-                 .includes(:reply_to_user)
+                 .includes(:user, :reply_to_user)
                  .order('sort_order')
-    @posts = @posts.with_deleted if @user.try(:staff?)
+    @posts = @posts.with_deleted if @guardian.can_see_deleted_posts?
     @posts
   end
 
@@ -300,23 +314,21 @@ class TopicView
 
   def find_topic(topic_id)
     finder = Topic.where(id: topic_id).includes(:category)
-    finder = finder.with_deleted if @user.try(:staff?)
+    finder = finder.with_deleted if @guardian.can_see_deleted_topics?
     finder.first
   end
 
   def unfiltered_posts
     result = @topic.posts
-    result = result.with_deleted if @user.try(:staff?)
+    result = result.with_deleted if @guardian.can_see_deleted_posts?
     result = @topic.posts.where("user_id IS NOT NULL") if @exclude_deleted_users
     result
   end
 
   def setup_filtered_posts
-
     # Certain filters might leave gaps between posts. If that's true, we can return a gap structure
     @contains_gaps = false
     @filtered_posts = unfiltered_posts
-    @filtered_posts = @filtered_posts.with_deleted if @user.try(:staff?)
 
     # Filters
     if @filter == 'summary'
@@ -329,9 +341,19 @@ class TopicView
       @contains_gaps = true
     end
 
+    # Username filters
     if @username_filters.present?
       usernames = @username_filters.map{|u| u.downcase}
-      @filtered_posts = @filtered_posts.where('post_number = 1 or user_id in (select u.id from users u where username_lower in (?))', usernames)
+      @filtered_posts = @filtered_posts.where('post_number = 1 OR posts.user_id IN (SELECT u.id FROM users u WHERE username_lower IN (?))', usernames)
+      @contains_gaps = true
+    end
+
+    # Deleted
+    # This should be last - don't want to tell the admin about deleted posts that clicking the button won't show
+    # copy the filter for has_deleted? method
+    @predelete_filtered_posts = @filtered_posts.spawn
+    if @guardian.can_see_deleted_posts? && !@show_deleted && has_deleted?
+      @filtered_posts = @filtered_posts.where("deleted_at IS NULL OR post_number = 1")
       @contains_gaps = true
     end
 
@@ -382,7 +404,7 @@ class TopicView
     closest_posts = filter_post_ids_by("@(post_number - #{post_number})")
     return nil if closest_posts.empty?
 
-    filtered_post_ids.index(closest_posts.first)
+    filtered_post_ids.index(closest_posts.first) || filtered_post_ids[0]
   end
 
 end

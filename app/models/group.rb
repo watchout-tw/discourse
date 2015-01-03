@@ -1,7 +1,7 @@
 class Group < ActiveRecord::Base
   include HasCustomFields
 
-  has_many :category_groups
+  has_many :category_groups, dependent: :destroy
   has_many :group_users, dependent: :destroy
 
   has_many :categories, through: :category_groups
@@ -21,11 +21,10 @@ class Group < ActiveRecord::Base
     :trust_level_1 => 11,
     :trust_level_2 => 12,
     :trust_level_3 => 13,
-    :trust_level_4 => 14,
-    :trust_level_5 => 15
+    :trust_level_4 => 14
   }
 
-  AUTO_GROUP_IDS = Hash[*AUTO_GROUPS.to_a.reverse]
+  AUTO_GROUP_IDS = Hash[*AUTO_GROUPS.to_a.flatten.reverse]
 
   ALIAS_LEVELS = {
     :nobody => 0,
@@ -35,7 +34,7 @@ class Group < ActiveRecord::Base
     :everyone => 99
   }
 
-  validate :alias_level, inclusion: { in: ALIAS_LEVELS.values}
+  validates :alias_level, inclusion: { in: ALIAS_LEVELS.values}
 
   def posts_for(guardian, before_post_id=nil)
     user_ids = group_users.map {|gu| gu.user_id}
@@ -71,10 +70,6 @@ class Group < ActiveRecord::Base
       group.save!
     end
 
-    # the everyone group is special, it can include non-users so there is no
-    # way to have the membership in a table
-    return group if name == :everyone
-
     group.name = I18n.t("groups.default_names.#{name}")
 
     # don't allow shoddy localization to break this
@@ -83,6 +78,41 @@ class Group < ActiveRecord::Base
       group.name = name
     end
 
+    # the everyone group is special, it can include non-users so there is no
+    # way to have the membership in a table
+    if name == :everyone
+      group.save!
+      return group
+    end
+
+    # Remove people from groups they don't belong in.
+    #
+    # BEWARE: any of these subqueries could match ALL the user records,
+    #         so they can't be used in IN clauses.
+    remove_user_subquery = case name
+                when :admins
+                  "SELECT u.id FROM users u WHERE NOT u.admin"
+                when :moderators
+                  "SELECT u.id FROM users u WHERE NOT u.moderator"
+                when :staff
+                  "SELECT u.id FROM users u WHERE NOT u.admin AND NOT u.moderator"
+                when :trust_level_0, :trust_level_1, :trust_level_2, :trust_level_3, :trust_level_4
+                  "SELECT u.id FROM users u WHERE u.trust_level < #{id - 10}"
+                end
+
+    remove_ids = exec_sql("SELECT gu.id id
+                             FROM group_users gu,
+                                  (#{remove_user_subquery}) u
+                            WHERE gu.group_id = #{group.id}
+                              AND gu.user_id = u.id").map {|x| x['id']}
+
+    if remove_ids.length > 0
+      remove_ids.each_slice(100) do |ids|
+        GroupUser.where(id: ids).delete_all
+      end
+    end
+
+    # Add people to groups
     real_ids = case name
                when :admins
                  "SELECT u.id FROM users u WHERE u.admin"
@@ -90,20 +120,16 @@ class Group < ActiveRecord::Base
                  "SELECT u.id FROM users u WHERE u.moderator"
                when :staff
                  "SELECT u.id FROM users u WHERE u.moderator OR u.admin"
-               when :trust_level_1, :trust_level_2, :trust_level_3, :trust_level_4, :trust_level_5
+               when :trust_level_1, :trust_level_2, :trust_level_3, :trust_level_4
                  "SELECT u.id FROM users u WHERE u.trust_level >= #{id-10}"
                when :trust_level_0
                  "SELECT u.id FROM users u"
                end
 
-
-    extra_users = group.users.where("users.id NOT IN (#{real_ids})").select('users.id')
     missing_users = GroupUser
       .joins("RIGHT JOIN (#{real_ids}) X ON X.id = user_id AND group_id = #{group.id}")
       .where("user_id IS NULL")
       .select("X.id")
-
-    group.group_users.where("user_id IN (#{extra_users.to_sql})").delete_all
 
     missing_users.each do |u|
       group.group_users.build(user_id: u.id)
@@ -246,22 +272,23 @@ class Group < ActiveRecord::Base
   def add(user)
     self.users.push(user)
   end
+
   protected
 
-  def name_format_validator
-    UsernameValidator.perform_validation(self, 'name')
-  end
-
-  # hack around AR
-  def destroy_deletions
-    if @deletions
-      @deletions.each do |gu|
-        gu.destroy
-        User.where('id = ? AND primary_group_id = ?', gu.user_id, gu.group_id).update_all 'primary_group_id = NULL'
-      end
+    def name_format_validator
+      UsernameValidator.perform_validation(self, 'name')
     end
-    @deletions = nil
-  end
+
+    # hack around AR
+    def destroy_deletions
+      if @deletions
+        @deletions.each do |gu|
+          gu.destroy
+          User.where('id = ? AND primary_group_id = ?', gu.user_id, gu.group_id).update_all 'primary_group_id = NULL'
+        end
+      end
+      @deletions = nil
+    end
 
 end
 
@@ -271,8 +298,8 @@ end
 #
 #  id          :integer          not null, primary key
 #  name        :string(255)      not null
-#  created_at  :datetime
-#  updated_at  :datetime
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
 #  automatic   :boolean          default(FALSE), not null
 #  user_count  :integer          default(0), not null
 #  alias_level :integer          default(0)

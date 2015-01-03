@@ -5,7 +5,14 @@ var deprecatedViewHelpers = {
   userSelector: 'user-selector',
   combobox: 'combo-box',
   categoryChooser: 'category-chooser',
-  chooseTopic: 'choose-topic'
+  chooseTopic: 'choose-topic',
+  'discourse-activity-filter': 'activity-filter'
+};
+
+var renamedHelpers = {
+  icon: "fa-icon",
+  date: "format-date",
+  age: "format-age"
 };
 
 export default {
@@ -15,12 +22,21 @@ export default {
       var newName = deprecatedViewHelpers[old];
       Ember.Handlebars.registerHelper(old, function(options) {
         Em.warn("The `" + old +"` helper is deprecated. Use `" + newName + "` instead.");
-        var helper = container.lookupFactory('view:' + newName);
+        var helper = container.lookupFactory('view:' + newName) || container.lookupFactory('component:' + newName);
         var hash = options.hash,
             types = options.hashTypes;
 
         Discourse.Utilities.normalizeHash(hash, types);
         return Ember.Handlebars.helpers.view.call(this, helper, options);
+      });
+    });
+
+    Ember.keys(renamedHelpers).forEach(function(old) {
+      var newName = renamedHelpers[old];
+      Ember.Handlebars.registerHelper(old, function() {
+        Em.warn("The `" + old +"` helper is deprecated. Use `" + newName + "` instead.");
+        var newHelper = container.lookupFactory('helper:' + newName);
+        return newHelper.apply(this, Array.prototype.slice.call(arguments));
       });
     });
   }

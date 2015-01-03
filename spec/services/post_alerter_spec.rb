@@ -20,7 +20,7 @@ describe PostAlerter do
     it "won't notify the user a second time on revision" do
       p1 = create_post_with_alerts(raw: '[quote="Evil Trout, post:1"]whatup[/quote]')
       lambda {
-        p1.revise(p1.user, '[quote="Evil Trout, post:1"]whatup now?[/quote]')
+        p1.revise(p1.user, { raw: '[quote="Evil Trout, post:1"]whatup now?[/quote]' })
       }.should_not change(evil_trout.notifications, :count)
     end
 
@@ -44,6 +44,11 @@ describe PostAlerter do
 
       user.reload
       user.notifications.count.should == 1
+
+      # don't notify on reflection
+      post1.reload
+      PostAlerter.new.extract_linked_users(post1).length.should == 0
+
     end
   end
 
@@ -62,7 +67,7 @@ describe PostAlerter do
     it "won't notify the user a second time on revision" do
       mention_post
       lambda {
-        mention_post.revise(mention_post.user, "New raw content that still mentions @eviltrout")
+        mention_post.revise(mention_post.user, { raw: "New raw content that still mentions @eviltrout" })
       }.should_not change(evil_trout.notifications, :count)
     end
 

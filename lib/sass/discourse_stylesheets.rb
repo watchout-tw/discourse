@@ -13,7 +13,7 @@ class DiscourseStylesheets
     @lock.synchronize do
       builder.compile unless File.exists?(builder.stylesheet_fullpath)
       builder.ensure_digestless_file
-      %[<link href="#{Rails.env.production? ? builder.stylesheet_relpath : builder.stylesheet_relpath_no_digest + '?body=1'}" media="screen" rel="stylesheet" />].html_safe
+      %[<link href="#{Rails.env.production? ? builder.stylesheet_relpath : builder.stylesheet_relpath_no_digest + '?body=1'}" media="all" rel="stylesheet" />].html_safe
     end
   end
 
@@ -107,7 +107,8 @@ class DiscourseStylesheets
   def digest
     @digest ||= begin
       theme = (cs = ColorScheme.enabled) ? "#{cs.id}-#{cs.version}" : 0
-      Digest::SHA1.hexdigest("#{RailsMultisite::ConnectionManagement.current_db}-#{theme}-#{DiscourseStylesheets.last_file_updated}")
+      category_updated = Category.last_updated_at
+      Digest::SHA1.hexdigest("#{RailsMultisite::ConnectionManagement.current_db}-#{theme}-#{DiscourseStylesheets.last_file_updated}-#{category_updated}")
     end
   end
 end

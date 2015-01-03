@@ -1,26 +1,32 @@
 class UserBadgesController < ApplicationController
   def index
-    params.permit(:username).permit(:granted_before)
+    params.permit [:granted_before, :offset]
 
-    if params[:username]
-      user = fetch_user_from_params
-      user_badges = user.user_badges
-    else
-      badge = fetch_badge_from_params
-      user_badges = badge.user_badges.order('granted_at DESC').limit(96)
-    end
+    badge = fetch_badge_from_params
+    user_badges = badge.user_badges.order('granted_at DESC, id DESC').limit(96)
+    user_badges = user_badges.includes(:user, :granted_by, badge: :badge_type, post: :topic)
 
-    if params[:granted_before]
-      user_badges = user_badges.where('granted_at < ?', Time.at(params[:granted_before].to_f))
-    end
-
-    user_badges = user_badges.includes(:user, :granted_by, badge: :badge_type)
-
-    if params[:grouped]
-      user_badges = user_badges.group(:badge_id).select(UserBadge.attribute_names.map {|x| "MAX(#{x}) as #{x}" }, 'COUNT(*) as count')
+    if offset = params[:offset]
+      user_badges = user_badges.offset(offset.to_i)
     end
 
     render_serialized(user_badges, UserBadgeSerializer, root: "user_badges")
+  end
+
+  def username
+    params.permit [:grouped]
+
+    user = fetch_user_from_params
+    user_badges = user.user_badges
+
+    if params[:grouped]
+      user_badges = user_badges.group(:badge_id)
+                               .select(UserBadge.attribute_names.map {|x| "MAX(#{x}) as #{x}" }, 'COUNT(*) as count')
+    end
+
+    user_badges = user_badges.includes(badge: [:badge_grouping, :badge_type])
+
+    render_serialized(user_badges, BasicUserBadgeSerializer, root: "user_badges")
   end
 
   def create
@@ -60,9 +66,9 @@ class UserBadgesController < ApplicationController
       params.permit(:badge_name)
       if params[:badge_name].nil?
         params.require(:badge_id)
-        badge = Badge.find_by(id: params[:badge_id])
+        badge = Badge.find_by(id: params[:badge_id], enabled: true)
       else
-        badge = Badge.find_by(name: params[:badge_name])
+        badge = Badge.find_by(name: params[:badge_name], enabled: true)
       end
       raise Discourse::NotFound.new if badge.blank?
 

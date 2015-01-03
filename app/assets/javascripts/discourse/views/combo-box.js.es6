@@ -8,6 +8,7 @@
 **/
 export default Discourse.View.extend({
   tagName: 'select',
+  attributeBindings: ['tabindex'],
   classNames: ['combobox'],
   valueAttribute: 'id',
 
@@ -33,13 +34,13 @@ export default Discourse.View.extend({
     }
 
     var selected = this.get('value');
-    if (selected) { selected = selected.toString(); }
+    if (!Em.isNone(selected)) { selected = selected.toString(); }
 
     if (this.get('content')) {
       var self = this;
       this.get('content').forEach(function(o) {
         var val = o[self.get('valueAttribute')];
-        if (val) { val = val.toString(); }
+        if (!Em.isNone(val)) { val = val.toString(); }
 
         var selectedText = (val === selected) ? "selected" : "";
         buffer.push("<option " + selectedText + " value=\"" + val + "\" " + self.buildData(o) + ">" + Handlebars.Utils.escapeExpression(Em.get(o, nameProperty)) + "</option>");
@@ -74,8 +75,8 @@ export default Discourse.View.extend({
   },
 
   willClearRender: function() {
-    var chosenId = "s2id_" + this.$().attr('id');
-    Ember.$("#" + chosenId).remove();
+    var elementId = "s2id_" + this.$().attr('id');
+    Ember.$("#" + elementId).remove();
   }
 
 });

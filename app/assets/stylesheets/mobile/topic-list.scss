@@ -27,25 +27,24 @@
 // Base list
 // --------------------------------------------------
 
-#topic-list {
+.topic-list {
+
+  > tbody > tr {
+    &:nth-child(odd) {
+      background-color: darken($secondary, 3%);
+      }
+    &:nth-child(even) {
+      background-color: $secondary;
+      }
+    &.highlighted {
+      background-color: scale-color($tertiary, $lightness: 85%);
+    }
+    }
+
   th,
   td {
     padding: 7px 5px;
     color: scale-color($primary, $lightness: 50%);
-    &:first-of-type {
-      padding-left: 5px;
-    }
-    &:last-of-type {
-      padding-right: 5px;
-    }
-  }
-  th {
-    &:first-of-type {
-      @include border-radius-all(4px 0 0 0);
-    }
-    &:last-of-type {
-      @include border-radius-all(0 4px 0 0);
-    }
   }
 
   a.title {color: $primary;}
@@ -53,7 +52,6 @@
 
   .badge-notification {
     position: relative;
-    padding: 4px 4px 4px 3px;
     top: -1px;
       i {color: $secondary;}
   }
@@ -65,19 +63,9 @@
   .topic-item-stats {
     .category, .num, .last-poster {
       float: left;
-      margin-right: 14px;
     }
     .num .fa {
       color: scale-color($primary, $lightness: 50%);
-    }
-    .fa-heart{
-      position: relative;
-      left: -1px;
-    }
-    .fa-comment{
-      position: relative;
-      top: -1px;
-      left: 1px;
     }
   }
 
@@ -87,13 +75,20 @@
 
   .age {
     white-space: nowrap;
+    a {
+      padding: 15px 10px 15px 5px;
+    }
   }
 }
 
 // Category list
 // --------------------------------------------------
 
-#topic-list.categories {
+tr.category-topic-link:nth-of-type(odd) {
+    background-color: darken($secondary, 3%) !important;
+    }
+
+.topic-list.categories {
   td.latest {
     vertical-align: top;
     padding: 5px;
@@ -134,12 +129,51 @@
 }
 
 .category-list-item {
+
+  .topic-list > tbody > tr {
+    &:nth-child(odd) {
+      background-color: $secondary;
+      }
+      &:nth-child(even) {
+        background-color: $secondary;
+      }
+    }
+
+  margin-bottom: 10px;
+
+  th .badge-category {
+    float: left;
+    margin: 1px 4px 0 0;
+    font-size: 110%;
+  }
+
+
   .posters {
-    display: none;
+    float: left;
+  }
+  > footer {
+    border-top: 0;
+    padding: 7px 10px;
+    figure {
+      float: left;
+      margin: 3px 7px 0 0;
+      color: scale-color($primary, $lightness: 10%);
+      font-weight: bold;
+      font-size: 12px;
+    }
+    figcaption {
+      display: inline;
+      font-weight: normal;
+    }
+    .btn {
+      float: right;
+      margin-left: 7px;
+    }
   }
 }
 
-#topic-list-bottom {
+
+.topic-list-bottom {
   margin: 20px 12px 0 12px;
 }
 
@@ -148,9 +182,6 @@
 // --------------------------------------------------
 
 .list-controls {
-  .badge-category {
-    margin-top: 6px;
-  }
   .category-dropdown-button {
     padding: 4px 10px 4px 8px;
   }
@@ -221,8 +252,9 @@
 }
 .fade {
   opacity: 0;
-  -webkit-transition: opacity 0.15s linear;
-  transition: opacity 0.15s linear;
+  transition: opacity linear .15s;
+  -webkit-transition: opacity linear .15s;
+
 }
 .fade.in {
   opacity: 1;
@@ -236,12 +268,11 @@ ol.category-breadcrumb {
 
 .category-dropdown-menu {
   height: 200px;
-  padding: 8px 5px 0 7px;
   margin-top: 31px;
 
   a.badge-category {
-    line-height: 26px;
-    padding: 0 8px;
+    line-height: 26px !important;
+    margin-bottom: 0 !important;
   }
 
   div {
@@ -249,12 +280,41 @@ ol.category-breadcrumb {
   }
 }
 
-.top-lists {margin-left: 15px;
-  #topic-list-bottom {
-    margin: 20px 0 0 0;
-  }
+.top-lists {
+  h2 { margin-left: 10px; }
+  .topic-list { padding-bottom: 10px; }
+  .btn-default.pull-right { margin-right: 10px; }
 }
 
 .category-notification-menu {
   display: none;
+}
+
+.topic-list-bottom h3 {
+  clear:both;
+  padding-top:10px;
+}
+
+.category-logo {
+  display: block;
+  max-width: 100%;
+  padding: 8px 0;
+}
+
+.period-chooser {
+  button {
+    margin-top: 10px;
+  }
+}
+
+button.dismiss-read {
+  margin-right: 10px;
+}
+
+// base defines extra padding for easier click/top of title field
+// this is a bit too much for mobile
+td.main-link {
+  a.title {
+    padding: 5px 10px 5px 0;
+  }
 }

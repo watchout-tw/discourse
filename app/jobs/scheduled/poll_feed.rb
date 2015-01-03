@@ -42,10 +42,14 @@ module Jobs
 
     class Feed
       require 'simple-rss'
-      SimpleRSS.item_tags << SiteSetting.embed_username_key_from_feed.to_sym
+
+      if SiteSetting.embed_username_key_from_feed.present?
+        SimpleRSS.item_tags << SiteSetting.embed_username_key_from_feed.to_sym
+      end
 
       def initialize
         @feed_url = SiteSetting.feed_polling_url
+        @feed_url = "http://#{@feed_url}" if @feed_url !~ /^https?\:\/\//
       end
 
       def topics

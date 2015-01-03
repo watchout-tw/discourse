@@ -15,15 +15,22 @@
         display: block;
         span.username {
           color: darken($primary, 40%);
+          display: inline-block;
         }
         span.name {
           font-size: 11px;
+          display: inline-block;
+          width: 90px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          vertical-align: middle;
         }
         &.selected {
-          background-color: lighten($highlight, 23%);
+          background-color: dark-light-diff($tertiary, $secondary, 90%, -60%);
         }
         @include hover {
-          background-color: lighten($highlight, 23%);
+          background-color: dark-light-diff($highlight, $secondary, 90%, -80%);
           text-decoration: none;
         }
       }
@@ -86,18 +93,26 @@ div.ac-wrap {
   display: none;
 }
 
-
 .auto-close-fields {
+  div:not(:first-child) {
+    margin-top: 10px;
+  }
+  label {
+    font-size: 14px;
+  }
   input {
+    text-align: center;
     width: 150px;
   }
   .examples {
-    margin: 10px 0 0 0;
-    color: $primary;
+    color: lighten($primary, 40%);
   }
 }
 
 .edit-auto-close-modal {
+  .btn.pull-right {
+    margin-right: 10px;
+  }
   form {
     margin: 0;
   }
@@ -111,3 +126,28 @@ div.ac-wrap {
     }
   }
 }
+
+.edit-category-modal {
+  .auto-close-fields {
+    input[type=text] {
+      width: 50px;
+    }
+  }
+}
+
+#reply-control {
+  .spinner {
+    position: absolute;
+    @include fades-in(0.25s);
+    left: 45%;
+    top: 20%;
+  }
+  &.loading {
+    .spinner {
+      z-index: 1000;
+      @include visible;
+    }
+  }
+
+}
+

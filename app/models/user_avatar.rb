@@ -34,7 +34,7 @@ class UserAvatar < ActiveRecord::Base
     # skip saving, we are not connected to the net
     Rails.logger.warn "Failed to download gravatar, socket error - user id #{ user.id }"
   ensure
-    tempfile.unlink if tempfile
+    tempfile.close! if tempfile && tempfile.respond_to?(:close!)
   end
 
 end
@@ -48,8 +48,8 @@ end
 #  custom_upload_id               :integer
 #  gravatar_upload_id             :integer
 #  last_gravatar_download_attempt :datetime
-#  created_at                     :datetime
-#  updated_at                     :datetime
+#  created_at                     :datetime         not null
+#  updated_at                     :datetime         not null
 #
 # Indexes
 #

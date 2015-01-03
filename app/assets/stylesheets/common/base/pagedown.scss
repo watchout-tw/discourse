@@ -45,7 +45,6 @@
   position: relative;
   border: 0;
   float: left;
-
   font-family: FontAwesome;
   font-weight: normal;
   font-style: normal;
@@ -58,7 +57,7 @@
   background-image: none !important;
   background-position: 0 0;
   background-repeat: repeat;
-  background-color: white;
+  background: transparent;
   padding: 4px;
 }
 
@@ -125,7 +124,8 @@
 }
 
 .wmd-prompt-background {
-  background-color: $primary;
+  background-color: #111;
+  box-shadow: 0 3px 7px rgba(0,0,0, .8);
 }
 
 .wmd-prompt-dialog {

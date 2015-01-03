@@ -10,9 +10,8 @@ body {
 
   .boxed {
     height: 100%;
-    @include border-radius-all(5px);
     .contents {
-      padding: 10px 10px 10px 10px;
+      padding: 10px;
     }
     &.white {
       background-color: $secondary;
@@ -24,10 +23,10 @@ body {
     }
     a.star {
       display: inline-block;
-      font-size: 15px;
-      line-height: 1;
+      font-size: 20px;
       color: scale-color($primary, $lightness: 75%);
-      margin-right: 3px;
+      margin-right: 8px;
+      margin-top: 4px;
       &:before {
         font-family: "FontAwesome";
         content: "\f005";
@@ -73,8 +72,6 @@ body {
       }
     }
   }
-
-
 }
 
 blockquote {
@@ -90,14 +87,33 @@ blockquote {
 
 .topic-statuses {
   display: inline-block;
-  margin: 0;
-  padding: 0;
+  vertical-align: middle;
   .topic-status {
-    margin: 0;
-    display: inline-block;
     i {
-      font-size: 15px;
+      font-size: 20px;
       color: darken($secondary, 60%);
     }
   }
+}
+.topic-statuses:empty {
+  display: none;
+}
+
+// Styles used before the user is logged into discourse. For example, activating their
+// account or changing their email.
+
+#simple-container {
+  width: 90%;
+}
+
+// if the logo is text, it can't be too big or small width devices have issues
+h2#site-text-logo
+{
+  max-width: 135px;
+  max-height: 1em;
+  overflow: hidden;
+  padding: 0;
+  margin: 5px 0 0 0;
+  text-overflow: clip;
+  white-space: nowrap;
 }

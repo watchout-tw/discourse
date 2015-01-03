@@ -22,9 +22,26 @@ module CategoryGuardian
 
   def can_delete_category?(category)
     can_edit_category?(category) &&
-    category.topic_count == 0 &&
+    category.topic_count <= 0 &&
     !category.uncategorized? &&
     !category.has_children?
+  end
+
+  def cannot_delete_category_reason(category)
+    return I18n.t('category.cannot_delete.uncategorized') if category.uncategorized?
+    return I18n.t('category.cannot_delete.has_subcategories') if category.has_children?
+
+    if category.topic_count != 0
+      oldest_topic = category.topics.where.not(id: category.topic_id).order('created_at ASC').limit(1).first
+      if oldest_topic
+        return I18n.t('category.cannot_delete.topic_exists', {count: category.topic_count, topic_link: "<a href=\"#{oldest_topic.url}\">#{oldest_topic.title}</a>"})
+      else
+        # This is a weird case, probably indicating a bug.
+        return I18n.t('category.cannot_delete.topic_exists_no_oldest', {count: category.topic_count})
+      end
+    end
+
+    nil
   end
 
   def can_see_category?(category)

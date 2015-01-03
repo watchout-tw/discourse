@@ -15,11 +15,14 @@ describe Upload do
   let(:user_id) { 1 }
   let(:url) { "http://domain.com" }
 
-  let(:image_path) { "#{Rails.root}/spec/fixtures/images/logo.png" }
-  let(:image) { File.new(image_path) }
-  let(:image_filename) { File.basename(image_path) }
-  let(:image_filesize) { File.size(image_path) }
+  let(:image_filename) { "logo.png" }
+  let(:image) { file_from_fixtures(image_filename) }
+  let(:image_filesize) { File.size(image) }
   let(:image_sha1) { Digest::SHA1.file(image).hexdigest }
+
+  let(:image_svg_filename) { "image.svg" }
+  let(:image_svg) { file_from_fixtures(image_svg_filename) }
+  let(:image_svg_filesize) { File.size(image_svg) }
 
   let(:attachment_path) { __FILE__ }
   let(:attachment) { File.new(attachment_path) }
@@ -48,10 +51,17 @@ describe Upload do
 
   context "#create_for" do
 
+    before { Upload.stubs(:fix_image_orientation) }
+
     it "does not create another upload if it already exists" do
       Upload.expects(:find_by).with(sha1: image_sha1).returns(upload)
       Upload.expects(:save).never
       Upload.create_for(user_id, image, image_filename, image_filesize).should == upload
+    end
+
+    it "fix image orientation" do
+      Upload.expects(:fix_image_orientation).with(image.path)
+      Upload.create_for(user_id, image, image_filename, image_filesize)
     end
 
     it "computes width & height for images" do
@@ -88,6 +98,27 @@ describe Upload do
       upload.width.should == 244
       upload.height.should == 66
       upload.url.should == url
+    end
+
+    context "when svg is authorized" do
+
+      before { SiteSetting.stubs(:authorized_extensions).returns("svg") }
+
+      it "consider SVG as an image" do
+        store = {}
+        Discourse.expects(:store).returns(store)
+        store.expects(:store_upload).returns(url)
+
+        upload = Upload.create_for(user_id, image_svg, image_svg_filename, image_svg_filesize)
+
+        upload.user_id.should == user_id
+        upload.original_filename.should == image_svg_filename
+        upload.filesize.should == image_svg_filesize
+        upload.width.should == 100
+        upload.height.should == 50
+        upload.url.should == url
+      end
+
     end
 
   end

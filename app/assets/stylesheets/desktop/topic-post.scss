@@ -1,24 +1,3 @@
-.gap {
-  background-color: scale-color-diff();
-  padding: 5px 0;
-  color: lighten($primary, 35%);
-  cursor: pointer;
-  text-align: center;
-  width: 80%;
-
-  &:hover {
-    background-color: scale-color-diff();
-  }
-
-  @include medium-width {
-    width: 795px;
-  }
-
-  @include small-width {
-    width: 815px;
-  }
-}
-
 .container {
   @extend .clearfix;
   max-width: $large-width;
@@ -32,6 +11,7 @@
 
 h1 .topic-statuses .topic-status i {
   font-size: 20px;
+  vertical-align: middle;
 }
 
 .logo-small {
@@ -51,41 +31,38 @@ h1 .topic-statuses .topic-status i {
 
 .reply-to-tab {
   position: absolute;
-  right: 430px;
+  right: 420px;
   z-index: 400;
   padding: 13px 6px 5px;
-  border-top: 1px solid scale-color-diff();
   font-size: 12px;
   color: scale-color($primary, $lightness: 50%);
-  @include medium-width {
-    right: 320px;
-  }
-  @include small-width {
-    right: 280px;
-  }
+
+}
+
+.via-email .reply-to-tab {
+  padding: 13px 15px 5px;
 }
 
 .gutter {
   .reply-new {
     .discourse-no-touch & {
      opacity:0;
-     transition: opacity linear 0.4s;
-     -webkit-transition: opacity linear 0.4s;
+     @include transition(opacity linear 0.4s);
+
     }
     .discourse-touch & {opacity: 1;}
   }
 }
 
-section.post-menu-area, .post-actions {
+div.actions, .post-actions {
     .discourse-no-touch & {
       opacity: 0.2;
-       transition: opacity linear 0.4s;
-    -webkit-transition: opacity linear 0.4s;
+      @include transition(opacity linear 0.4s);
     }
     .discourse-touch & {opacity: 1;}
   }
 
-  &:hover section.post-menu-area, &:hover .post-actions {
+  &:hover div.actions, &:hover .post-actions {
     opacity: 1;
 
   }
@@ -111,7 +88,8 @@ nav.post-controls {
 
   span.badge-posts {
     margin-right: 5px;
-    transition: all linear 0.15s;
+    @include transition(all linear 0.15s);
+
   }
 
   .actions {
@@ -125,13 +103,13 @@ nav.post-controls {
   }
 
   .show-replies {
-    background: scale-color-diff();
+    background: dark-light-diff($primary, $secondary, 90%, -65%);
     padding: 8px 15px;
     padding-bottom: 20px;
     margin-left: 0;
     span.badge-posts {color: scale-color($primary, $lightness: 60%);}
     &:hover {
-      background: scale-color-diff();
+      background: dark-light-diff($primary, $secondary, 90%, -65%);
       span.badge-posts {color: $primary;}
     }
     i {
@@ -142,17 +120,17 @@ nav.post-controls {
   button.create {
     margin-right: 0;
     color: $tertiary;
-    background: scale-color($tertiary, $lightness: 90%);
+    background: dark-light-diff($tertiary, $secondary, 90%, -65%);
     padding: 8px 20px;
     margin-left: 10px;
 
     &:hover {  color: $secondary;
-      background: $tertiary;
+      background: dark-light-diff($tertiary, $secondary, 0%, -20%)
     }
 
     &:active {
-      background: scale-color($tertiary, $lightness: 50%);
-    @include box-shadow(inset 0 1px 3px rgba($primary, .3));
+      background: dark-light-diff($tertiary, $secondary, 50%, -35%);
+    box-shadow: inset 0 1px 3px rgba(0,0,0, .3);
 
     }
 
@@ -169,14 +147,14 @@ nav.post-controls {
     background: transparent;
     border: none;
     margin-left: 3px;
-    transition: all linear 0.15s;
+    @include transition(all linear 0.15s);
          &:hover {
           background: scale-color-diff();
           color: $primary;
         }
 
         &:active {
-            @include box-shadow(inset 0 1px 3px rgba($primary, .4));
+            box-shadow: inset 0 1px 3px rgba(0,0,0, .4);
         }
 
         &.hidden {
@@ -191,8 +169,14 @@ nav.post-controls {
           color: $secondary;
         }
 
-        &.like:hover {color: $love;
-          background: scale-color($love, $lightness: 75%);
+        &.like:hover {
+          color: $love;
+          background: dark-light-diff($love, $secondary, 85%, -60%)
+        }
+
+        &.has-like {color: $love;}
+        &.has-like[disabled]:hover {
+          background: transparent;
         }
 
         &.bookmark {padding: 8px 11px; }
@@ -206,9 +190,6 @@ nav.post-controls {
             &:before {
               content: "\f097";
             }
-          }
-          &.last-read {
-            color: $danger;
           }
           &.bookmarked {
             &:before {
@@ -225,8 +206,8 @@ nav.post-controls {
     border: 1px solid scale-color-diff();
     position: absolute;
     text-align: left;
-    bottom: 0;
-    right: 0;
+    bottom: -2px;
+    right: 15px;
     z-index: 1000;
     display: none;
 
@@ -254,44 +235,62 @@ nav.post-controls {
 }
 
 .embedded-posts {
-  h1, h2, h3 {margin: 10px 0;}
-  a.mention {background: darken(scale-color-diff(), 10%);}
+  background: dark-light-diff($primary, $secondary, 90%, -65%) !important;
 
-  .topic-body { width: 610px; border: none; }
+  h1, h2, h3 { margin: 10px 0; }
+  a.mention { background: darken(scale-color-diff(), 10%); }
+
+  .topic-body {
+    background: dark-light-diff($primary, $secondary, 90%, -65%) !important;
+    width: 87%;
+    padding-left: 1%;
+    padding-right: 1%;
+    border-top: none;
+    // WARNING: overflow hide is required for quoted / embedded images
+    // which expect "normal" post width, but expansions are narrower
+    overflow: hidden;
+  }
+
+  .topic-avatar {
+     width: 45px;
+     margin: 0 5px 0 15px;
+     border: none;
+  }
 
   // bottom means "reply expansion" below a post
   &.bottom {
-    &.hidden {display: block; opacity: 0; }
+    &.hidden {
+      display: block;
+      opacity: 0;
+    }
   }
-  &.bottom .arrow {float: right; margin: 0 0 0 0;}
-  &.bottom { margin-top: -11px;}
+  &.bottom .arrow { float: right; }
+  &.bottom {
+    margin-top: -11px;
+  }
 
   // top means "in reply to expansion" above a post
   &.top {
-    margin-left: 66px;
-    max-width: 713px;
-    @include medium-width {
-    margin-left: 59px;
-    }
-    @include small-width {
-    margin-left: 57px;
-    max-width: 720px;
-    }
+    margin-left: 56px;
+    width: 701px;
   }
-  &.top.topic-body {padding-left: 0;}
-    .topic-avatar {border: none; padding-left: 15px;}
-    .post-date {color: scale-color($primary, $lightness: 50%);}
-    .fa-arrow-up {margin-left: 5px;}
-    .row {border-top: 1px solid darken(scale-color-diff(), 10%); padding-top: 7px;}
-    .reply:first-of-type .row {border-top: none;}
-    .quote {margin-top: 0 !important;}
-  background: scale-color-diff();
+  &.top.topic-body {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .post-date { color: scale-color($primary, $lightness: 50%); }
+  .fa-arrow-up { margin-left: 5px; }
+  .row {
+    border-top: 1px solid darken(scale-color-diff(), 10%);
+    padding-top: 7px;
+  }
+  .reply:first-of-type .row { border-top: none; }
 
   .quote .title, blockquote, .onebox, .onebox-result {
     background: darken(scale-color-diff(), 5%);
     border-left: 5px solid darken(scale-color-diff(), 12%);
   }
-
 
   .topic-meta-data {
     position: relative;
@@ -309,14 +308,12 @@ nav.post-controls {
 }
 
 .bottom-round nav.post-controls .show-replies {
-background: scale-color-diff();
-margin-bottom: 0;
-padding-bottom: 8px;
+  background: scale-color-diff();
+  margin-bottom: 0;
+  padding-bottom: 8px;
   &:hover {background: scale-color-diff();
   }
 }
-
-
 
 .post-action {
   .relative-date {
@@ -330,20 +327,12 @@ a.star {
   float: left;
 }
 
-#main a.star.starred {
-  text-shadow: none !important;
-}
-
 .topic-map {
   margin: 20px 0 0 0;
-  background: scale-color(scale-color-diff(), $lightness: 40%);
+  background: dark-light-diff($primary, $secondary, 90%, -65%);
 
   .buttons .btn {
     &:hover {border: 1px solid $primary !important;}
-  }
-
-  .topic-links li {
-    word-wrap: break-word;
   }
 
   h3 {
@@ -353,12 +342,11 @@ a.star {
   }
 
   h4 {
-    margin: 0 0 3px 0;
+    margin: 1px 0 2px 0;
     color: scale-color($primary, $lightness: 50%);
     font-weight: normal;
     font-size: 12px;
     line-height: 15px;
-    text-transform: lowercase;
   }
 
   p,
@@ -376,8 +364,6 @@ a.star {
     color: scale-color($primary, $lightness: 50%);
   }
 
-
-
   .avatars {
     > div {
       float: left;
@@ -392,7 +378,13 @@ a.star {
       font-weight: normal;
       font-size: 11px;
       line-height: 14px;
-          }
+    }
+  }
+
+  /* in expanded avatar view, limit to one line for now */
+  .avatars.clearfix {
+    height: 25px;
+    overflow: hidden;
   }
 
   .avatar {
@@ -401,12 +393,14 @@ a.star {
   }
 
   .map {
+    .secondary {text-align: center;}
     li {
       float: left;
-      padding: 7px 11px;
+      padding: 7px 10px;
       &:last-of-type {
         border-right: 0;
       }
+      &:nth-child(3) { text-align:center; }
     }
     a, .number {
       line-height: 20px;
@@ -421,38 +415,41 @@ a.star {
   .avatars,
   .links,
   .information {
-    padding: 7px 14px;
+    padding: 7px 10px 15px 10px;
     color: $primary;
   }
   .information {
     border-top: 2px solid scale-color-diff();
   }
 
-.participants { // PMs //
-  .user {float: left; margin: 7px 20px 7px 0;}
-}
+  .participants { // PMs //
+    .user {float: left; margin: 7px 20px 7px 0;}
+  }
 
   .topic-links {
-    li > a {
-      margin-left: 5px;
-    }
     .badge-notification {
-      margin: 0 0 4px;
+      margin: 1px 5px 5px 0;
     }
   }
+
+  td {
+    vertical-align: top;
+    padding:1px;
+  }
+
   .buttons {
     float: right;
     .btn {
       border: 0;
-      border-bottom: 1px solid scale-color-diff();
+      border-bottom: 1px solid dark-light-diff($primary, $secondary, 80%, -75%);
       padding: 0 23px;
       color: $primary;
-      background: scale-color-diff();
+      background: dark-light-diff($primary, $secondary, 80%, -75%);
       &:hover {
-        background: scale-color($primary, $lightness: 75%);
+        background: dark-light-diff($primary, $secondary, 65%, -85%);
         color: $primary;
         border: none !important;
-        border-bottom: 1px solid scale-color($primary, $lightness: 75%) !important;
+        border-bottom: 1px solid dark-light-diff($primary, $secondary, 65%, -85%) !important;
         span.badge-posts {color: $primary;}
       }
 
@@ -476,6 +473,7 @@ a.star {
     color: $primary;
   }
   .btn {
+    outline: 0;
     margin-bottom: 5px;
     margin-right: 10px;
     .fa-star {margin-right: 5px;}
@@ -485,10 +483,15 @@ a.star {
 #suggested-topics {
   clear: left;
   padding: 20px 0 15px 0;
-  #topic-list > tbody > tr:nth-child(even) {
-    background-color: darken($secondary, 3%);
-  }
-  #topic-list > tbody > tr:nth-child(odd) {
+  .topic-list {
+    > tbody > tr {
+      &:nth-child(odd) {
+          background-color: darken($secondary, 3%);
+      }
+      &:nth-child(even) {
+          background-color: $secondary;
+      }
+    }
   }
   table {
     box-shadow: none;
@@ -511,20 +514,6 @@ button.expand-post {
   margin-top: 10px;
 }
 
-.quote-button {
-  display: none;
-  position: absolute;
-  background-color: scale-color($primary, $lightness: 50%);
-  color: $secondary;
-  padding: 10px;
-  z-index: 401;
-
-  &:hover {
-    background-color: scale-color($primary, $lightness: 40%);
-    cursor: pointer;
-  }
-}
-
 .quote-button.visible {
   display: block;
 }
@@ -533,65 +522,90 @@ iframe {
   max-width: 100%;
 }
 
+@keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+@-webkit-keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
 .extra-info-wrapper {
-  float: left;
-  width: 78%;
-  max-width: 800px;
+  overflow: hidden;
+
+.star, .badge-wrapper, i,  .topic-link:not(.loading) {
+  -webkit-animation: fadein .7s;
+  animation-duration: .7s;
+  animation-name: fadein;
+}
+
   .topic-statuses {
-    i         { color: $header_primary; }
+    i  { color: $header_primary; }
+    i.fa-envelope { color: $danger; }
     .unpinned { color: $header_primary; }
   }
-  .topic-link { color: $header_primary; }
+
+  .topic-link {
+    color: $header_primary;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
-
-@include medium-width {
-  .extra-info-wrapper {
-  max-width: 740px;
-}
-}
-
-
-@include small-width {
-    .extra-info-wrapper {
-  max-width: 680px;
-}
-}
-
+/* default docked header CSS for all topics, including those without categories */
 .extra-info {
   h1 {
     margin: 5px 0 0 0;
-    font-size: 1.8em;
-    line-height: 1.2em;
+    font-size: 1.6em;
+    line-height: 1.3em;
   }
 
   a.star {
-    margin-right: 7px;
-    font-size: 20px;
-    margin-top: 6px;
+    margin: 0 7px 20px 2px;
+    font-size: 17px;
+    color: dark-light-diff($secondary, $primary, 80%, -20%) !important;
   }
+  a.star.starred {color: $danger !important;}
 
   .topic-statuses {
     margin-top: -2px;
   }
 
-  .badge-category {
-    vertical-align: top;
-    margin-top: 2px;
+  .badge-wrapper {
+    margin: 0 0 0 2px;
+    padding: 0;
+
+    .badge-category {
+      color: $header_primary;
+      padding: 0 0 0 3px;
+      margin-right: 5px;
+    }
+
+    .badge-category-parent {
+      margin: 0;
+      padding: 0px 1px;
+    }
   }
 
 }
+
+/* override docked header CSS for topics with categories */
+.extra-info.has-category {
+  h1 {
+    line-height: 1.1em;
+    margin: 0 0 2px 0;
+  }
+}
+
 
 .open >.dropdown-menu {
   display: block;
 }
 
-.dropdown-menu li  {
-  margin: 5px 0;
-}
-
 .btn-group {
-  margin-top: 25px;
   position: relative;
 }
 
@@ -600,20 +614,11 @@ iframe {
   position: relative;
 }
 
-.contents .cooked a {
-  word-wrap: break-word;
+a.mention {
+  padding: 2px 4px;
+  color: $primary;
+  background: scale-color-diff();
 }
-
-.contents .cooked {
-  word-wrap: break-word;
-  h1, h2, h3, h4, h5, h6 { margin: 30px 0 10px; }
-}
-
-  a.mention {
-    padding: 2px 4px;
-    color: $primary;
-    background: scale-color-diff();
-  }
 
 
 .modal-body {
@@ -622,40 +627,21 @@ iframe {
   }
 }
 
-.post-hidden {
-  opacity: 0.5;
-}
-
 .moderator {
   .topic-body {
-    background-color: scale-color($highlight, $lightness: 75%);
+    background-color: dark-light-diff($highlight, $secondary, 70%, -80%);
   }
 }
 
 .deleted {
   .topic-body {
-  background-color: scale-color($danger, $lightness: 75%);
+    background-color: dark-light-diff(rgba($danger,.7), $secondary, 50%, -60%);
   }
 }
 
 #share-link {
   width: 365px;
   margin-left: -4px;
-
-  h3 {
-    margin: 5px 0;
-    float: left;
-  }
-
-  .date {
-    float: right;
-    margin: 5px;
-  }
-
-  input[type=text] {
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
 }
 
 .post-select {
@@ -685,31 +671,31 @@ iframe {
 }
 
 
-blockquote { /* solo quotes */
-  margin: 0;
+/* solo quotes */
+blockquote {
+  /* leave browser defaults for top and bottom here */
+  margin-left: 0;
+  margin-right: 0;
   padding: 12px;
-
-    a.mention {background: darken(scale-color-diff(), 10%);}
-    p:first-of-type {margin-top: 0;}
-    p:last-of-type {margin-bottom: 0;}
+  a.mention {background: darken(scale-color-diff(), 10%);}
 }
 
-.quote { /* quotes with attribution */
+// we assume blockquotes have their own margins, so all blockquotes
+// will remove margins from first (top) and last (bottom) child elements
+blockquote > *:first-child {
+  margin-top: 0 !important;
+}
+blockquote > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+
+/* quotes with attribution */
+.quote {
   &>blockquote {
-      margin-top: 0;
-      padding-top: 0;
-      p:first-of-type {margin:0;}
     .onebox-result {
       background-color: scale-color-diff();
     }
-  }
-
-  .title {
-    border-left: 5px solid darken(scale-color-diff(), 10%);
-    background-color: scale-color-diff();
-    padding: 12px;
-  .avatar { margin-right: 7px; }
-  img { margin-top: -4px; }
   }
 
   aside {
@@ -725,53 +711,43 @@ blockquote { /* solo quotes */
 
 }
 
-.quote-controls {
-  float: right;
-  color: scale-color($primary, $lightness: 50%);
-  a {
-  margin: 0;
-  }
-    .back:before,
-    .quote-other-topic:before {
-    display: inline-block;
-    margin-left: 8px;
-    color: scale-color($primary, $lightness: 50%);
-    font-family: "FontAwesome";
-    position: relative;
-    z-index: 20;
-    }
-    .back:before {
-    content: "\f062";
-    }
-    .quote-other-topic:before {
-    content: "\f061";
-    }
-}
+
 
 .gutter {
-  float: left;
-  width: 19%;
-  margin-top: 15px;
-  padding-left: 15px;
+  margin-top: 13px;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1;
+  padding-left: 757px;
 
   ul {margin: 0;}
   li {margin-bottom: 10px;}
   i {font-size: 12px;}
 
+  .reply-new {
+    padding-left: 27px;
+    display:block;
+    overflow:hidden;
+  }
+
+  .track-link {
+    padding-left: 10px;
+    display: block;
+    overflow: hidden;
+    }
+
   .post-links {
     list-style-type: none;
-    padding-left: 19px;
     position: relative;
-    margin-left: 5px;
     line-height: 18px;
+    word-wrap: break-word;
     a i {
-      position: absolute;
-      left: 0;
-      margin-right: 15px;
-      margin-bottom: 20px;
-      margin-top: 2px;
+      position: relative;
+      margin-right: 7px;
+      margin-top: -2px;
+      margin-left: -17px;
     }
-    a.track-link {color: scale-color($primary, $lightness: 50%);}
+
     a.toggle-more {
       display: block;
       text-align: right;
@@ -780,41 +756,43 @@ blockquote { /* solo quotes */
   }
 }
 
+// variables are used to calculate the width of .gap
+$topic-body-width: 690px;
+$topic-body-width-padding: 11px;
+$topic-avatar-width: 45px;
 .topic-body {
-  width: 695px;
+  width: $topic-body-width;
   float: left;
   position: relative;
-  border-top: 1px solid scale-color-diff();
-  padding: 12px 0 15px 0;
+  z-index: 2;
+  border-top: 1px solid dark-light-diff($primary, $secondary, 90%, -75%);
+  padding: 12px $topic-body-width-padding 15px $topic-body-width-padding;
   &.highlighted {
-    background-color: scale-color($tertiary, $lightness: 85%);
-  }
-  img:not(.avatar), svg {
-    max-width: 100%;
+    background-color: dark-light-diff($tertiary, $secondary, 90%, -40%);
+
   }
 }
 .topic-avatar {
- border-top: 1px solid scale-color-diff();
- padding-top: 16px;
- width: 55px;
- float: left;
+  border-top: 1px solid dark-light-diff($primary, $secondary, 90%, -75%);
+  padding-top: 16px;
+  width: $topic-avatar-width;
+  float: left;
+  position: relative;
+  z-index: 2;
+}
 
- .wiki {
-   margin-top: 14px;
-   color: scale-color($primary, $lightness: 60%);
-   margin-left: 5px;
- }
+.gap {
+  background-color: scale-color-diff();
+  padding: 5px 0;
+  color: lighten($primary, 30%);
+  cursor: pointer;
+  text-align: center;
+  width: calc(#{$topic-avatar-width} + #{$topic-body-width} + 2 * #{$topic-body-width-padding});
 }
 
 .posts-wrapper {
   position: relative;
 }
-
-.row:before, .row:after {
-  display: table;
-  content: "";
-}
-.row:after {clear: both;}
 
 .dropdown {
   position: relative;
@@ -838,23 +816,23 @@ blockquote { /* solo quotes */
   display: none;
   float: left;
   width: 550px;
-  padding: 4px 0;
   margin: 1px 0 0;
   list-style: none;
   background-color: $secondary;
   border: 1px solid scale-color-diff();
-  box-shadow: 0 1px 5px rgba($primary, .4);
+  box-shadow: 0 1px 5px rgba(0,0,0, .4);
   background-clip: padding-box;
   span {font-size: 12px;}
-.title {font-weight: bold; display: block; font-size: 14px;}
+  .title {font-weight: bold; display: block; font-size: 14px;}
 }
 .dropdown-menu a {
   display: block;
-  padding: 3px 9px;
+  padding: 9px;
   clear: both;
   font-weight: normal;
   line-height: 18px;
   color: $primary;
+  @include transition(all linear .15s);
 
   & > div {
     margin-left: 26px;
@@ -863,16 +841,17 @@ blockquote { /* solo quotes */
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a,
 .dropdown-menu .active > a:hover {
-  color: $tertiary;
+  color: $primary;
   text-decoration: none;
-  background-color: scale-color($tertiary, $lightness: 90%);
+  background-color: dark-light-diff($highlight, $secondary, 50%, -70%);
+
 }
 
 .dropdown-menu .disabled > a,
 .dropdown-menu .disabled > a:hover {
   text-decoration: none;
   color: $primary;
-  background-color: scale-color($highlight, $lightness: 25%);
+  background-color: dark-light-diff($tertiary, $secondary, 90%, -60%);
   cursor: default;
 }
 
@@ -887,16 +866,6 @@ blockquote { /* solo quotes */
   clear: both;
 }
 
-.fade {
-  opacity: 0;
-  -webkit-transition: opacity 0.15s linear;
-  transition: opacity 0.15s linear;
-}
-
-.fade.in {
-  opacity: 1;
-}
-
 #selected-posts {
 
   padding-left: 20px;
@@ -905,7 +874,7 @@ blockquote { /* solo quotes */
   position: fixed;
   z-index: 1000;
   left: 50%;
-  background-color: scale-color($tertiary, $lightness: 50%);
+  background-color: dark-light-diff($tertiary, $secondary, 90%, -40%);
   border: 1px solid $tertiary;
   padding: 5px;
   margin-bottom: 5px;
@@ -957,13 +926,13 @@ blockquote { /* solo quotes */
     }
     &:active {
       @include linear-gradient(darken($tertiary, 18%), darken($tertiary, 12%));
-      @include box-shadow(inset 0 1px 3px rgba($primary, 0.2));
+      box-shadow: inset 0 1px 3px rgba(0,0,0, 0.2);
       color: $secondary;
     }
     &[disabled] {
       text-shadow: 0 1px 0 rgba($primary, 0.2);
       @include linear-gradient($tertiary, darken($tertiary, 20%));
-      @include box-shadow((inset 0 1px 0 rgba($primary, 0.33), inset 0 -1px 2px rgba($primary, 0.2)));
+      @include box-shadow((inset 0 1px 0 rgba(0,0,0, 0.33), inset 0 -1px 2px rgba($primary, 0.2)));
     }
   }
 }
@@ -988,16 +957,17 @@ blockquote { /* solo quotes */
 
     .select-posts {
       position: absolute;
-      right: 5px;
+      left: 100%;
       z-index: 490;
-      top: 4px;
+      top: 8px;
+      width: 800px;
+      height: 100px;
+      background-color: $secondary;
 
       button {
+        margin-left: 8px;
         background-color: scale-color($primary, $lightness: 70%);
-        border-top: 1px solid $tertiary;
-        border-left: 1px solid $tertiary;
-        border-bottom: 1px solid scale-color-diff();
-        border-right: 1px solid scale-color-diff();
+        border: 1px solid scale-color($primary, $lightness: 60%);
         color: $primary;
       }
     }
@@ -1015,23 +985,14 @@ a.attachment:before {
     position: relative;
 }
 
-.private_message .gutter:before, .deleted-topic .gutter:before, .read_restricted .gutter:before {
+.deleted-topic .gutter:before {
     display: block;
     position: absolute;
-    top: 0;
-    left: 10px;
-    color: scale-color-diff();
+    left: 767px;
+    color: rgba(dark-light-diff($primary, $secondary, 90%, -65%) , .8);
     font: 90px/1 FontAwesome;
-    content: "\f05c";
+    content: "\f014";
     z-index: -5;
-}
-
-.read_restricted .gutter:before {
-    content: "\f0c0";
-}
-
-.private_message .gutter:before {
-    content: "\f0e0";
 }
 
 .topic-meta-data {
@@ -1056,7 +1017,7 @@ a.attachment:before {
 }
 
 span.highlighted {
-  background-color: scale-color($highlight, $lightness: 70%);
+  background-color: dark-light-diff($tertiary, $secondary, 90%, -40%);
 }
 
 .username.new-user a {
@@ -1066,13 +1027,68 @@ span.highlighted {
 .read-state {
   color: scale-color($tertiary, $lightness: 50%);
   position: absolute;
-  right: -8px;
+  right: -2px;
   top: 13px;
   font-size: 8px;
 }
 
 .read-state.read {
   opacity: 0;
-  -webkit-transition: opacity 1s ease-out;
-  transition: opacity 1s ease-out;
+  @include transition(opacity ease-out 1s);
+
+}
+
+
+/* Tablet (portrait) ----------- */
+
+@media all
+and (max-width : 1140px) {
+  .post-cloak .reply-to-tab {
+    right: 320px;
+  }
+}
+
+
+@media all
+and (max-width : 975px) {
+  .post-cloak .reply-to-tab {
+    right: 300px;
+  }
+}
+
+@media all
+and (max-width : 940px) {
+  .post-cloak .reply-to-tab {
+    right: 250px;
+  }
+}
+
+@media all
+and (max-width : 870px) {
+
+  .gutter {
+    display: none;
+    }
+
+  .topic-avatar {
+    width: 5%;
+  }
+
+  .post-cloak .reply-to-tab {
+      right: 15%;
+    }
+
+  .topic-body {
+      width: 91%;
+      padding-left: 2%;
+    }
+
+  .embedded-posts {
+    // top means "in reply to expansion" above a post
+    &.top {
+      margin-left: 6%;
+      width: 91%;
+    }
+  }
+
 }

@@ -179,14 +179,19 @@ class SiteCustomization < ActiveRecord::Base
     return "" unless stylesheet.present?
     return @stylesheet_link_tag if @stylesheet_link_tag
     ensure_stylesheets_on_disk!
-    @stylesheet_link_tag = "<link class=\"custom-css\" rel=\"stylesheet\" href=\"/#{CACHE_PATH}#{stylesheet_filename}?#{stylesheet_hash}\" type=\"text/css\" media=\"screen\">"
+    @stylesheet_link_tag = link_css_tag "/#{CACHE_PATH}#{stylesheet_filename}?#{stylesheet_hash}"
   end
 
   def mobile_stylesheet_link_tag
     return "" unless mobile_stylesheet.present?
     return @mobile_stylesheet_link_tag if @mobile_stylesheet_link_tag
     ensure_stylesheets_on_disk!
-    @mobile_stylesheet_link_tag = "<link class=\"custom-css\" rel=\"stylesheet\" href=\"/#{CACHE_PATH}#{stylesheet_filename(:mobile)}?#{stylesheet_hash(:mobile)}\" type=\"text/css\" media=\"screen\">"
+    @mobile_stylesheet_link_tag = link_css_tag "/#{CACHE_PATH}#{stylesheet_filename(:mobile)}?#{stylesheet_hash(:mobile)}"
+  end
+
+  def link_css_tag(href)
+    href = (GlobalSetting.cdn_url || "") + href
+    %Q{<link class="custom-css" rel="stylesheet" href="#{href}" type="text/css" media="all">}
   end
 end
 
@@ -202,8 +207,8 @@ end
 #  user_id                 :integer          not null
 #  enabled                 :boolean          not null
 #  key                     :string(255)      not null
-#  created_at              :datetime
-#  updated_at              :datetime
+#  created_at              :datetime         not null
+#  updated_at              :datetime         not null
 #  override_default_style  :boolean          default(FALSE), not null
 #  stylesheet_baked        :text             default(""), not null
 #  mobile_stylesheet       :text

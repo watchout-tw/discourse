@@ -24,7 +24,7 @@ export default Em.Component.extend({
 
         var renderActionIf = function(property, dataAttribute, text) {
           if (!c.get(property)) { return; }
-          buffer.push(" <a href='#' data-" + dataAttribute + "='" + c.get('id') + "'>" + text + "</a>.");
+          buffer.push(" <span class='action-link " + dataAttribute  +"-action'><a href='#' data-" + dataAttribute + "='" + c.get('id') + "'>" + text + "</a>.</span>");
         };
 
         // TODO multi line expansion for flags
@@ -32,13 +32,13 @@ export default Em.Component.extend({
         if (c.get('usersExpanded')) {
           var postUrl;
           c.get('users').forEach(function(u) {
-            iconsHtml += "<a href=\"" + Discourse.getURL("/users/") + (u.get('username_lower')) + "\">";
+            iconsHtml += "<a href=\"" + Discourse.getURL("/users/") + u.get('username_lower') + "\" data-user-card=\"" + u.get('username_lower') + "\">";
             if (u.post_url) {
               postUrl = postUrl || u.post_url;
             }
             iconsHtml += Discourse.Utilities.avatarImg({
               size: 'small',
-              avatarTemplate: u.get('avatar_template'),
+              avatarTemplate: u.get('avatarTemplate'),
               title: u.get('username')
             });
             iconsHtml += "</a>";
@@ -53,7 +53,7 @@ export default Em.Component.extend({
         renderActionIf('usersCollapsed', 'who-acted', c.get('description'));
         renderActionIf('canAlsoAction', 'act', I18n.t("post.actions.it_too." + c.get('actionType.name_key')));
         renderActionIf('can_undo', 'undo', I18n.t("post.actions.undo." + c.get('actionType.name_key')));
-        renderActionIf('can_clear_flags', 'clear-flags', I18n.t("post.actions.clear_flags", { count: c.count }));
+        renderActionIf('can_defer_flags', 'defer-flags', I18n.t("post.actions.defer_flags", { count: c.count }));
 
         buffer.push("</div>");
       });
@@ -62,7 +62,7 @@ export default Em.Component.extend({
     var post = this.get('post');
     if (post.get('deleted')) {
       buffer.push("<div class='post-action'>" +
-                  I18n.t("post.deleted_by") + " " +
+                  "<i class='fa fa-trash-o'></i>&nbsp;" +
                   Discourse.Utilities.tinyAvatar(post.get('postDeletedBy.avatar_template'), {title: post.get('postDeletedBy.username')}) +
                   Discourse.Formatter.autoUpdatingRelativeAge(new Date(post.get('postDeletedAt'))) +
                   "</div>");
@@ -77,8 +77,8 @@ export default Em.Component.extend({
     var $target = $(e.target),
         actionTypeId;
 
-    if (actionTypeId = $target.data('clear-flags')) {
-      this.actionTypeById(actionTypeId).clearFlags();
+    if (actionTypeId = $target.data('defer-flags')) {
+      this.actionTypeById(actionTypeId).deferFlags();
       return false;
     }
 

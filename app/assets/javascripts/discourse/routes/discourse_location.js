@@ -32,7 +32,15 @@ Ember.DiscourseLocation = Ember.Object.extend({
   */
   initState: function() {
     set(this, 'history', get(this, 'history') || window.history);
-    this.replaceState(this.formatURL(this.getURL()));
+
+    var url = this.formatURL(this.getURL()),
+        loc = get(this, 'location');
+
+    if (loc && loc.hash) {
+      url += loc.hash;
+    }
+
+    this.replaceState(url);
   },
 
   /**
@@ -178,7 +186,9 @@ Ember.DiscourseLocation = Ember.Object.extend({
         if (self.getURL() === self._previousURL) { return; }
       }
       var url = self.getURL();
-      popstateCallbacks.forEach(function(cb) { cb(url); });
+      popstateCallbacks.forEach(function(cb) {
+        cb(url);
+      });
       callback(url);
     });
   },
@@ -218,6 +228,16 @@ Ember.CloakedCollectionView.reopen({
   _watchForPopState: function() {
     var self = this,
         cb = function() {
+               // Sam: This is a hack, but a very important one
+               // Due to the way we use replace state the back button works strangely
+               //
+               // If you visit a topic from the front page, scroll a bit around and then hit back
+               // you notice that first the page scrolls a bit (within the topic) and then it goes back
+               // this transition is jarring and adds uneeded rendering costs.
+               //
+               // To repro comment the hack out and wack a debugger statement here and in
+               // topic_route deactivate
+               $('.posts,#topic-title').hide();
                self.cleanUp();
                self.set('controller.postStream.loaded', false);
              };

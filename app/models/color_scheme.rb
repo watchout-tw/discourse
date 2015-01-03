@@ -60,6 +60,10 @@ class ColorScheme < ActiveRecord::Base
     new_color_scheme
   end
 
+  def self.hex_for_name(name)
+    # Can't use `where` here because base doesn't allow it
+    (enabled || base).colors.find {|c| c.name == name }.try(:hex)
+  end
 
   def colors=(arr)
     @colors_by_name = nil
@@ -100,6 +104,6 @@ end
 #  enabled      :boolean          default(FALSE), not null
 #  versioned_id :integer
 #  version      :integer          default(1), not null
-#  created_at   :datetime
-#  updated_at   :datetime
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
 #

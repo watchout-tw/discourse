@@ -13,7 +13,7 @@
    Then any handlebars files you create in the `connectors/evil-trout` directory
    will automatically be appended. For example:
 
-   plugins/hello/assets/javascripts/discourse/templates/connectors/evil-trout/hello.handlebars
+   plugins/hello/assets/javascripts/discourse/templates/connectors/evil-trout/hello.hbs
 
    With the contents:
 
@@ -103,6 +103,7 @@ export default function(connectionName, options) {
     } else {
       view = childViews[0];
     }
+    delete options.fn;  // we don't need the default template since we have a connector
     return Ember.Handlebars.helpers.view.call(this, view, options);
   } else if (options.fn) {
 

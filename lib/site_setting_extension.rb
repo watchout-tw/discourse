@@ -177,7 +177,6 @@ module SiteSettingExtension
     end
   end
 
-
   def ensure_listen_for_changes
     unless @subscribed
       MessageBus.subscribe("/site_settings") do |message|
@@ -273,7 +272,7 @@ module SiteSettingExtension
       }
       value = domain_array.join("|")
     end
-    return value
+    value
   end
 
   def set(name, value)
@@ -289,6 +288,7 @@ module SiteSettingExtension
   protected
 
   def clear_cache!
+    SiteText.text_for_cache.clear
     Rails.cache.delete(SiteSettingExtension.client_settings_cache_key)
   end
 
@@ -355,7 +355,6 @@ module SiteSettingExtension
 
 
   def setup_methods(name, current_value)
-
     clean_name = name.to_s.sub("?", "")
 
     eval "define_singleton_method :#{clean_name} do
@@ -387,8 +386,7 @@ module SiteSettingExtension
       url = "http://#{url}" if URI.parse(url).scheme.nil?
       url = URI.parse(url).host
     end
-    return url
+    url
   end
 
 end
-

@@ -112,23 +112,30 @@ describe UserNotifications do
       # in mailing list mode user_replies is not sent through
       response.user.mailing_list_mode = true
       mail = UserNotifications.user_replied(response.user, post: response, notification: notification)
-      mail.class.should == ActionMailer::Base::NullMail
 
+      if rails_master?
+        mail.message.class.should == ActionMailer::Base::NullMail
+      else
+        mail.class.should == ActionMailer::Base::NullMail
+      end
 
       response.user.mailing_list_mode = nil
       mail = UserNotifications.user_replied(response.user, post: response, notification: notification)
 
-      mail.class.should_not == ActionMailer::Base::NullMail
-
+      if rails_master?
+        mail.message.class.should_not == ActionMailer::Base::NullMail
+      else
+        mail.class.should_not == ActionMailer::Base::NullMail
+      end
     end
   end
 
   describe '.user_posted' do
-    let(:response_by_user) { Fabricate(:user, name: "John Doe") }
+    let(:response_by_user) { Fabricate(:user, name: "John Doe", username: "john") }
     let(:post) { Fabricate(:post) }
     let(:response) { Fabricate(:post, topic: post.topic, user: response_by_user)}
     let(:user) { Fabricate(:user) }
-    let(:notification) { Fabricate(:notification, user: user) }
+    let(:notification) { Fabricate(:notification, user: user, data: {original_username: response_by_user.username}.to_json) }
 
     it 'generates a correct email' do
       SiteSetting.stubs(:enable_email_names).returns(false)
@@ -136,6 +143,9 @@ describe UserNotifications do
 
       # from should not include full user name if "show user full names" is disabled
       expect(mail[:from].display_names).to_not eql(['John Doe'])
+
+      # from should include username if "show user full names" is disabled
+      expect(mail[:from].display_names).to eql(['john'])
 
       # subject should not include category name
       expect(mail.subject).not_to match(/Uncategorized/)
@@ -153,18 +163,18 @@ describe UserNotifications do
   end
 
   describe '.user_private_message' do
-    let(:response_by_user) { Fabricate(:user, name: "John Doe") }
+    let(:response_by_user) { Fabricate(:user, name: "", username: "john") }
     let(:topic) { Fabricate(:private_message_topic) }
     let(:response) { Fabricate(:post, topic: topic, user: response_by_user)}
     let(:user) { Fabricate(:user) }
-    let(:notification) { Fabricate(:notification, user: user) }
+    let(:notification) { Fabricate(:notification, user: user, data: {original_username: response_by_user.username}.to_json) }
 
     it 'generates a correct email' do
       SiteSetting.stubs(:enable_email_names).returns(true)
       mail = UserNotifications.user_private_message(response.user, post: response, notification: notification)
 
-      # from should include full user name
-      expect(mail[:from].display_names).to eql(['John Doe'])
+      # from should include username if full user name is not provided
+      expect(mail[:from].display_names).to eql(['john'])
 
       # subject should include "[PM]"
       expect(mail.subject).to match("[PM]")
@@ -183,7 +193,16 @@ describe UserNotifications do
 
   def expects_build_with(condition)
     UserNotifications.any_instance.expects(:build_email).with(user.email, condition)
-    UserNotifications.send(mail_type, user, notification: notification, post: notification.post)
+    mailer = UserNotifications.send(mail_type, user, notification: notification, post: notification.post)
+
+    if rails_master?
+      # Starting from Rails 4.2, calling MyMailer.some_method no longer result
+      # in an immediate call to MyMailer#some_method. Instead, a "lazy proxy" is
+      # returned (this is changed to support #deliver_later). As a quick hack to
+      # fix the test, calling #message (or anything, really) would force the
+      # Mailer object to be created and the method invoked.
+      mailer.message
+    end
   end
 
   shared_examples "supports reply by email" do

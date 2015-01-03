@@ -18,7 +18,18 @@ class GroupsController < ApplicationController
 
   def members
     group = find_group(:group_id)
-    render_serialized(group.users.order('username_lower asc').limit(200).to_a, GroupUserSerializer)
+
+    members = group.users.order('username_lower asc')
+
+    # TODO: We should fix the root cause of the bug where if there
+    # are more than 200 groups it will truncate
+    if group.automatic?
+      limit = (params[:limit] || 200).to_i
+      offset = (params[:offset] || 0).to_i
+      members = members.limit(limit).offset(offset)
+    end
+
+    render_serialized(members.to_a, GroupUserSerializer)
   end
 
   private

@@ -1,9 +1,14 @@
+import registerUnbound from 'discourse/helpers/register-unbound';
+
 export function renderAvatar(user, options) {
   options = options || {};
 
   if (user) {
     var username = Em.get(user, 'username');
-    if (!username) username = Em.get(user, options.usernamePath);
+    if (!username) {
+      if (!options.usernamePath) { return ''; }
+      username = Em.get(user, options.usernamePath);
+    }
 
     var title;
     if (!options.ignoreTitle) {
@@ -36,9 +41,6 @@ export function renderAvatar(user, options) {
   }
 }
 
-Handlebars.registerHelper('avatar', function(user, options) {
-  if (typeof user === 'string') {
-    user = Ember.Handlebars.get(this, user, options);
-  }
-  return new Handlebars.SafeString(renderAvatar.call(this, user, options.hash));
+registerUnbound('avatar', function(user, params) {
+  return new Handlebars.SafeString(renderAvatar.call(this, user, params));
 });

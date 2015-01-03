@@ -24,7 +24,7 @@ required:
     default: ''
     type: email
   notification_email:
-    default: 'info@unconfigured.discourse.org'
+    default: 'noreply@unconfigured.discourse.org'
     type: email
   site_contact_username:
     default: ''
@@ -108,7 +108,7 @@ basic:
   post_menu_hidden_items:
     client: true
     type: list
-    default: 'edit|delete|admin'
+    default: 'bookmark|edit|delete|admin'
     choices:
      - like
      - edit
@@ -151,10 +151,6 @@ basic:
   fixed_category_positions:
     client: true
     default: false
-  topics_per_page:
-    default: 30
-    min: 1
-    client: true
   show_subcategory_list:
     default: false
     client: true
@@ -196,10 +192,10 @@ login:
     default: false
   twitter_consumer_key:
     default: ''
-    regex: "^[a-zA-Z0-9_+-]*$"
+    regex: "^[a-zA-Z0-9_+-]+$"
   twitter_consumer_secret:
     default: ''
-    regex: "^[a-zA-Z0-9_+-]*$"
+    regex: "^[a-zA-Z0-9_+-]+$"
   enable_facebook_logins:
     client: true
     default: false
@@ -208,19 +204,20 @@ login:
     regex: "^\\d+$"
   facebook_app_secret:
     default: ''
-    regex: "^[a-f0-9]*$"
+    regex: "^[a-f0-9]+$"
   enable_github_logins:
     client: true
     default: false
   github_client_id:
     default: ''
-    regex: "^[a-f0-9]*$"
+    regex: "^[a-f0-9]+$"
   github_client_secret:
     default: ''
-    regex: "^[a-f0-9]*$"
+    regex: "^[a-f0-9]+$"
   enable_sso:
     client: true
     default: false
+  enable_sso_provider: false
   sso_url: ''
   sso_secret: ''
   sso_overrides_email: false
@@ -284,6 +281,10 @@ users:
     default: false
   email_token_valid_hours: 24
   email_token_grace_period_hours: 0
+  purge_unactivated_users_grace_period_days: 7
+  public_user_custom_fields:
+    type: list
+    default: ''
 
 posting:
   min_post_length:
@@ -377,7 +378,7 @@ posting:
     default: 10000
   default_code_lang:
     client: true
-    default: "lang-auto"
+    default: "auto"
   warn_reviving_old_topic_age: 180
   autohighlight_all_code:
     client: true
@@ -388,9 +389,18 @@ posting:
     default: ''
     refresh: true
     type: list
+  enable_emoji:
+    default: true
+    client: true
+  emoji_set:
+    default: 'emoji_one'
+    client: true
+    enum: 'EmojiSetSiteSetting'
 
 email:
-  email_time_window_mins: 10
+  email_time_window_mins:
+    default: 10
+    client: true
   email_posts_context: 5
   digest_min_excerpt_length: 100
   digest_topics: 20
@@ -400,7 +410,9 @@ email:
   email_custom_headers: 'Auto-Submitted: auto-generated'
   email_subject: '[%{site_name}] %{optional_pm}%{optional_cat}%{topic_title}'
   reply_by_email_enabled: false
-  reply_by_email_address: ''
+  reply_by_email_address:
+    default: ''
+    regex: "%{reply_key}"
   pop3_polling_enabled: false
   pop3_polling_ssl: true
   pop3_polling_period_mins: 5
@@ -478,6 +490,7 @@ files:
   allow_animated_avatars:
     client: true
     default: false
+  allow_animated_thumbnails: false
 
 trust:
   default_trust_level:
@@ -575,6 +588,12 @@ spam:
       default: 2
       min: 0
       max: 3
+  max_new_accounts_per_registration_ip: 3
+  min_ban_entries_for_roll_up: 5
+  max_age_unmatched_emails: 365
+  max_age_unmatched_ips: 365
+  num_flaggers_to_close_topic: 5
+  num_flags_to_close_topic: 12
 
 rate_limits:
   unique_posts_mins:
@@ -638,10 +657,6 @@ developer:
   verbose_localization:
     default: false
     client: true
-  posts_chunksize:
-    client: true
-    default: 20
-    min: 1
 
 embedding:
   embeddable_host: ''
@@ -784,10 +799,6 @@ uncategorized:
 
   notify_about_flags_after: 48
 
-  public_user_custom_fields:
-    type: list
-    default: ''
-
   enable_cdn_js_debugging: false
 
   show_create_topics_notice:
@@ -799,11 +810,6 @@ uncategorized:
     default: true
 
   disable_edit_notifications: false
-  purge_inactive_users_grace_period_days: 7
-
-  company_full_name: 'My Unconfigured Forum Ltd.'
-  company_short_name: 'Unconfigured Forum'
-  company_domain: 'www.example.com'
 
   vacuum_db_days: 90
   last_vacuum:

@@ -42,6 +42,14 @@ class PostRevisor
     @post_successfully_saved = true
     @topic_successfully_saved = true
 
+    @validate_post = true
+    @validate_post = @opts[:validate_post] if @opts.has_key?(:validate_post)
+    @validate_post = !@opts[:skip_validations] if @opts.has_key?(:skip_validations)
+
+    @validate_topic = true
+    @validate_topic = @opts[:validate_topic] if @opts.has_key?(:validate_topic)
+    @validate_topic = !@opts[:validate_topic] if @opts.has_key?(:skip_validations)
+
     Post.transaction do
       revise_post
 
@@ -145,7 +153,7 @@ class PostRevisor
     clear_flags_and_unhide_post
 
     @post.extract_quoted_post_numbers
-    @post_successfully_saved = @post.save(validate: !@opts[:skip_validations])
+    @post_successfully_saved = @post.save(validate: @validate_post)
     @post.save_reply_relationships
   end
 
@@ -169,7 +177,7 @@ class PostRevisor
     @topic.title = @fields[:title] if @fields.has_key?(:title)
     Topic.transaction do
       @topic_successfully_saved = @topic.change_category_to_id(@fields[:category_id]) if @fields.has_key?(:category_id)
-      @topic_successfully_saved &&= @topic.save(validate: !@opts[:skip_validations])
+      @topic_successfully_saved &&= @topic.save(validate: @validate_topic)
     end
   end
 
@@ -253,6 +261,9 @@ class PostRevisor
   def update_topic_excerpt
     excerpt = @post.excerpt(220, strip_links: true)
     @topic.update_column(:excerpt, excerpt)
+    if @topic.archetype == "banner"
+      ApplicationController.banner_json_cache.clear
+    end
   end
 
   def update_category_description

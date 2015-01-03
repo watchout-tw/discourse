@@ -7,6 +7,7 @@ require_dependency 'rate_limiter'
 require_dependency 'crawler_detection'
 require_dependency 'json_error'
 require_dependency 'letter_avatar'
+require_dependency 'distributed_cache'
 
 class ApplicationController < ActionController::Base
   include CurrentUser
@@ -48,6 +49,10 @@ class ApplicationController < ActionController::Base
 
   def use_crawler_layout?
     @use_crawler_layout ||= (has_escaped_fragment? || CrawlerDetection.crawler?(request.user_agent))
+  end
+
+  def slow_platform?
+    request.user_agent =~ /Android/
   end
 
   def set_layout
@@ -250,6 +255,7 @@ class ApplicationController < ActionController::Base
       store_preloaded("siteSettings", SiteSetting.client_settings_json)
       store_preloaded("customHTML", custom_html_json)
       store_preloaded("banner", banner_json)
+      store_preloaded("customEmoji", custom_emoji)
     end
 
     def preload_current_user_data
@@ -261,7 +267,7 @@ class ApplicationController < ActionController::Base
     def custom_html_json
       data = {
         top: SiteText.text_for(:top),
-        bottom: SiteText.text_for(:bottom)
+        footer: SiteCustomization.custom_footer(session[:preview_style])
       }
 
       if DiscoursePluginRegistry.custom_html
@@ -271,11 +277,25 @@ class ApplicationController < ActionController::Base
       MultiJson.dump(data)
     end
 
-    def banner_json
-      topic = Topic.where(archetype: Archetype.banner).limit(1).first
-      banner = topic.present? ? topic.banner : {}
+    def self.banner_json_cache
+      @banner_json_cache ||= DistributedCache.new("banner_json")
+    end
 
-      MultiJson.dump(banner)
+    def banner_json
+      json = ApplicationController.banner_json_cache["json"]
+
+      unless json
+        topic = Topic.where(archetype: Archetype.banner).limit(1).first
+        banner = topic.present? ? topic.banner : {}
+        ApplicationController.banner_json_cache["json"] = json = MultiJson.dump(banner)
+      end
+
+      json
+    end
+
+    def custom_emoji
+      serializer = ActiveModel::ArraySerializer.new(Emoji.custom, each_serializer: EmojiSerializer)
+      MultiJson.dump(serializer)
     end
 
     def render_json_error(obj)
@@ -335,6 +355,8 @@ class ApplicationController < ActionController::Base
     def redirect_to_login_if_required
       return if current_user || (request.format.json? && api_key_valid?)
 
+      # save original URL in a cookie
+      cookies[:destination_url] = request.original_url unless request.original_url =~ /uploads/
       redirect_to :login if SiteSetting.login_required?
     end
 

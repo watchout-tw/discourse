@@ -172,6 +172,12 @@ class Topic < ActiveRecord::Base
     unless skip_callbacks
       schedule_auto_close_job
     end
+
+    banner = "banner".freeze
+
+    if archetype_was == banner || archetype == banner
+      ApplicationController.banner_json_cache.clear
+    end
   end
 
   def initialize_default_values
@@ -346,7 +352,7 @@ class Topic < ActiveRecord::Base
   end
 
   def self.listable_count_per_day(start_date, end_date)
-    listable_topics.where('created_at >= ? and created_at < ?', start_date, end_date).group('date(created_at)').order('date(created_at)').count
+    listable_topics.where('created_at >= ? and created_at <= ?', start_date, end_date).group('date(created_at)').order('date(created_at)').count
   end
 
   def private_message?
@@ -391,8 +397,8 @@ class Topic < ActiveRecord::Base
     similar
   end
 
-  def update_status(status, enabled, user)
-    TopicStatusUpdate.new(self, user).update!(status, enabled)
+  def update_status(status, enabled, user, message=nil)
+    TopicStatusUpdate.new(self, user).update!(status, enabled, message)
   end
 
   # Atomically creates the next post number
@@ -791,10 +797,10 @@ class Topic < ActiveRecord::Base
       else
         self.auto_close_started_at ||= Time.zone.now
       end
-      if by_user.try(:staff?)
+      if by_user.try(:staff?) || by_user.try(:trust_level) == TrustLevel[4]
         self.auto_close_user = by_user
       else
-        self.auto_close_user ||= (self.user.staff? ? self.user : Discourse.system_user)
+        self.auto_close_user ||= (self.user.staff? || self.user.trust_level == TrustLevel[4] ? self.user : Discourse.system_user)
       end
     end
 
@@ -849,56 +855,58 @@ end
 #
 # Table name: topics
 #
-#  id                      :integer          not null, primary key
-#  title                   :string(255)      not null
-#  last_posted_at          :datetime
-#  created_at              :datetime         not null
-#  updated_at              :datetime         not null
-#  views                   :integer          default(0), not null
-#  posts_count             :integer          default(0), not null
-#  user_id                 :integer
-#  last_post_user_id       :integer          not null
-#  reply_count             :integer          default(0), not null
-#  featured_user1_id       :integer
-#  featured_user2_id       :integer
-#  featured_user3_id       :integer
-#  avg_time                :integer
-#  deleted_at              :datetime
-#  highest_post_number     :integer          default(0), not null
-#  image_url               :string(255)
-#  off_topic_count         :integer          default(0), not null
-#  like_count              :integer          default(0), not null
-#  incoming_link_count     :integer          default(0), not null
-#  bookmark_count          :integer          default(0), not null
-#  star_count              :integer          default(0), not null
-#  category_id             :integer
-#  visible                 :boolean          default(TRUE), not null
-#  moderator_posts_count   :integer          default(0), not null
-#  closed                  :boolean          default(FALSE), not null
-#  archived                :boolean          default(FALSE), not null
-#  bumped_at               :datetime         not null
-#  has_summary             :boolean          default(FALSE), not null
-#  vote_count              :integer          default(0), not null
-#  archetype               :string(255)      default("regular"), not null
-#  featured_user4_id       :integer
-#  notify_moderators_count :integer          default(0), not null
-#  spam_count              :integer          default(0), not null
-#  illegal_count           :integer          default(0), not null
-#  inappropriate_count     :integer          default(0), not null
-#  pinned_at               :datetime
-#  score                   :float
-#  percent_rank            :float            default(1.0), not null
-#  notify_user_count       :integer          default(0), not null
-#  subtype                 :string(255)
-#  slug                    :string(255)
-#  auto_close_at           :datetime
-#  auto_close_user_id      :integer
-#  auto_close_started_at   :datetime
-#  deleted_by_id           :integer
-#  participant_count       :integer          default(1)
-#  word_count              :integer
-#  excerpt                 :string(1000)
-#  pinned_globally         :boolean          default(FALSE), not null
+#  id                            :integer          not null, primary key
+#  title                         :string(255)      not null
+#  last_posted_at                :datetime
+#  created_at                    :datetime         not null
+#  updated_at                    :datetime         not null
+#  views                         :integer          default(0), not null
+#  posts_count                   :integer          default(0), not null
+#  user_id                       :integer
+#  last_post_user_id             :integer          not null
+#  reply_count                   :integer          default(0), not null
+#  featured_user1_id             :integer
+#  featured_user2_id             :integer
+#  featured_user3_id             :integer
+#  avg_time                      :integer
+#  deleted_at                    :datetime
+#  highest_post_number           :integer          default(0), not null
+#  image_url                     :string(255)
+#  off_topic_count               :integer          default(0), not null
+#  like_count                    :integer          default(0), not null
+#  incoming_link_count           :integer          default(0), not null
+#  bookmark_count                :integer          default(0), not null
+#  star_count                    :integer          default(0), not null
+#  category_id                   :integer
+#  visible                       :boolean          default(TRUE), not null
+#  moderator_posts_count         :integer          default(0), not null
+#  closed                        :boolean          default(FALSE), not null
+#  archived                      :boolean          default(FALSE), not null
+#  bumped_at                     :datetime         not null
+#  has_summary                   :boolean          default(FALSE), not null
+#  vote_count                    :integer          default(0), not null
+#  archetype                     :string(255)      default("regular"), not null
+#  featured_user4_id             :integer
+#  notify_moderators_count       :integer          default(0), not null
+#  spam_count                    :integer          default(0), not null
+#  illegal_count                 :integer          default(0), not null
+#  inappropriate_count           :integer          default(0), not null
+#  pinned_at                     :datetime
+#  score                         :float
+#  percent_rank                  :float            default(1.0), not null
+#  notify_user_count             :integer          default(0), not null
+#  subtype                       :string(255)
+#  slug                          :string(255)
+#  auto_close_at                 :datetime
+#  auto_close_user_id            :integer
+#  auto_close_started_at         :datetime
+#  deleted_by_id                 :integer
+#  participant_count             :integer          default(1)
+#  word_count                    :integer
+#  excerpt                       :string(1000)
+#  pinned_globally               :boolean          default(FALSE), not null
+#  auto_close_based_on_last_post :boolean          default(FALSE)
+#  auto_close_hours              :float
 #
 # Indexes
 #

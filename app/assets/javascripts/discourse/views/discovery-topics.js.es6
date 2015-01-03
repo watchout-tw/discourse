@@ -1,6 +1,7 @@
 import UrlRefresh from 'discourse/mixins/url-refresh';
+import LoadMore from "discourse/mixins/load-more";
 
-export default Discourse.View.extend(Discourse.LoadMore, UrlRefresh, {
+export default Discourse.View.extend(LoadMore, UrlRefresh, {
   eyelineSelector: '.topic-list-item',
 
   actions: {
@@ -19,7 +20,7 @@ export default Discourse.View.extend(Discourse.LoadMore, UrlRefresh, {
   },
 
   _readjustScrollPosition: function() {
-    var scrollTo = Discourse.Session.currentProp('topicListScrollPosition');
+    var scrollTo = this.session.get('topicListScrollPosition');
 
     if (typeof scrollTo !== "undefined") {
       Em.run.schedule('afterRender', function() {
@@ -34,7 +35,7 @@ export default Discourse.View.extend(Discourse.LoadMore, UrlRefresh, {
 
   // Remember where we were scrolled to
   saveScrollPosition: function() {
-    Discourse.Session.current().set('topicListScrollPosition', $(window).scrollTop());
+    this.session.set('topicListScrollPosition', $(window).scrollTop());
   },
 
   // When the topic list is scrolled

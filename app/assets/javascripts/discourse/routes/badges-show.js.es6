@@ -1,4 +1,13 @@
-export default Discourse.Route.extend({
+import ShowFooter from "discourse/mixins/show-footer";
+
+export default Discourse.Route.extend(ShowFooter, {
+  actions: {
+    didTransition: function() {
+      this.controllerFor("badges/show")._showFooter();
+      return true;
+    }
+  },
+
   serialize: function(model) {
     return {id: model.get('id'), slug: model.get('name').replace(/[^A-Za-z0-9_]+/g, '-').toLowerCase()};
   },
@@ -13,6 +22,13 @@ export default Discourse.Route.extend({
     }
   },
 
+  afterModel: function(model) {
+    var self = this;
+    return Discourse.UserBadge.findByBadgeId(model.get('id')).then(function(userBadges) {
+      self.userBadges = userBadges;
+    });
+  },
+
   titleToken: function() {
     var model = this.modelFor('badges.show');
     if (model) {
@@ -21,10 +37,7 @@ export default Discourse.Route.extend({
   },
 
   setupController: function(controller, model) {
-    Discourse.UserBadge.findByBadgeId(model.get('id')).then(function(userBadges) {
-      controller.set('userBadges', userBadges);
-      controller.set('userBadgesLoaded', true);
-    });
     controller.set('model', model);
+    controller.set('userBadges', this.userBadges);
   }
 });

@@ -6,6 +6,25 @@ describe User do
   it { should validate_presence_of :username }
   it { should validate_presence_of :email }
 
+  describe '#count_by_signup_date' do
+    before(:each) do
+      User.destroy_all
+      Timecop.freeze
+      Fabricate(:user)
+      Fabricate(:user, created_at: 1.day.ago)
+      Fabricate(:user, created_at: 1.day.ago)
+      Fabricate(:user, created_at: 2.days.ago)
+      Fabricate(:user, created_at: 4.days.ago)
+    end
+    after(:each) { Timecop.return }
+    let(:signups_by_day) { {1.day.ago.to_date => 2, 2.days.ago.to_date => 1, Time.now.utc.to_date => 1} }
+
+    it 'collect closed interval signups' do
+      User.count_by_signup_date(2.days.ago, Time.now).should include(signups_by_day)
+      User.count_by_signup_date(2.days.ago, Time.now).should_not include({4.days.ago.to_date => 1})
+    end
+  end
+
   context '.enqueue_welcome_message' do
     let(:user) { Fabricate(:user) }
 
@@ -1094,7 +1113,6 @@ describe User do
 
   describe "automatic avatar creation" do
     it "sets a system avatar for new users" do
-      SiteSetting.enable_system_avatars = true
       u = User.create!(username: "bob", email: "bob@bob.com")
       u.reload
       u.uploaded_avatar_id.should == nil
@@ -1128,40 +1146,24 @@ describe User do
   end
 
   describe "refresh_avatar" do
-    it "picks gravatar if system avatar is picked and gravatar was just downloaded" do
-
-      png = Base64.decode64("R0lGODlhAQABALMAAAAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//wBiZCH5BAEAAA8ALAAAAAABAAEAAAQC8EUAOw==")
-      FakeWeb.register_uri( :get,
-                            "http://www.gravatar.com/avatar/d10ca8d11301c2f4993ac2279ce4b930.png?s=500&d=404",
-                             body: png )
-
-      user = User.create!(username: "bob", name: "bob", email: "a@a.com")
-      user.reload
-
+    it "enqueues the update_gravatar job when automatically downloading gravatars" do
       SiteSetting.automatically_download_gravatars = true
-      SiteSetting.enable_system_avatars = true
+
+      user = Fabricate(:user)
+
+      Jobs.expects(:enqueue).with(:update_gravatar, anything)
 
       user.refresh_avatar
-      user.reload
-
-      user.user_avatar.gravatar_upload_id.should == user.uploaded_avatar_id
-
-      user.uploaded_avatar_id = nil
-      user.save
-      user.refresh_avatar
-
-      user.reload
-      user.uploaded_avatar_id.should == nil
     end
   end
 
-  describe "#purge_inactive" do
+  describe "#purge_unactivated" do
     let!(:user) { Fabricate(:user) }
     let!(:inactive) { Fabricate(:user, active: false) }
     let!(:inactive_old) { Fabricate(:user, active: false, created_at: 1.month.ago) }
 
-    it 'should only remove old, inactive users' do
-      User.purge_inactive
+    it 'should only remove old, unactivated users' do
+      User.purge_unactivated
       all_users = User.all
       all_users.include?(user).should == true
       all_users.include?(inactive).should == true

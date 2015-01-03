@@ -9,6 +9,9 @@ module PostGuardian
     already_did_flagging      = taken.any? && (taken & PostActionType.flag_types.values).any?
 
     if authenticated? && post
+
+      return false if action_key == :notify_moderators && !SiteSetting.enable_private_messages
+
       # we allow flagging for trust level 1 and higher
       (is_flag && @user.has_trust_level?(TrustLevel[1]) && not(already_did_flagging)) ||
 
@@ -26,6 +29,9 @@ module PostGuardian
 
       # new users can't notify_user because they are not allowed to send private messages
       not(action_key == :notify_user && !@user.has_trust_level?(TrustLevel[1])) &&
+
+      # can't send private messages if they're disabled globally
+      not(action_key == :notify_user && !SiteSetting.enable_private_messages) &&
 
       # no voting more than once on single vote topics
       not(action_key == :vote && opts[:voted_in_topic] && post.topic.has_meta_data_boolean?(:single_vote))
@@ -180,8 +186,8 @@ module PostGuardian
     is_staff?
   end
 
-  def can_view_raw_email?
-    is_staff?
+  def can_view_raw_email?(post)
+    post && (is_staff? || post.user_id == @user.id)
   end
 
   def can_unhide?(post)

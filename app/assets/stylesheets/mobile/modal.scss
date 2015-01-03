@@ -48,6 +48,9 @@
 .modal-footer .btn-group .btn + .btn {
   margin-left: -1px;
 }
+
+.modal-footer span.hint { display: none; }
+
 .modal-header {
   // we need tighter spacing on mobile for header
   // this clearfix under the modal title h3 pushes it way down
@@ -55,15 +58,14 @@
     display:none;
   }
   h3 {
-    color: $quaternary;
-    font-size: 18px;
+    font-size: 1.286em;
     padding-left: 15px;
     margin-bottom: 5px;
   }
 }
 .close {
   float: right;
-  font-size: 24px;
+  font-size: 1.714em;
   padding: 10px 15px 5px 5px;
   margin: -15px 0 0 0;
   color: $primary;
@@ -97,8 +99,9 @@
 }
 
 .custom-message-length {
-  margin-bottom: 10px;
-  margin-left: 20px;
+  margin: -10px 0 10px 20px;
+  color: scale-color($primary, $lightness: 70%);
+  font-size: 85%;
 }
 
 .flag-message {
@@ -170,7 +173,7 @@
 
 #search-help h2 {
   margin: 0;
-  font-size: 12px;
+  font-size: 0.857em;
 }
 
 #search-help p {

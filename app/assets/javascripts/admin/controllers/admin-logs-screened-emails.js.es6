@@ -1,14 +1,7 @@
-/**
-  This controller supports the interface for listing screened email addresses in the admin section.
+import { outputExportResult } from 'discourse/lib/export-result';
 
-  @class AdminLogsScreenedEmailsController
-  @extends Ember.ArrayController
-  @namespace Discourse
-  @module Discourse
-**/
 export default Ember.ArrayController.extend(Discourse.Presence, {
   loading: false,
-  content: [],
 
   actions: {
     clearBlock: function(row){
@@ -16,14 +9,18 @@ export default Ember.ArrayController.extend(Discourse.Presence, {
         // feeling lazy
         window.location.reload();
       });
+    },
+
+    exportScreenedEmailList: function(subject) {
+      Discourse.ExportCsv.exportScreenedEmailList().then(outputExportResult);
     }
   },
 
   show: function() {
     var self = this;
-    this.set('loading', true);
+    self.set('loading', true);
     Discourse.ScreenedEmail.findAll().then(function(result) {
-      self.set('content', result);
+      self.set('model', result);
       self.set('loading', false);
     });
   }

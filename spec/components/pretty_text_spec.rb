@@ -84,7 +84,6 @@ describe PrettyText do
   describe "Excerpt" do
 
     it "sanitizes attempts to inject invalid attributes" do
-
       spinner = "<a href=\"http://thedailywtf.com/\" data-bbcode=\"' class='fa fa-spin\">WTF</a>"
       PrettyText.excerpt(spinner, 20).should match_html spinner
 
@@ -216,6 +215,10 @@ describe PrettyText do
       post.excerpt.should == two_hundred
     end
 
+    it "unescapes html entities when we want text entities" do
+      PrettyText.excerpt("&#39;", 500, text_entities: true).should == "'"
+    end
+
   end
 
   describe "strip links" do
@@ -294,5 +297,10 @@ describe PrettyText do
     end
   end
 
+
+  it 'can escape *' do
+    PrettyText.cook("***a***a").should match_html("<p><strong><em>a</em></strong>a</p>")
+    PrettyText.cook("***\\****a").should match_html("<p><strong><em>*</em></strong>a</p>")
+  end
 
 end

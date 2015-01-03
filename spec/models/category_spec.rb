@@ -169,20 +169,45 @@ describe Category do
   end
 
   describe 'non-english characters' do
-    let(:category) { Fabricate(:category, name: "電車男") }
+    let(:category) { Fabricate(:category, name: "测试") }
 
     it "creates a blank slug, this is OK." do
       category.slug.should be_blank
       category.slug_for_url.should == "#{category.id}-category"
     end
+
+    it "creates a localized slug if default locale is zh_CN" do
+      SiteSetting.default_locale = 'zh_CN'
+      category.slug.should_not be_blank
+      category.slug_for_url.should == "ce-shi"
+    end
   end
 
   describe 'slug would be a number' do
-    let(:category) { Fabricate(:category, name: "電車男 2") }
+    let(:category) { Fabricate(:category, name: "2") }
 
     it 'creates a blank slug' do
       category.slug.should be_blank
       category.slug_for_url.should == "#{category.id}-category"
+    end
+  end
+
+  describe 'custom slug can be provided' do
+    it 'has the custom value' do
+      c = Fabricate(:category, name: "Cats", slug: "cats-category")
+      c.slug.should eq("cats-category")
+    end
+
+    it 'and be sanitized' do
+      c = Fabricate(:category, name: 'Cats', slug: '  invalid slug')
+      c.slug.should == 'invalid-slug'
+    end
+
+    it 'fails if custom slug is duplicate with existing' do
+      c1 = Fabricate(:category, name: "Cats", slug: "cats")
+      c2 = Fabricate.build(:category, name: "More Cats", slug: "cats")
+      c2.should_not be_valid
+      c2.errors[:slug].should be_present
     end
   end
 
@@ -275,6 +300,16 @@ describe Category do
         @topic.category.should == @category
         @category.topic.should == @topic
       end
+    end
+  end
+
+  describe "update" do
+    it "should enforce uniqueness of slug" do
+      Fabricate(:category, slug: "the-slug")
+      c2 = Fabricate(:category, slug: "different-slug")
+      c2.slug = "the-slug"
+      c2.should_not be_valid
+      c2.errors[:slug].should be_present
     end
   end
 

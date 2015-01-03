@@ -135,12 +135,6 @@ class ListController < ApplicationController
     render 'list', formats: [:rss]
   end
 
-  def popular_redirect
-    # We've renamed popular to latest. Use a redirect until we're sure we can
-    # safely remove this.
-    redirect_to latest_path, :status => 301
-  end
-
   def top(options=nil)
     options ||= {}
     period = ListController.best_period_for(current_user.try(:previous_visit_at), options[:category])
@@ -270,6 +264,7 @@ class ListController < ApplicationController
       search: params[:search]
     }
     options[:no_subcategories] = true if params[:no_subcategories] == 'true'
+    options[:slow_platform] = true if slow_platform?
 
     options
   end

@@ -298,9 +298,7 @@ Discourse.AdminUser = Discourse.User.extend({
     });
   },
 
-  deleteForbidden: function() {
-    return (!this.get('can_be_deleted') || this.get('post_count') > 0);
-  }.property('post_count'),
+  deleteForbidden: Em.computed.not("canBeDeleted"),
 
   deleteExplanation: function() {
     if (this.get('deleteForbidden')) {
@@ -314,22 +312,30 @@ Discourse.AdminUser = Discourse.User.extend({
     }
   }.property('deleteForbidden'),
 
-  destroy: function() {
+  destroy: function(opts) {
     var user = this;
+    var location = document.location.pathname;
 
     var performDestroy = function(block) {
-      var formData = { context: window.location.pathname };
+      var formData = { context: location };
       if (block) {
         formData["block_email"] = true;
         formData["block_urls"] = true;
         formData["block_ip"] = true;
+      }
+      if (opts && opts.deletePosts) {
+        formData["delete_posts"] = true;
       }
       Discourse.ajax("/admin/users/" + user.get('id') + '.json', {
         type: 'DELETE',
         data: formData
       }).then(function(data) {
         if (data.deleted) {
-          document.location = "/admin/users/list/active";
+          if (/^\/admin\/users\/list\//.test(location)) {
+            document.location = location;
+          } else {
+            document.location = "/admin/users/list/active";
+          }
         } else {
           bootbox.alert(I18n.t("admin.user.delete_failed"));
           if (data.user) {

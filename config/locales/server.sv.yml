@@ -23,13 +23,11 @@ sv:
   log_in: "Logga in"
   via: "%{username} via %{site_name}"
   is_reserved: "är reserverat"
-  purge_reason: "Automatiskt borttagen på grund av att vara gammal och ej verifierad"
   disable_remote_images_download_reason: "Fjärrbilds nedladdning är inaktiverad eftersom det inte fanns tillräckligt mycket lagringsutrymme tillgängligt."
   errors:
     messages:
       too_long_validation: "är begränsad till %{max} karaktärer; du skrev in %{length}. "
       invalid_boolean: "Ogiltigt boolean."
-      taken: "används redan"
     embed:
       load_from_remote: "Det uppstod ett fel vid laddning av artikeln."
   bulk_invite:
@@ -256,7 +254,6 @@ sv:
   activation:
     action: "Aktivera ditt konto"
     already_done: "Tyvärr, denna kontoaktiveringslänk är inte längre giltig. Kanske är ditt konto redan aktiverat?"
-    please_continue: "Ditt nya konto är konfirmerat och du är nu inloggad."
     continue_button: "Fortsätt till %{site_name}"
     welcome_to: "Välkommen till %{site_name}!"
     approval_required: "En moderator måste manuellt godkänna ditt nya konto innan du kan komma åt detta forum. Du kommer få ett mail när ditt konto har godkänts!"
@@ -273,12 +270,8 @@ sv:
       description: 'Detta inläggs innehåll är inkluderar saker som som en förnuftig person skulle betrakta som stötande, kränkande eller överträdelse av <a href="/guidelines"> våra community riktlinjer</a>r.'
       long_form: 'flagga detta som olämpligt'
     notify_user:
-      title: 'Notifiera {{username}}'
-      long_form: 'notifierad användare'
       email_body: "%{link}\n\n%{message}"
     notify_moderators:
-      title: 'Notifiera moderatorer'
-      long_form: 'notifierade moderatorer'
       email_title: 'Ett inlägg i "%{title}" kräver uppmärksamhet från en moderator'
       email_body: "%{link}\n\n%{message}"
     bookmark:
@@ -300,8 +293,6 @@ sv:
     inappropriate:
       title: 'Olämpligt'
       long_form: 'flaggad som olämplig'
-    notify_moderators:
-      title: 'Notifiera moderatorer'
   archetypes:
     regular:
       title: "Vanlig Tråd"
@@ -458,6 +449,13 @@ sv:
     faq_url: "Om du har en FAQ någon annanstans som du vill använda, skriv den fullständiga URL:en här."
     privacy_policy_url: "Om du har ett dokument med en integritetspolicy någon annanstans som du vill använda, skriv den fullständiga URL:en här."
     default_digest_email_frequency: "Hur ofta användare får emailutskick som standard. De kan ändra detta val under sina inställningar."
+    errors:
+      invalid_email: "Felaktig e-postadress."
+      invalid_username: "Det finns ingen användare med detta användarnamn."
+      invalid_integer_min_max: "Värdet måste vara mellan %{min} och %{max}."
+      invalid_integer_min: "Värdet måste vara %{max} eller större."
+      invalid_integer_max: "Värdet får inte vara större än %{max}."
+      invalid_integer: "Värdet måste vara ett heltal."
   notification_types:
     mentioned: "%{display_username} mentioned you in %{link}"
     liked: "%{display_username} liked your post in %{link}"
@@ -520,6 +518,10 @@ sv:
       subject_template: "Välkommen till %{site_name}!"
     welcome_invite:
       subject_template: "Välkommen till %{site_name}!"
+    restore_succeeded:
+      text_body_template: "Återställningen lyckades."
+    restore_failed:
+      subject_template: "Återställningen misslyckades"
     too_many_spam_flags:
       subject_template: "Nytt konto blockerat"
     blocked_by_staff:
@@ -608,6 +610,8 @@ sv:
     signup:
       subject_template: "[%{site_name}] Activate your new account"
       text_body_template: "Välkommen till %{site_name}!\n\nKlicka på följande länk för att bekräfta och aktivera ditt nya konto:\n%{base_url}/users/activate-account/%{email_token}\n\nOm länken ovan inte går att klicka på kan du kopiera och klistra in länken i adressfältet i din webbläsare. \n"
+  page_not_found:
+    see_more: "Mer"
   deleted: 'raderad'
   upload:
     pasted_image_filename: "Inklistrad bild"

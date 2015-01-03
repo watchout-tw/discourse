@@ -100,33 +100,29 @@ Discourse.Composer = Discourse.Model.extend({
 
   hidePreview: Em.computed.not('showPreview'),
 
-  // Whether to disable the post button
+  // whether to disable the post button
   cantSubmitPost: function() {
-
-    // Can't submit while loading
+    // can't submit while loading
     if (this.get('loading')) return true;
 
-    // Title is required when:
-    //    - creating a new topic
-    //    - editing the 1st post
-    //    - creating a private message
-
+    // title is required when
+    //  - creating a new topic/private message
+    //  - editing the 1st post
     if (this.get('canEditTitle') && !this.get('titleLengthValid')) return true;
-
-    // Need at least one user when sending a private message
-    if ( this.get('creatingPrivateMessage') &&
-         this.get('targetUsernames') &&
-        (this.get('targetUsernames').trim() + ',').indexOf(',') === 0) {
-      return true;
-    }
 
     // reply is always required
     if (this.get('missingReplyCharacters') > 0) return true;
 
-    return this.get('canCategorize') &&
-        !Discourse.SiteSettings.allow_uncategorized_topics &&
-        !this.get('categoryId') &&
-        !Discourse.User.currentProp('staff');
+    if (this.get("privateMessage")) {
+      // need at least one user when sending a PM
+      return this.get('targetUsernames') && (this.get('targetUsernames').trim() + ',').indexOf(',') === 0;
+    } else {
+      // has a category? (when needed)
+      return this.get('canCategorize') &&
+            !Discourse.SiteSettings.allow_uncategorized_topics &&
+            !this.get('categoryId') &&
+            !Discourse.User.currentProp('staff');
+    }
   }.property('loading', 'canEditTitle', 'titleLength', 'targetUsernames', 'replyLength', 'categoryId', 'missingReplyCharacters'),
 
   /**
@@ -306,7 +302,18 @@ Discourse.Composer = Discourse.Model.extend({
       }
     }
 
+    if(opts && opts.space){
+      if(before.length > 0 && !before[before.length-1].match(/\s/)){
+        before = before + " ";
+      }
+      if(after.length > 0 && !after[0].match(/\s/)){
+        after = " " + after;
+      }
+    }
+
     this.set('reply', before + text + after);
+
+    return before.length + text.length;
   },
 
   togglePreview: function() {
@@ -456,13 +463,10 @@ Discourse.Composer = Discourse.Model.extend({
 
     // Update the title if we've changed it
     if (this.get('title') && post.get('post_number') === 1) {
-      var topic = this.get('topic');
-      topic.setProperties({
+      Discourse.Topic.update(this.get('topic'), {
         title: this.get('title'),
-        fancy_title: Handlebars.Utils.escapeExpression(this.get('title')),
-        category_id: parseInt(this.get('categoryId'), 10)
+        category_id: this.get('categoryId')
       });
-      topic.save();
     }
 
     post.setProperties({

@@ -25,6 +25,7 @@ class TopicQuery
                      status
                      state
                      search
+                     slow_platform
                      ).map(&:to_sym)
 
   # Maps `order` to a columns in `topics`
@@ -56,9 +57,9 @@ class TopicQuery
     # When logged in we start with different results
     if @user
       builder.add_results(unread_results(topic: topic, per_page: builder.results_left), :high)
-      builder.add_results(new_results(topic: topic, per_page: builder.category_results_left), :high) unless builder.category_full?
+      builder.add_results(new_results(topic: topic, per_page: builder.category_results_left)) unless builder.full?
     end
-    builder.add_results(random_suggested(topic, builder.results_left, builder.excluded_topic_ids), :low) unless builder.full?
+    builder.add_results(random_suggested(topic, builder.results_left, builder.excluded_topic_ids)) unless builder.full?
 
     create_list(:suggested, {}, builder.results)
   end
@@ -155,15 +156,21 @@ class TopicQuery
 
   protected
 
+    def per_page_setting
+      @options[:slow_platform] ? 15 : 30
+    end
+
     def create_list(filter, options={}, topics = nil)
       topics ||= default_results(options)
       topics = yield(topics) if block_given?
-      TopicList.new(filter, @user, topics, options.merge(@options))
+      list = TopicList.new(filter, @user, topics, options.merge(@options))
+      list.per_page = per_page_setting
+      list
     end
 
     def private_messages_for(user)
       options = @options
-      options.reverse_merge!(per_page: SiteSetting.topics_per_page)
+      options.reverse_merge!(per_page: per_page_setting)
 
       # Start with a list of all topics
       result = Topic.includes(:allowed_users)
@@ -230,10 +237,10 @@ class TopicQuery
     # Create results based on a bunch of default options
     def default_results(options={})
       options.reverse_merge!(@options)
-      options.reverse_merge!(per_page: SiteSetting.topics_per_page)
+      options.reverse_merge!(per_page: per_page_setting)
 
       # Start with a list of all topics
-      result = Topic
+      result = Topic.unscoped
 
       if @user
         result = result.joins("LEFT OUTER JOIN topic_users AS tu ON (topics.id = tu.topic_id AND tu.user_id = #{@user.id.to_i})")
@@ -286,6 +293,7 @@ class TopicQuery
                                         notification_level = ?)', @user.id, level)
       end
 
+      require_deleted_clause = true
       if status = options[:status]
         case status
         when 'open'
@@ -298,9 +306,16 @@ class TopicQuery
           result = result.where('topics.visible')
         when 'invisible'
           result = result.where('NOT topics.visible')
+        when 'deleted'
+          guardian = Guardian.new(@user)
+          if guardian.is_staff?
+            result = result.where('topics.deleted_at IS NOT NULL')
+            require_deleted_clause = false
+          end
         end
       end
 
+      result = result.where('topics.deleted_at IS NULL') if require_deleted_clause
       result = result.where('topics.posts_count <= ?', options[:max_posts]) if options[:max_posts].present?
       result = result.where('topics.posts_count >= ?', options[:min_posts]) if options[:min_posts].present?
 

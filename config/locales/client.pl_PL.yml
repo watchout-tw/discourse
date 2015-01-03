@@ -100,7 +100,7 @@ pl_PL:
           other: "%{count} dni temu"
     share:
       topic: 'udostępnij odnośnik do tego tematu'
-      post: 'udostępnij odnośnik do wpisu #%{postNumber}'
+      post: 'wpis #%{postNumber}'
       close: 'zamknij'
       twitter: 'udostępnij ten odnośnik na Twitterze'
       facebook: 'udostępnij ten odnośnik na Facebooku'
@@ -269,14 +269,20 @@ pl_PL:
       location_not_found: (nieznane)
       organisation: Organizacja
       phone: Numer telefonu
-      other_accounts: Inne konta z tym adresem IP
-      no_other_accounts: (brak)
+      other_accounts: "Inne konta z tym adresem IP:"
+      delete_other_accounts: "Usuń %{count}"
+      username: "nazwa użytkownika"
+      trust_level: "TL"
+      read_time: "czas czytania:"
+      topics_entered: "wprowadzone tematy:"
+      post_count: "# wpisów"
+      confirm_delete_other_accounts: "Czy na pewno chcesz usunąć wybrane konta?"
     user:
       said: "{{username}}:"
       profile: "Profil"
       mute: "Wycisz"
       edit: "Edytuj ustawienia"
-      download_archive: "pobierz archiwum moich wpisów"
+      new_private_message: "Nowa Prywatna Wiadomość"
       private_message: "Prywatna wiadomość"
       private_messages: "Wiadomości"
       activity_stream: "Aktywność"
@@ -313,6 +319,7 @@ pl_PL:
       deleted_yourself: "Twoje konto zostało usunięte."
       delete_yourself_not_allowed: "Nie możesz usunąć swojego konta w tej chwili. Skontaktuj się z administratorem, by usunął Twoje konto za Ciebie."
       unread_message_count: "Wiadomości"
+      admin_delete: "Usuń"
       staff_counters:
         flags_given: "uczynnych oflagowań"
         flagged_posts: "oflagowane wpisy"
@@ -360,29 +367,32 @@ pl_PL:
         instructions: "Tło karty użytkownika est wycentrowane i posiada domyślną szerokość 590px."
       email:
         title: "Email"
-        instructions: "Nie będzie publicznie widoczny."
-        ok: "Wygląda dobrze. Wyślemy Ci wiadomość do potwierdzenia."
-        invalid: "Podaj poprawny adres email."
-        authenticated: "Twój adres email został potwierdzony przez {{provider}}."
-        frequency: "Wyślemy do Ciebie email tylko jeżeli dawno Cię nie widzieliśmy i wyłącznie na temat rzeczy których jeszcze nie widziałeś."
+        instructions: "Nie będzie publicznie widoczny"
+        ok: "Otrzymasz potwierdzenie emailem"
+        invalid: "Podaj poprawny adres email"
+        authenticated: "Twój email został potwierdzony przez {{provider}}"
+        frequency:
+          zero: "Otrzymasz email natychmiast jeśli nie widziałeś rzeczy na temat której wysyłamy email."
+          one: "Otrzymasz e-mail jeśli nie widzieliśmy Cie w ciągu ostatniej minuty i jeszcze nie widziałeś rzeczy której dotyczy powiadomienie."
+          other: "Otrzymasz e-mail jeśli nie widzieliśmy Cie w ciągu ostatnich  {{count}} minut i jeszcze nie widziałeś rzeczy której dotyczy powiadomienie."
       name:
         title: "Pełna nazwa"
         instructions: "Twoja pełna nazwa (opcjonalna)"
-        too_short: "Twoja nazwa jest za krótka."
-        ok: "Twoja nazwa jest poprawna."
+        too_short: "Twoja nazwa jest zbyt krótka"
+        ok: "Twoja nazwa jest ok"
       username:
         title: "Nazwa konta"
-        instructions: "Unikalna, krótka i bez spacji."
-        short_instructions: "Aby o tobie wspomnieć, wystarczy napisać @{{username}}."
-        available: "Nazwa jest dostępna."
-        global_match: "Email zgadza się z zarejestrowaną nazwą użytkownika."
+        instructions: "Unikalna, krótka i bez spacji"
+        short_instructions: "Inni mogą o tobie wspomnieć pisząc @{{username}}"
+        available: "Nazwa użytkownika jest dostępna"
+        global_match: "Email zgadza się z zarejestrowaną nazwą użytkownika"
         global_mismatch: "Zajęta. Może spróbuj {{suggestion}}?"
         not_available: "Niedostępna. Może spróbuj {{suggestion}}?"
-        too_short: "Nazwa jest za krótka."
-        too_long: "Nazwa jest za długa."
+        too_short: "Nazwa użytkownika jest zbyt krótka"
+        too_long: "Nazwa użytkownika jest zbyt długa"
         checking: "Sprawdzanie, czy nazwa jest dostępna…"
-        enter_email: 'Nazwa znaleziona. Wpisz przypisany adres email.'
-        prefilled: "Email zgadza się z zarejestrowaną nazwą użytkownika."
+        enter_email: 'Nazwa użytkownika znaleziona – wpisz przypisany adres email'
+        prefilled: "Email zgadza się z zarejestrowaną nazwą użytkownika"
       locale:
         title: "Język interfejsu"
         instructions: "Język interfejsu użytkownika. Zmieni się, gdy odświeżysz stronę."
@@ -457,7 +467,6 @@ pl_PL:
           none: "Jeszcze nikogo nie zaproszono. Możesz wysłać pojedyncze zaproszenie lub <a href='https://meta.discourse.org/t/send-bulk-invites/16468'>zaprosić wiele osób na raz wysyłając odpowiedni plik</a>."
           text: "Zaproszenia hurtowe z pliku"
           uploading: "Wysyłanie…"
-          success: "Plik został przesłany pomyślnie, wkrótce dostaniesz powiadomienie z postępem."
           error: "Podczas przesyłania wystąpił błąd '{{filename}}': {{message}}"
       password:
         title: "Hasło"
@@ -465,7 +474,6 @@ pl_PL:
         common: "To hasło jest zbyt popularne."
         ok: "Twoje hasło jest poprawne."
         instructions: "Co najmniej %{count} znaków."
-      associated_accounts: "Powiązane konta"
       ip_address:
         title: "Ostatni adres IP"
       registration_ip_address:
@@ -501,6 +509,8 @@ pl_PL:
         fixed: "Załaduj stronę"
     close: "Zamknij"
     assets_changed_confirm: "Serwis został zmieniony, czy pozwolisz na przeładowanie strony w celu aktualizacji do najnowszej wersji?"
+    logout: "Nastąpiło wylogowanie."
+    refresh: "Odśwież"
     read_only_mode:
       enabled: "Administrator włączył tryb tylko do odczytu. Możesz przeglądać serwis, jednak zmiany nie będą możliwe."
       login_disabled: "Logowanie jest zablokowane, gdy strona jest w trybie tylko do odczytu."
@@ -615,7 +625,7 @@ pl_PL:
       reply: "Odpowiedz"
       cancel: "Anuluj"
       create_topic: "Utwórz temat"
-      create_pm: "Utwórz prywatną wiadomość"
+      create_pm: "Prywatna wiadomość"
       title: "Lub naciśnij Ctrl+Enter"
       users_placeholder: "Dodaj osobę"
       title_placeholder: "O czym jest ta dyskusja w jednym zwartym zdaniu. "
@@ -686,10 +696,10 @@ pl_PL:
       title_with_attachments: "Dodaj obraz lub plik"
       from_my_computer: "Z mojego urządzenia"
       from_the_web: "Z Internetu"
-      remote_tip: "odnośnik do obrazu http://example.com/image.jpg"
-      remote_tip_with_attachments: "odnośnik do obrazu lub pliku http://example.com/file.ext (dozwolone rozszerzenia: {{authorized_extensions}})."
+      remote_tip: "link do obrazu"
+      remote_tip_with_attachments: "odnośnik do obrazu lub pliku ({{authorized_extensions}})"
       local_tip: "kliknij, aby wybrać obraz z Twojego urządzenia"
-      local_tip_with_attachments: "kliknij, aby wybrać obraz lub plik z Twojego urządzenia (dozwolone rozszerzenia: {{authorized_extensions}})"
+      local_tip_with_attachments: "kliknij aby wybrać obraz lub plik ze swojego urządzenia ({{authorized_extensions}})"
       hint: "(możesz także upuścić plik z katalogu komputera w okno edytora)"
       hint_for_supported_browsers: "(możesz przeciągnąć lub wkleić obrazy do edytora, aby je wgrać)"
       uploading: "Wgrywanie"
@@ -703,6 +713,7 @@ pl_PL:
         user: "Szukaj wpisów @{{username}}"
         category: "Szukaj w kategorii \"{{category}}\""
         topic: "Szukaj w tym temacie"
+        private_messages: "Wyszukiwanie w prywatnych wiadomościach"
     site_map: "przejdź do innej listy tematów lub kategorii"
     go_back: 'wróć'
     not_logged_in_user: 'strona użytkownika z podsumowaniem bieżących działań i ustawień'
@@ -759,7 +770,7 @@ pl_PL:
         top: "Nie ma już więcej najlepszych tematów."
     topic:
       filter_to: "{{post_count}} wpisów w temacie"
-      create: 'Utwórz temat'
+      create: 'Nowy temat'
       create_long: 'Utwórz nowy temat'
       private_message: 'Napisz Prywatną Wiadomość'
       list: 'Tematy'
@@ -1187,7 +1198,7 @@ pl_PL:
       general: 'Ogólne'
       settings: 'Ustawienia'
       delete: 'Usuń kategorię'
-      create: 'Utwórz kategorię'
+      create: 'Nowa kategoria'
       save: 'Zapisz kategorię'
       creation_error: Podczas tworzenia tej kategorii wystąpił błąd.
       save_error: Podczas zapisywania tej kategorii wystąpił błąd.
@@ -1238,7 +1249,8 @@ pl_PL:
           title: "Wyciszone"
           description: "Nie będziesz powiadamiany o nowych tematach w tych kategoriach i nie będą się one pojawiać w karcie Nieprzeczytane."
     flagging:
-      title: 'Dlaczego chcesz oflagować ten wpis?'
+      title: 'Dziękujemy za pomoc w utrzymaniu porządku w naszej społeczności!'
+      private_reminder: 'oflagowania są poufne i widoczne <b>jedynie</b> dla obsługi serwisu'
       action: 'Oflaguj wpis'
       take_action: "Podejmij działanie"
       notify_action: 'Prywatna wiadomość'
@@ -1254,14 +1266,14 @@ pl_PL:
         off_topic: "Jest nie-na-temat"
         inappropriate: "Jest nieodpowiednie"
         spam: "Jest odebrane jako spam"
-      custom_placeholder_notify_user: "Dlaczego ten wpis wymaga bezpośredniej, prywatnej rozmowy z tym użytkownikiem? Napisz konkretnie, konstuktywnie i kulturalnie."
-      custom_placeholder_notify_moderators: "Dlaczego ten wpis wymaga uwagi moderatora? Daj nam znać co konkretnie Cię zaniepokoiło i dostarcz nam odpowiednie odnośniki jeśli to możliwe."
+      custom_placeholder_notify_user: "Napisz konkretnie, konstuktywnie i kulturalnie."
+      custom_placeholder_notify_moderators: "Dlaczego ten wpis wymaga uwagi moderatora? Opisz co konkretnie Cię zaniepokoiło i jeśli to możliwe umieść odpowiednie odnośniki."
       custom_message:
         at_least: "wprowadź co najmniej {{n}} znaków"
         more: "{{n}} aby wysłać…"
         left: "{{n}} pozostało"
     flagging_topic:
-      title: "Dlaczego chcesz zgłosić ten temat?"
+      title: "Dziękujemy za pomoc w utrzymaniu porządku w naszej społeczności!"
       action: "Zgłoś temat"
       notify_action: "Wyślij prywatną wiadomość"
     topic_map:
@@ -1384,7 +1396,7 @@ pl_PL:
       title: 'Administrator Discourse'
       moderator: 'Moderator'
       dashboard:
-        title: "Kokpit"
+        title: "Raporty"
         last_updated: "Ostatnia aktualizacja panelu kontrolnego:"
         version: "Wersja"
         up_to_date: "Wersja Aktualna!"
@@ -1571,18 +1583,20 @@ pl_PL:
             title: "Wycofaj bazę danych do poprzedniego poprawnego stanu"
             confirm: "Czy na pewno chcesz przywrócić bazę danych do poprzedniego poprawnego stanu?"
       export_csv:
-        users:
-          text: "Eksport użytkowników"
-          title: "Wyeksportuj listę użytkowników do pliku CSV"
-        success: "Rozpoczęto eksport, za jakiś czas otrzymasz powiadomienie z informacją o postępach."
         failed: "Eksport zakończył się niepowodzeniem. Sprawdź logi."
+        button_text: "Eksportuj"
+        button_title:
+          user: "Eksportuj listę wszystkich użytkowników do formatu CSV."
+          staff_action: "Eksportuj log zmian wykonanych przez zespół do formatu CSV."
+          screened_email: "Eksportuj listę monitorowanych adresów email do formatu CSV."
+          screened_ip: "Eksportuj listę monitorowanych IP do formatu CSV."
+          screened_url: "Eksportuj listę monitorowanych URLi do formatu CSV."
       customize:
         title: "Wygląd"
         long_title: "Personalizacja strony"
+        css: "CSS"
         header: "Nagłówki"
-        css: "Arkusz stylów"
-        mobile_header: "Mobilne nagłówki"
-        mobile_css: "Mobilny arkusz stylów"
+        footer: "Stopka"
         override_default: "Nie dołączaj standardowego arkusza stylów"
         enabled: "Włączone?"
         preview: "podgląd"
@@ -1652,6 +1666,7 @@ pl_PL:
         settings: "Ustawienia"
         all: "Wszystkie"
         sending_test: "Wysyłanie testowego emaila…"
+        error: "<b>BŁAD</b> - %{server_error}"
         test_error: "Wystąpił problem podczas wysyłania testowego maila. Sprawdź ustawienia poczty, sprawdź czy Twój serwer nie blokuje połączeń pocztowych i spróbuj ponownie."
         sent: "Wysłane"
         skipped: "Pominięte"
@@ -1665,7 +1680,7 @@ pl_PL:
         sent_test: "wysłany!"
         delivery_method: "Metoda Dostarczenia"
         preview_digest: "Pokaż zestawienie aktywności"
-        preview_digest_desc: "Narzędzie służące do podglądu treści emaila z zestawieniem aktywności jaki jest wysyłany z twojego forum."
+        preview_digest_desc: "Podgląd treści emaila z zestawieniem aktywności jaki jest wysyłany nieaktywnym użytkownikom."
         refresh: "Odśwież"
         format: "Format"
         html: "html"
@@ -1727,6 +1742,7 @@ pl_PL:
             check_email: "sprawdzenie poczty"
             delete_topic: "usunięcie tematu"
             delete_post: "usunięcie wpisu"
+            impersonate: "udawanie użytkownika"
         screened_emails:
           title: "Ekranowane emaile"
           description: "Kiedy ktoś próbuje założyć nowe konto, jego adres email zostaje sprawdzony i rejestracja zostaje zablokowana, lub inna akcja jest podejmowana."
@@ -1742,6 +1758,9 @@ pl_PL:
           title: "Ekranowane adresy IP"
           description: 'Adres IP który teraz oglądasz. Użyj "Zezwól" aby dodać do białej listy adresów IP.'
           delete_confirm: "Czy na pewno chcesz usunąć regułę dla %{ip_address}?"
+          roll_up_confirm: "Czy na pewno chcesz zgrupować monitorowane IP w podsieci?"
+          rolled_up_some_subnets: "Pomyślnie zwinięto ban IP dla podsieci: %{subnets}."
+          rolled_up_no_subnet: "Brak pozycji do zwinięcia."
           actions:
             block: "Zablokuj"
             do_nothing: "Zezwól"
@@ -1750,6 +1769,9 @@ pl_PL:
             label: "Nowy:"
             ip_address: "Adres IP"
             add: "Dodaj"
+          roll_up:
+            text: "Zgrupuj"
+            title: "Tworzy nowy ban dla podsieci jeśli jest co najmniej  'min_ban_entries_for_roll_up' pozycji."
         logster:
           title: "Logi błędów"
       impersonate:
@@ -1760,16 +1782,17 @@ pl_PL:
         create: 'Dodaj Administratora'
         last_emailed: "Ostatnio wysłano email"
         not_found: "Przepraszamu, taka nazwa użytkowanika nie istnieje w naszym systemie."
+        id_not_found: "Przepraszamy, ten identyfikator użytkownika nie istnieje w naszym systemie."
         active: "Aktywny"
         show_emails: "Pokaż emaile"
         nav:
           new: "Nowi"
           active: "Aktywni"
           pending: "Oczekujący"
-          admins: 'Administratorzy'
-          moderators: 'Moderatorzy'
+          staff: 'Zespół'
           suspended: 'Zawieszeni'
           blocked: 'Zablokowani'
+          suspect: 'Podejrzani'
         approved: "Zatwierdzam?"
         approved_selected:
           one: "zatwierdź użytkownika"
@@ -1788,10 +1811,12 @@ pl_PL:
           regular: 'Użytkownicy na 2 poziomie zaufania (Zwyczajni)'
           leader: 'Użytkownicy na 3 poziomie zaufania (Regularni)'
           elder: 'Użytkownicy na 4 poziomie zaufania (Weterani)'
+          staff: "Zespół"
           admins: 'Administratorzy'
           moderators: 'Moderatoratorzy'
           blocked: 'Zablokowane konta'
           suspended: 'Zawieszone konta'
+          suspect: 'Podejrzani użytkownicy'
         reject_successful:
           one: "Odrzucenie 1 użytkownika(-czki) powiodło się."
           few: "Odrzucenie %{count} użytkowników powiodło się."
@@ -2063,7 +2088,6 @@ pl_PL:
         back: '<b>u</b> wstecz'
         up_down: '<b>k</b>/<b>j</b> zaznacz &uarr; &darr;'
         open: '<b>o</b> lub <b>Enter</b> otwórz wybrany temat'
-        next_prev: '<b>shift j</b>/<b>shift k</b> następna/poprzednia sekcja'
       application:
         title: 'Aplikacja'
         create: '<b>c</b> utwórz nowy temat'
@@ -2078,10 +2102,8 @@ pl_PL:
       actions:
         title: 'Operacje'
         star: '<b>f</b> oznacz temat gwiazdką'
-        share_topic: '<b>shift s</b> udostępnij temat'
         share_post: '<b>s</b> udostępnij wpis'
         reply_as_new_topic: '<b>t</b> odpowiedz w nowym temacie'
-        reply_topic: '<b>shift r</b> odpowiedz w temacie'
         reply_post: '<b>r</b> odpowiedz na wpis'
         quote_post: '<b>q</b> cytuj wpis'
         like: '<b>l</b> polub wpis'

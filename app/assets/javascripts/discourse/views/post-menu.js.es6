@@ -1,3 +1,5 @@
+import StringBuffer from 'discourse/mixins/string-buffer';
+
 // Helper class for rendering a button
 export var Button = function(action, label, icon, opts) {
   this.action = action;
@@ -10,6 +12,18 @@ export var Button = function(action, label, icon, opts) {
   }
   this.opts = this.opts || opts || {};
 };
+
+function animateHeart($elem, start, end, complete) {
+  $elem.stop()
+       .css('textIndent', start)
+       .animate({ textIndent: end }, {
+          complete: complete,
+          step: function(now) {
+            $(this).css('transform','scale('+now+')');
+          },
+          duration: 150
+        }, 'linear');
+}
 
 Button.prototype.render = function(buffer) {
   var opts = this.opts;
@@ -28,13 +42,12 @@ Button.prototype.render = function(buffer) {
 
 var hiddenButtons;
 
-export default Discourse.View.extend({
+export default Discourse.View.extend(StringBuffer, {
   tagName: 'section',
   classNames: ['post-menu-area', 'clearfix'],
 
-  shouldRerender: Discourse.View.renderIfChanged(
+  rerenderTriggers: [
     'post.deleted_at',
-    'post.flagsAvailable.@each',
     'post.reply_count',
     'post.showRepliesBelow',
     'post.can_delete',
@@ -43,13 +56,13 @@ export default Discourse.View.extend({
     'post.topic.deleted_at',
     'post.replies.length',
     'post.wiki',
-    'collapsed'),
+    'collapsed'],
 
   _collapsedByDefault: function() {
     this.set('collapsed', true);
   }.on('init'),
 
-  render: function(buffer) {
+  renderString: function(buffer) {
     var post = this.get('post');
 
     buffer.push("<nav class='post-controls'>");
@@ -95,6 +108,10 @@ export default Discourse.View.extend({
       } else {
         hiddenButtons = [];
       }
+    }
+
+    if(post.get("bookmarked")){
+      hiddenButtons.removeObject("bookmark");
     }
 
     var yours = post.get('yours');
@@ -195,7 +212,23 @@ export default Discourse.View.extend({
   },
 
   clickLike: function(post) {
-    this.get('controller').send('toggleLike', post);
+    var $heart = this.$('.fa-heart'),
+        controller = this.get('controller'),
+        $likeButton = this.$('button[data-action=like]');
+
+    var acted = post.get('actionByName.like.acted');
+    if (acted) {
+      controller.send('toggleLike', post);
+      $likeButton.removeClass('has-like').addClass('like');
+    } else {
+      var scale = [1.0, 1.5];
+      animateHeart($heart, scale[0], scale[1], function() {
+        animateHeart($heart, scale[1], scale[0], function() {
+          controller.send('toggleLike', post);
+          $likeButton.removeClass('like').addClass('has-like');
+        });
+      });
+    }
   },
 
   // Flag button

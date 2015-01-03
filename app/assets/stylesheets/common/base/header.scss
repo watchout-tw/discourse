@@ -17,7 +17,7 @@
     .title {
       display: table;
       float: left;
-      height: 40px;
+      height: 45px;
       > a {
         display: table-cell;
         vertical-align: middle;
@@ -29,7 +29,7 @@
     }
 
     .fa-home {
-      font-size: 23px;
+      font-size: 1.643em;
     }
 
     .panel {
@@ -66,7 +66,7 @@
         border-top: 1px solid transparent;
         border-left: 1px solid transparent;
         border-right: 1px solid transparent;
-        @include transition(all linear .15s);
+        transition: all linear .15s;
 
 
         &:hover {
@@ -107,7 +107,7 @@
       [class^="fa fa-"] {
         width: 32px;
         height: 32px;
-        font-size: 21px;
+        font-size: 1.714em;
         line-height: 32px;
         display: inline-block;
       }
@@ -160,7 +160,7 @@
   }
 
   li:not(.category):not(.heading) {
-    font-size: 13px;
+    font-size: 0.929em;
     line-height: 16px;
 
       .fa {
@@ -170,7 +170,7 @@
       a {
         display: block;
         padding: 5px;
-        @include transition(all linear .15s);
+        transition: all linear .15s;
       }
 
       &:hover a:not(.badge-notification) {
@@ -222,12 +222,11 @@
     .none {
       padding: 5px;
     }
-    .loading {
-      padding: 10px;
-      display: block;
-      color: scale-color($primary, $lightness: 50%);
-      font-size: 24px;
-      text-align: center;
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border-width: 2px;
+      margin: 0 auto;
     }
     /* as a big ol' click target, don't let text inside be selected */
     @include unselectable;
@@ -267,6 +266,7 @@
 
   .search-context {
     padding: 0 5px;
+    label { margin-bottom: 0; }
   }
 
   .searching {
@@ -274,12 +274,10 @@
     top: 0;
     right: 0;
     .spinner {
-      width: 16px;
-      height: 16px;
-      }
-    .container1 > div, .container2 > div, .container3 > div {
-      width: 4px;
-      height: 4px;
+      width: 10px;
+      height: 10px;
+      border-width: 2px;
+      margin: 20px 0 0 0;
       }
   }
   // I am ghetto using this to display "Show More".. be warned
@@ -364,4 +362,9 @@
 
 #search-help table td {
   padding-right: 10px;
+}
+
+// we don't need this X to clear field
+#search-term::-ms-clear {
+  display: none;
 }

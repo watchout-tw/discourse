@@ -6,6 +6,8 @@
   @namespace Discourse
   @module Discourse
 **/
+import { outputExportResult } from 'discourse/lib/export-result';
+
 export default Ember.ArrayController.extend(Discourse.Presence, {
   loading: false,
   filters: {},
@@ -15,7 +17,7 @@ export default Ember.ArrayController.extend(Discourse.Presence, {
     this.set('loading', true);
     Discourse.URL.set('queryParams', this.get('filters')); // TODO: doesn't work
     Discourse.StaffActionLog.findAll(this.get('filters')).then(function(result) {
-      self.set('content', result);
+      self.set('model', result);
       self.set('loading', false);
     });
   }.observes('filters.action_name', 'filters.acting_user', 'filters.target_user', 'filters.subject'),
@@ -60,6 +62,10 @@ export default Ember.ArrayController.extend(Discourse.Presence, {
 
     filterBySubject: function(subject) {
       this.set('filters.subject', subject);
+    },
+
+    exportStaffActionLogs: function(subject) {
+      Discourse.ExportCsv.exportStaffActionLogs().then(outputExportResult);
     }
   }
 });

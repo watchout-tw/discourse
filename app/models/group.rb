@@ -10,7 +10,7 @@ class Group < ActiveRecord::Base
   after_save :destroy_deletions
 
   validate :name_format_validator
-  validates_uniqueness_of :name
+  validates_uniqueness_of :name, case_sensitive: false
 
   AUTO_GROUPS = {
     :everyone => 0,
@@ -38,11 +38,11 @@ class Group < ActiveRecord::Base
 
   def posts_for(guardian, before_post_id=nil)
     user_ids = group_users.map {|gu| gu.user_id}
-    result = Post.where(user_id: user_ids).includes(:user, :topic).references(:posts, :topics)
+    result = Post.where(user_id: user_ids).includes(:user, :topic, :topic => :category).references(:posts, :topics, :category)
                  .where('topics.archetype <> ?', Archetype.private_message)
                  .where(post_type: Post.types[:regular])
 
-    unless guardian.is_staff?
+    unless guardian.is_admin?
       allowed_ids = guardian.allowed_category_ids
       if allowed_ids.length > 0
         result = result.where('topics.category_id IS NULL or topics.category_id IN (?)', allowed_ids)
@@ -271,6 +271,10 @@ class Group < ActiveRecord::Base
 
   def add(user)
     self.users.push(user)
+  end
+
+  def remove(user)
+    self.group_users.where(user: user).each(&:destroy)
   end
 
   protected

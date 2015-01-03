@@ -202,17 +202,6 @@ Discourse.Topic = Discourse.Model.extend({
     });
   },
 
-  // Save any changes we've made to the model
-  save: function() {
-    // Don't save unless we can
-    if (!this.get('details.can_edit')) return;
-
-    return Discourse.ajax(this.get('url'), {
-      type: 'PUT',
-      data: { title: this.get('title'), category_id: this.get('category.id') }
-    });
-  },
-
   /**
     Invite a user to this topic
 
@@ -365,6 +354,29 @@ Discourse.Topic.reopenClass({
       });
       result.set('actionByName', lookup);
     }
+  },
+
+  update: function(topic, props) {
+    props = JSON.parse(JSON.stringify(props)) || {};
+
+    // Annoyingly, empty arrays are not sent across the wire. This
+    // allows us to make a distinction between arrays that were not
+    // sent and arrays that we specifically want to be empty.
+    Object.keys(props).forEach(function(k) {
+      var v = props[k];
+      if (v instanceof Array && v.length === 0) {
+        props[k + '_empty_array'] = true;
+      }
+    });
+
+    return Discourse.ajax(topic.get('url'), { type: 'PUT', data: props }).then(function(result) {
+
+      // The title can be cleaned up server side
+      props.title = result.basic_topic.title;
+      props.fancy_title = result.basic_topic.fancy_title;
+
+      topic.setProperties(props);
+    });
   },
 
   create: function() {

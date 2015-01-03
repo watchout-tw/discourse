@@ -636,6 +636,11 @@ describe UsersController do
         response.should be_success
       end
 
+      it 'should return a JSON response with the updated username' do
+        xhr :put, :username, username: user.username, new_username: new_username
+        ::JSON.parse(response.body)['username'].should == new_username
+      end
+
     end
   end
 
@@ -782,7 +787,7 @@ describe UsersController do
       xhr :get, :invited, username: inviter.username, filter: 'billybob'
 
       invites = JSON.parse(response.body)['invites']
-      expect(invites).to have(1).item
+      invites.size.should == 1
       expect(invites.first).to include('email' => 'billybob@example.com')
     end
 
@@ -804,7 +809,7 @@ describe UsersController do
       xhr :get, :invited, username: inviter.username, filter: 'billybob'
 
       invites = JSON.parse(response.body)['invites']
-      expect(invites).to have(1).item
+      invites.size.should == 1
       expect(invites.first).to include('email' => 'billybob@example.com')
     end
 
@@ -830,7 +835,7 @@ describe UsersController do
           xhr :get, :invited, username: inviter.username
 
           invites = JSON.parse(response.body)['invites']
-          expect(invites).to have(1).item
+          invites.size.should == 1
           expect(invites.first).to include('email' => invite.email)
         end
       end
@@ -851,7 +856,7 @@ describe UsersController do
             xhr :get, :invited, username: inviter.username
 
             invites = JSON.parse(response.body)['invites']
-            expect(invites).to have(1).item
+            invites.size.should == 1
             expect(invites.first).to include("email" => invite.email)
           end
         end
@@ -885,7 +890,7 @@ describe UsersController do
           xhr :get, :invited, username: inviter.username
 
           invites = JSON.parse(response.body)['invites']
-          expect(invites).to have(1).item
+          invites.size.should == 1
           expect(invites.first).to include('email' => invite.email)
         end
       end
@@ -1218,7 +1223,7 @@ describe UsersController do
             upload = Fabricate(:upload)
             Upload.expects(:create_for).returns(upload)
             # enqueues the user_image generator job
-            xhr :post, :upload_avatar, username: user.username, file: user_image_url, image_type: "avatar"
+            xhr :post, :upload_user_image, username: user.username, file: user_image_url, image_type: "avatar"
             json = JSON.parse(response.body)
             json['url'].should == "/uploads/default/1/1234567890123456.png"
             json['width'].should == 100
@@ -1292,6 +1297,13 @@ describe UsersController do
         response.should be_success
       end
 
+      it 'returns success' do
+        xhr :put, :pick_avatar, username: user.username, upload_id: 111
+        user.reload.uploaded_avatar_id.should == 111
+        response.should be_success
+        json = ::JSON.parse(response.body)
+        json['success'].should == "OK"
+      end
     end
 
   end

@@ -68,7 +68,6 @@ ja:
           other: "%{count} 日前"
     share:
       topic: 'このトピックのリンクをシェアする'
-      post: 'ポスト #%{postNumber} のリンクをシェアする'
       close: '閉じる'
       twitter: 'Twitter でこのリンクを共有する'
       facebook: 'Facebook でこのリンクを共有する'
@@ -87,6 +86,7 @@ ja:
     admin_title: "管理者"
     flags_title: "フラグ"
     show_more: "もっと見る"
+    show_help: "ヘルプ"
     links: "リンク"
     links_lowercase: "リンク"
     faq: "よくある質問"
@@ -120,6 +120,7 @@ ja:
       stat:
         all_time: "All Time"
         last_7_days: "過去7日間"
+      topic_count: "トピック"
     bookmarks:
       not_logged_in: "ポストをブックマークするには、ログインする必要があります"
       created: "このポストをブックマークしました"
@@ -217,14 +218,11 @@ ja:
       location_not_found: （不明）
       organisation: 組織
       phone: 電話
-      other_accounts: 同じIPアドレスを持つアカウント
-      no_other_accounts: （なし）
     user:
       said: "{{username}}:"
       profile: "プロフィール"
       mute: "ミュート"
       edit: "プロフィールを編集"
-      download_archive: "ポストのアーカイブをダウンロード"
       private_message: "プライベートメッセージ"
       private_messages: "メッセージ"
       activity_stream: "アクティビティ"
@@ -301,28 +299,13 @@ ja:
         title: "プロフィール背景"
       email:
         title: "メールアドレス"
-        instructions: "Eメールアドレスは外部に公開されません。"
-        ok: "メールアドレス OK。確認用のメールを送ります。"
-        invalid: "正しいメールアドレスを入力してください。"
-        authenticated: "あたなのメールは {{provider}} により認証されました。"
-        frequency: "メールは、あなたがしばらくの間サイトにログインせず未読トピックが溜まった時のみ送信されます。"
       name:
         title: "名前"
-        too_short: "名前が短すぎます。"
-        ok: "名前 OK。"
       username:
         title: "ユーザ名"
-        instructions: "空白を含まないユニークな名前を入力してください。"
-        short_instructions: "他のユーザはあなたを @{{username}} でタグ付けできます。"
-        available: "ユーザ名は利用可能です。"
-        global_match: "メールアドレスが登録済のユーザ名と一致しました。"
         global_mismatch: "既に利用されています。{{suggestion}} などはいかがでしょう？"
         not_available: "利用できません。{{suggestion}} などはいかがでしょう？"
-        too_short: "ユーザ名が短すぎます。"
-        too_long: "ユーザ名が長すぎます。"
         checking: "ユーザ名が利用可能か確認しています..."
-        enter_email: 'ユーザ名が見つかりました。メールアドレスを入力してください。'
-        prefilled: "この登録ユーザが使用するメールアドレスが見つかりました。"
       locale:
         title: "表示言語"
         instructions: "ユーザインタフェイス表示言語。ページを更新する際には、表示言語を更新されます。"
@@ -387,7 +370,6 @@ ja:
           none: "あなたはまだ誰も招待していません。"
           text: "ファイルからまとめて招待をする"
           uploading: "アップロード中..."
-          success: "ファイル通常にアップされていました。"
           error: "ファイルアップロードエラー：'{{filename}}': {{message}}"
       password:
         title: "パスワード"
@@ -395,7 +377,6 @@ ja:
         common: "このパスワードは他の人が使用している可能性があります。"
         ok: "パスワード OK。"
         instructions: "%{count} 文字以上の長さにしてください。"
-      associated_accounts: "関連アカウント"
       ip_address:
         title: "最終 IP アドレス"
       registration_ip_address:
@@ -542,8 +523,6 @@ ja:
       reply_here: "ここに回答"
       reply: "回答"
       cancel: "キャンセル"
-      create_topic: "トピックを作成"
-      create_pm: "送信"
       title: "またはCtrl+Enter"
       users_placeholder: "ユーザの追加"
       title_placeholder: "このディスカッションを簡潔に説明してください。"
@@ -604,10 +583,7 @@ ja:
       title_with_attachments: "画像/ファイルをアップロード"
       from_my_computer: "このデバイスから"
       from_the_web: "Web から"
-      remote_tip: "画像のアドレスを入力してください (例 http://example.com/image.jpg)。"
-      remote_tip_with_attachments: "画像/ファイルのアドレスを入力してください (例 http://example.com/file.ext) (使用可能な拡張子: {{authorized_extensions}})."
       local_tip: "クリックしてアップロードする画像を選択してください"
-      local_tip_with_attachments: "クリックしてアップロードする画像/ファイルを選択してください (使用可能な拡張子: {{authorized_extensions}})"
       hint: "(アップロードする画像をエディタにドラッグ&ドロップすることもできます)"
       hint_for_supported_browsers: "(アップロードする画像をエディタにドラッグ&ドロップまたは貼り付けることもできます)"
       uploading: "アップロード中"
@@ -673,7 +649,6 @@ ja:
         top: "トップトピックはありません。"
     topic:
       filter_to: "トピック内の{{post_count}}個のポストを表示"
-      create: 'トピックを作成する'
       create_long: '新しいトピックの作成'
       private_message: 'プライベートメッセージを作成'
       list: 'トピック'
@@ -1021,7 +996,6 @@ ja:
       general: '一般'
       settings: '設定'
       delete: 'カテゴリを削除する'
-      create: 'カテゴリを作成する'
       save: 'カテゴリを保存する'
       creation_error: カテゴリの作成に失敗しました。
       save_error: カテゴリの保存に失敗しました。
@@ -1066,7 +1040,6 @@ ja:
           title: "ミュート中"
           description: "このカテゴリに投稿されたトピックについての通知を受け取りません。また、未読タブにも通知されません。"
     flagging:
-      title: 'このポストにフラグをつける理由は何ですか?'
       action: 'フラグをつける'
       take_action: "アクションをする"
       notify_action: '通知する'
@@ -1075,14 +1048,11 @@ ja:
       yes_delete_spammer: "はい、スパマーを削除する"
       submit_tooltip: "プライベートフラッグを通知する"
       cant: "申し訳ありませんが、現在このポストにフラグを立てることはできません。"
-      custom_placeholder_notify_user: "ポストについて、このユーザに個人的に直接確認する必要がある内容を書いてください。詳細かつ建設的に、そして何よりマナーを守った内容にしてください。"
-      custom_placeholder_notify_moderators: "ポストについて、モデレータの確認が必要な理由を書いてください。問題の詳細を書くとともに、可能であれば参照リンクなども加えてください。"
       custom_message:
         at_least: "少なくとも{{n}}文字入力してください"
         more: "あと{{n}}文字..."
         left: "残り{{n}}文字"
     flagging_topic:
-      title: "このトピックにあなたがフラグを立てる理由は何ですか？"
       action: "トピックにフラグを立てる"
       notify_action: "プライベートメッセージ"
     topic_map:
@@ -1346,18 +1316,11 @@ ja:
             title: "データベースを元の作業状態にロールバックする"
             confirm: "本当にデータベースを元の作業状態にロールバックしますか？"
       export_csv:
-        users:
-          text: "ユーザ情報を出力する"
-          title: "ユーザ情報をCSVファイルに出力する"
-        success: "出力作業が始まりました。"
         failed: "出力失敗。詳しくはログに参考してください。"
       customize:
         title: "カスタマイズ"
         long_title: "サイトのカスタマイズ"
         header: "ヘッダ"
-        css: "スタイルシート"
-        mobile_header: "モバイル向けヘッダ"
-        mobile_css: "モバイル向けスタイルシート"
         override_default: "標準のスタイルシートを読み込まない"
         enabled: "有効にする"
         preview: "プレビュー"
@@ -1422,7 +1385,6 @@ ja:
         sent_test: "送信完了!"
         delivery_method: "送信方法"
         preview_digest: "ダイジェストのプレビュー"
-        preview_digest_desc: "フォーラムより送信されるダイジェストメールのプレビューです。"
         refresh: "更新"
         format: "フォーマット"
         html: "html"
@@ -1516,8 +1478,6 @@ ja:
           new: "新規"
           active: "アクティブ"
           pending: "保留中"
-          admins: '管理者'
-          moderators: 'モデレータ'
           suspended: 'サスペンド中'
           blocked: 'ブロック中'
         approved: "承認?"
@@ -1719,7 +1679,6 @@ ja:
         back: '<b>u</b> 戻る'
         up_down: '<b>k</b>/<b>j</b> トピック・投稿 &uarr; &darr;移動'
         open: '<b>o</b> or <b>Enter</b> トピックへ'
-        next_prev: '<b>shift j</b>/<b>shift k</b> 次・前の選択へ移動'
       application:
         title: 'アプリケーション'
         create: '<b>c</b> 新しいトピックを作成'
@@ -1734,9 +1693,7 @@ ja:
       actions:
         title: '操作'
         star: '<b>f</b> お気に入りトピック'
-        share_topic: '<b>shift s</b> トピックをシェアする'
         share_post: '<b>s</b> 投稿をシェアする'
-        reply_topic: '<b>shift r</b> トピックに返信'
         reply_post: '<b>r</b> 投稿に返信'
         quote_post: '<b>q</b> 投稿を引用する'
         like: '<b>l</b> 投稿を「いいね！」する'

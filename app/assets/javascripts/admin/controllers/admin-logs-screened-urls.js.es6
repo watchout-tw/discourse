@@ -1,21 +1,20 @@
-/**
-  This controller supports the interface for listing screened URLs in the admin section.
+import { outputExportResult } from 'discourse/lib/export-result';
 
-  @class AdminLogsScreenedUrlsController
-  @extends Ember.ArrayController
-  @namespace Discourse
-  @module Discourse
-**/
 export default Ember.ArrayController.extend(Discourse.Presence, {
   loading: false,
-  content: [],
 
   show: function() {
     var self = this;
-    this.set('loading', true);
+    self.set('loading', true);
     Discourse.ScreenedUrl.findAll().then(function(result) {
-      self.set('content', result);
+      self.set('model', result);
       self.set('loading', false);
     });
+  },
+
+  actions: {
+    exportScreenedUrlList: function(subject) {
+      Discourse.ExportCsv.exportScreenedUrlList().then(outputExportResult);
+    }
   }
 });

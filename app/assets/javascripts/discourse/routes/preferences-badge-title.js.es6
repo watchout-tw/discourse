@@ -1,16 +1,18 @@
-export default Discourse.RestrictedUserRoute.extend({
+import RestrictedUserRoute from "discourse/routes/restricted-user";
+
+export default RestrictedUserRoute.extend({
   model: function() {
     return Discourse.UserBadge.findByUsername(this.modelFor('user').get('username'));
   },
 
   renderTemplate: function() {
-    return this.render('user/badge-title', { into: 'user', outlet: 'userOutlet' });
+    return this.render('user/badge-title', { into: 'user' });
   },
 
   // A bit odd, but if we leave to /preferences we need to re-render that outlet
   deactivate: function() {
     this._super();
-    this.render('preferences', { into: 'user', outlet: 'userOutlet', controller: 'preferences' });
+    this.render('preferences', { into: 'user', controller: 'preferences' });
   },
 
   setupController: function(controller, model) {

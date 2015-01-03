@@ -5,9 +5,9 @@ describe DiscourseSingleSignOn do
     @sso_url = "http://somesite.com/discourse_sso"
     @sso_secret = "shjkfdhsfkjh"
 
-    SiteSetting.stubs("enable_sso").returns(true)
-    SiteSetting.stubs("sso_url").returns(@sso_url)
-    SiteSetting.stubs("sso_secret").returns(@sso_secret)
+    SiteSetting.enable_sso = true
+    SiteSetting.sso_url = @sso_url
+    SiteSetting.sso_secret = @sso_secret
   end
 
   def make_sso
@@ -32,6 +32,20 @@ describe DiscourseSingleSignOn do
     parsed.external_id.should == sso.external_id
     parsed.custom_fields["a"].should == "Aa"
     parsed.custom_fields["b.b"].should == "B.b"
+  end
+
+  it "can do round trip parsing correctly" do
+    sso = SingleSignOn.new
+    sso.sso_secret = "test"
+    sso.name = "sam saffron"
+    sso.username = "sam"
+    sso.email = "sam@sam.com"
+
+    sso = SingleSignOn.parse(sso.payload, "test")
+
+    sso.name.should == "sam saffron"
+    sso.username.should == "sam"
+    sso.email.should == "sam@sam.com"
   end
 
   it "can lookup or create user when name is blank" do

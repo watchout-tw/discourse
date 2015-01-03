@@ -26,7 +26,7 @@ class Upload < ActiveRecord::Base
 
   def create_thumbnail!(width, height)
     return unless SiteSetting.create_thumbnails?
-    thumbnail = OptimizedImage.create_for(self, width, height)
+    thumbnail = OptimizedImage.create_for(self, width, height, allow_animation: SiteSetting.allow_animated_thumbnails)
     if thumbnail
       optimized_images << thumbnail
       self.width = width
@@ -150,6 +150,7 @@ end
 #  updated_at        :datetime         not null
 #  sha1              :string(40)
 #  origin            :string(1000)
+#  retain_hours      :integer
 #
 # Indexes
 #

@@ -7,7 +7,7 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
                       'selected',
                       'post.hidden:post-hidden',
                       'post.deleted',
-                      'byTopicCreator:topic-creator',
+                      'post.topicOwner:topic-owner',
                       'groupNameClass',
                       'post.wiki:wiki'],
   postBinding: 'content',
@@ -45,8 +45,13 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
 
   // If the cooked content changed, add the quote controls
   cookedChanged: function() {
-    Em.run.scheduleOnce('afterRender', this, '_insertQuoteControls');
+    Em.run.scheduleOnce('afterRender', this, '_cookedWasChanged');
   }.observes('post.cooked'),
+
+  _cookedWasChanged: function() {
+    this.trigger('postViewUpdated', this.$());
+    this._insertQuoteControls();
+  },
 
   mouseUp: function(e) {
     if (this.get('controller.multiSelect') && (e.metaKey || e.ctrlKey)) {
@@ -157,7 +162,7 @@ Discourse.PostView = Discourse.GroupedView.extend(Ember.Evented, {
 
       self.$(".cooked a[href]").each(function() {
         var link = $(this);
-        if (!lc.internal && link.attr('href') === lc.url) {
+        if ((!lc.internal || lc.url[0] === "/") && link.attr('href') === lc.url) {
           // don't display badge counts on category badge
           if (link.closest('.badge-category').length === 0 && ((link.closest(".onebox-result").length === 0 && link.closest('.onebox-body').length === 0) || link.hasClass("track-link"))) {
             link.append("<span class='badge badge-notification clicks' title='" +

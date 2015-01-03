@@ -2,6 +2,8 @@ import ObjectController from 'discourse/controllers/object';
 import CanCheckEmails from 'discourse/mixins/can-check-emails';
 
 export default ObjectController.extend(CanCheckEmails, {
+  indexStream: false,
+  needs: ['user-notifications', 'user_topics_list'],
 
   viewingSelf: function() {
     return this.get('content.username') === Discourse.User.currentProp('username');
@@ -32,16 +34,27 @@ export default ObjectController.extend(CanCheckEmails, {
            (this.get('userActionType') === Discourse.UserAction.TYPES.messages_received);
   }.property('userActionType'),
 
-  /**
-    Can the currently logged in user invite users to the site
-
-    @property canInviteToForum
-  **/
   canInviteToForum: function() {
     return Discourse.User.currentProp('can_invite_to_forum');
   }.property(),
 
+  canDeleteUser: function() {
+    return this.get('can_be_deleted') && this.get('can_delete_all_posts');
+  }.property('can_be_deleted', 'can_delete_all_posts'),
+
   privateMessagesActive: Em.computed.equal('pmView', 'index'),
   privateMessagesMineActive: Em.computed.equal('pmView', 'mine'),
-  privateMessagesUnreadActive: Em.computed.equal('pmView', 'unread')
+  privateMessagesUnreadActive: Em.computed.equal('pmView', 'unread'),
+
+  actions: {
+    adminDelete: function() {
+      Discourse.AdminUser.find(this.get('username').toLowerCase()).then(function(user){
+        user.destroy({deletePosts: true});
+      });
+    },
+
+    exportUserArchive: function() {
+      Discourse.ExportCsv.exportUserArchive();
+    }
+  }
 });

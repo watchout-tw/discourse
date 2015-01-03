@@ -656,19 +656,16 @@ describe TopicsController do
     context 'filters' do
 
       it 'grabs first page when no filter is provided' do
-        SiteSetting.stubs(:posts_chunksize).returns(20)
         TopicView.any_instance.expects(:filter_posts_in_range).with(0, 19)
         xhr :get, :show, topic_id: topic.id, slug: topic.slug
       end
 
       it 'grabs first page when first page is provided' do
-        SiteSetting.stubs(:posts_chunksize).returns(20)
         TopicView.any_instance.expects(:filter_posts_in_range).with(0, 19)
         xhr :get, :show, topic_id: topic.id, slug: topic.slug, page: 1
       end
 
       it 'grabs correct range when a page number is provided' do
-        SiteSetting.stubs(:posts_chunksize).returns(20)
         TopicView.any_instance.expects(:filter_posts_in_range).with(20, 39)
         xhr :get, :show, topic_id: topic.id, slug: topic.slug, page: 2
       end
@@ -781,6 +778,12 @@ describe TopicsController do
           Topic.any_instance.expects(:change_category_to_id).returns(false)
           xhr :put, :update, topic_id: @topic.id, slug: @topic.title, category_id: -1
           expect(response).not_to be_success
+        end
+
+        it "doesn't call the PostRevisor when there is no changes" do
+          PostRevisor.any_instance.expects(:revise!).never
+          xhr :put, :update, topic_id: @topic.id, slug: @topic.title, title: @topic.title, category_id: @topic.category_id
+          expect(response).to be_success
         end
 
         context "allow_uncategorized_topics is false" do

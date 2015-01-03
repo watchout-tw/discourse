@@ -39,6 +39,13 @@ class PostAction < ActiveRecord::Base
     nil
   end
 
+  def self.flag_count_by_date(start_date, end_date)
+    where('created_at >= ? and created_at <= ?', start_date, end_date)
+      .where(post_action_type_id: PostActionType.flag_types.values)
+      .group('date(created_at)').order('date(created_at)')
+      .count
+  end
+
   def self.update_flagged_posts_count
     posts_flagged_count = PostAction.active
                                     .flags
@@ -92,7 +99,7 @@ class PostAction < ActiveRecord::Base
 
   def self.count_per_day_for_type(post_action_type, since_days_ago=30)
     unscoped.where(post_action_type_id: post_action_type)
-            .where('created_at > ?', since_days_ago.days.ago)
+            .where('created_at >= ?', since_days_ago.days.ago)
             .group('date(created_at)')
             .order('date(created_at)')
             .count
@@ -174,6 +181,8 @@ class PostAction < ActiveRecord::Base
     title = I18n.t("post_action_types.#{post_action_type}.email_title", title: post.topic.title)
     body = I18n.t("post_action_types.#{post_action_type}.email_body", message: opts[:message], link: "#{Discourse.base_url}#{post.url}")
 
+    title = title.truncate(255, separator: /\s/)
+
     opts = {
       archetype: Archetype.private_message,
       title: title,
@@ -232,7 +241,7 @@ class PostAction < ActiveRecord::Base
     else
       post_action = PostAction.where(where_attrs).first
 
-      # after_commit is not called on an `update_all` so do the notify ourselves
+      # after_commit is not called on an 'update_all' so do the notify ourselves
       post_action.notify_subscribers
     end
 
@@ -349,7 +358,7 @@ class PostAction < ActiveRecord::Base
       # Voting also changes the sort_order
       Post.where(id: post_id).update_all ["vote_count = :count, sort_order = :max - :count", count: count, max: Topic.max_sort_order]
     when :like
-      # `like_score` is weighted higher for staff accounts
+      # 'like_score' is weighted higher for staff accounts
       score = PostAction.joins(:user)
                         .where(post_id: post_id)
                         .sum("CASE WHEN users.moderator OR users.admin THEN #{SiteSetting.staff_like_weight} ELSE 1 END")
@@ -370,6 +379,7 @@ class PostAction < ActiveRecord::Base
 
   def enforce_rules
     post = Post.with_deleted.where(id: post_id).first
+    PostAction.auto_close_if_treshold_reached(post.topic)
     PostAction.auto_hide_if_needed(user, post, post_action_type_key)
     SpamRulesEnforcer.enforce!(post.user) if post_action_type_key == :spam
   end
@@ -380,11 +390,34 @@ class PostAction < ActiveRecord::Base
     end
   end
 
+  MAXIMUM_FLAGS_PER_POST = 3
+
+  def self.auto_close_if_treshold_reached(topic)
+    return if topic.closed?
+
+    flags = PostAction.active
+                      .flags
+                      .joins(:post)
+                      .where("posts.topic_id = ?", topic.id)
+                      .where.not(user_id: Discourse::SYSTEM_USER_ID)
+                      .group("post_actions.user_id")
+                      .pluck("post_actions.user_id, COUNT(post_id)")
+
+    # we need a minimum number of unique flaggers
+    return if flags.count < SiteSetting.num_flaggers_to_close_topic
+    # we need a minimum number of flags
+    return if flags.sum { |f| f[1] } < SiteSetting.num_flags_to_close_topic
+
+    # the threshold has been reached, we will close the topic waiting for intervention
+    message = I18n.t("temporarily_closed_due_to_flags")
+    topic.update_status("closed", true, Discourse.system_user, message)
+  end
+
   def self.auto_hide_if_needed(acting_user, post, post_action_type)
     return if post.hidden
 
     if post_action_type == :spam &&
-       acting_user.trust_level == TrustLevel[3] &&
+       acting_user.has_trust_level?(TrustLevel[3]) &&
        post.user.trust_level == TrustLevel[0]
 
        hide_post!(post, post_action_type, Post.hidden_reasons[:flagged_by_tl3_user])
@@ -464,5 +497,6 @@ end
 # Indexes
 #
 #  idx_unique_actions             (user_id,post_action_type_id,post_id,targets_topic) UNIQUE
+#  idx_unique_flags               (user_id,post_id,targets_topic) UNIQUE
 #  index_post_actions_on_post_id  (post_id)
 #

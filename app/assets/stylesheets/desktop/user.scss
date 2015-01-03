@@ -7,7 +7,7 @@
 }
 
 .profile-image {
-  height: 250px;
+  height: 420px;
   width: 100%;
   background-size: cover;
   transition: height .15s linear;
@@ -16,7 +16,7 @@
 
 .no-background {
   .profile-image {
-    height: 0;
+    height: 200px;
   }
 
 }
@@ -115,9 +115,7 @@
   margin-bottom: 50px;
 
   table.group-members {
-    width: 75%;
-    float:  right;
-
+    width: 100%;
     p {
       max-width: 600px;
       white-space: nowrap;
@@ -141,15 +139,22 @@
     }
   }
 
+  .user-right.groups {
+    margin-top: 0;
+  }
+
+  .user-right {
+    width: 75%;
+    float: right;
+    margin-top: 20px;
+  }
+
   .user-content {
     padding: 10px 8px;
     background-color: $secondary;
     border: 1px solid scale-color-diff();
     margin-bottom: 10px;
     box-sizing: border-box;
-    width: 75%;
-    float: right;
-    margin-top: 20px;
 
     .btn.right {
       float: right
@@ -177,23 +182,23 @@
   }
 
   .about {
-    background-size: 1110px 250px;
     background-position: center center;
+    background-size: cover;
     width: 100%;
     margin-bottom: 10px;
     overflow: hidden;
     color: $secondary;
 
     &.group {
-      width: 75%;
-      float: right;
-      margin-top: 20px;
-      .details {padding: 15px;}
+      .details {
+        padding: 15px;
+        margin: 0;
+      }
     }
 
   .secondary {
     background: dark-light-diff($primary, $secondary, 90%, -65%);
-    font-size: 13px;
+    font-size: 0.929em;
       .btn { padding: 3px 12px; }
 
       dl dd {
@@ -236,16 +241,18 @@
 
     .details {
       padding: 15px 15px 4px 15px;
-      background-color: $primary;
+      margin-top: -200px;
+      background: rgba($primary, .85);
       transition: margin .15s linear;
 
       h1 {
-        font-size: 30px;
+        font-size: 2.143em;
         font-weight: normal;
+        i {font-size: .8em;}
       }
 
       h2 {
-        font-size: 17px;
+        font-size: 1.214em;
         font-weight: normal;
         margin-top: 10px;
         max-width: 100%;
@@ -256,7 +263,7 @@
 
       h3 {
         font-weight: normal;
-        font-size: 14px;
+        font-size: 1em;
         margin: 5px 0;
         i:not(:first-of-type) {
           margin-left: 10px;
@@ -319,6 +326,7 @@
     .controls {
       padding: 0 0 12px 0;
       float: right;
+      text-align: right;
       width: 180px;
       ul {list-style-type: none;}
       a {
@@ -377,11 +385,11 @@
         }
 
         h1 {
-          font-size: 20px;
+          font-size: 1.429em;
         }
 
         h2 {
-          font-size: 15px;
+          font-size: 1.071em;
           margin-top: 4px;
         }
 
@@ -394,11 +402,9 @@
 
 
   .user-stream {
-      float: right;
-      width: 75%;
     .excerpt {
       margin: 5px 0;
-      font-size: 13px;
+      font-size: 0.929em;
       word-wrap: break-word;
       color: $primary;
     }
@@ -427,12 +433,12 @@
     .time, .delete-info {
       display: block;
       float: right;
-      color: $primary;
+      color: lighten($primary, 40%);
       margin-right: 8px;
       font-size: 11px;
     }
     .delete-info i {
-      font-size: 14px;
+      font-size: 1em;
     }
     .avatar-link {
       float: left;
@@ -440,19 +446,20 @@
     }
     .title {
       display: block;
-      font-size: 14px;
+      font-size: 1em;
       max-width: 80%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .name {
-      display: block;
-      font-size: 14px;
+      display: inline-block;
+      font-size: 1em;
       max-width: 400px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      vertical-align: middle;
     }
     .edit-reason {
       background-color: scale-color($highlight, $lightness: 25%);
@@ -483,7 +490,7 @@
       // common/base/header.scss
       .fa, .icon {
         color: scale-color($primary, $lightness: 50%);
-        font-size: 24px;
+        font-size: 1.714em;
       }
     }
   }
@@ -491,8 +498,6 @@
   .staff-counters {
     text-align: left;
     background: $primary;
-    padding: 7px 0;
-    display: inline;
     > div {
       margin: 0 10px 0 0;
       display: inline-block;
@@ -574,20 +579,16 @@
 }
 
 .paginated-topics-list {
-  float: right;
-  width: 75%;
-  margin-top: 20px;
+  .topic-list > tbody > tr:nth-child(odd) {
+    background-color: darken($secondary, 3%);
+  }
 
-    .topic-list > tbody > tr:nth-child(odd)  {
-      background-color: darken($secondary, 3%);
-      }
+  .topic-list > tbody > tr:nth-child(even) {
+    background-color: $secondary;
+  }
 
-    .topic-list > tbody > tr:nth-child(even) {
-      background-color: $secondary;
-      }
-
-    .user-content {
-        width: 100%;
-        margin-top: 0;
-      }
+  .user-content {
+    width: 100%;
+    margin-top: 0;
+  }
 }

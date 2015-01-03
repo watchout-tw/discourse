@@ -6,6 +6,16 @@
 # https://www.transifex.com/projects/p/discourse-org/
 
 ja:
+  stringex:
+    characters:
+      number: "-"
+  i18n:
+    transliterate:
+      rule:
+        ț: "t"
+        Ț: "t"
+        ș: "s"
+        Ș: "s"
   dates:
     short_date_no_year: "MMM D"
     short_date: "MMM D, YYYY"
@@ -23,12 +33,29 @@ ja:
   log_in: "ログイン"
   via: "%{username} via %{site_name}"
   is_reserved: "is reserved"
+  disable_remote_images_download_reason: "ディスク容量が不足しているため、リモートでの画像ダウンロードは無効になっています。"
   errors:
     messages:
       too_long_validation: "は、最大文字数(%{max}文字)を超えています。(入力したのは%{length}文字 ) "
+      invalid_boolean: "無効なboolean."
+    embed:
+      load_from_remote: "投稿の読み込みに失敗しました。"
+  bulk_invite:
+    file_should_be_csv: "アップロードするファイルは、csv または txt 形式である必要があります。"
+  backup:
+    operation_already_running: "操作を実行しています。他の操作はできません。"
+    backup_file_should_be_tar_gz: "バックアップファイルは .tar .gz 形式でなければいけません。"
+    not_enough_space_on_disk: "このバックアップファイルをアップロードするディスクの空き容量が足りません。"
+  not_logged_in: "ログインしてください。"
+  read_only_mode_enabled: "このサイトは読み取り専用モードです。会話は無効になっています。"
+  too_many_replies:
+    other: "申し訳ありません、新しいユーザーの同じトピックへの返信は、一時的に %{count} 回に制限されています。"
   embed:
     start_discussion: "議論の開始"
     continue: "議論を続ける"
+    more_replies:
+      other: "%{count} 以上の返信"
+    loading: "会話をロードしています…"
     permalink: "パーマリンク"
     in_reply_to: "▶ %{username}"
     replies:
@@ -225,14 +252,12 @@ ja:
   activation:
     action: "アカウントを有効する"
     already_done: "申し訳ありませんが、このアカウント認証リンクは無効です。既にアカウントがアクティブになっていませんか?"
-    please_continue: "新しいアカウントを作成しました。自動的にログインされています。"
     continue_button: "%{site_name} へ"
     welcome_to: "%{site_name} へようこそ!"
     approval_required: "このフォーラムにアクセスするにはモデレータによる承認が必要です。承認されるとメールにて通知されます!"
   post_action_types:
     off_topic:
       title: '関係ない話題'
-      description: 'この投稿は、このトピックの話題に合わない。または、この質問はこのカテゴリーに合わない。'
       long_form: '「関係ない話題」としてフラグを立つ'
     spam:
       title: 'スパム'
@@ -243,15 +268,10 @@ ja:
       description: 'この投稿は、誹謗中傷、恫喝、名誉毀損、わいせつ、犯罪行為など他人を不快にさせる内容を含んでいる。'
       long_form: '不適切フラグをたてる'
     notify_user:
-      title: '{{username}} に通知'
       description: 'この投稿やトピックを書いた人に、直接メッセージを送る。（フラグを付けません）'
-      long_form: 'ユーザに通知'
       email_title: '「%{title}」にの投稿'
       email_body: "%{link}\n\n%{message}"
     notify_moderators:
-      title: '管理人に通知'
-      description: 'この投稿やトピックは不適切な可能性があるため、管理人による確認を必要とする。'
-      long_form: 'モデレータに通知'
       email_title: '"%{title}" のポストに関する管理人の確認が必要とする'
       email_body: "%{link}\n\n%{message}"
     bookmark:
@@ -276,9 +296,7 @@ ja:
       description: 'この投稿は、誹謗中傷、恫喝、名誉毀損、わいせつ、犯罪行為など他人を不快にさせる内容を含んでいる。'
       long_form: '不適切フラグをたてる'
     notify_moderators:
-      title: '管理人に通知'
       description: 'この投稿やトピックは不適切な可能性があるため、管理人による確認を必要とする。'
-      long_form: 'モデレータに告知する'
       email_title: 'トピック"%{title}" は不適切な可能性があるため、管理人による確認を必要とする。'
       email_body: "%{link}\n\n%{message}"
   flagging:
@@ -416,7 +434,6 @@ ja:
       description: "全ページのトップに追加される HTML (ヘッダとナビゲーション/トピックタイトルの間に表示されます)"
     bottom:
       title: "ページボトム"
-      description: "全ページのボトムに追加される HTML"
   site_settings:
     default_locale: "この Discourse インスタンスのデフォルト言語 (ISO 639-1 Code)"
     allow_uncategorized_topics: "カテゴリなしのトピック作成を許可するか。"
@@ -604,17 +621,13 @@ ja:
         ---
         %{respond_instructions}
     digest:
-      why: "あなたが最後にアクセスした %{last_seen_at} 以降に %{site_link} で行われた人気議論のまとめです。"
       subject_template: "[%{site_name}] メールマガジン【%{date}】"
       new_activity: "あなたのトピックおよびポストにおけるアクティビティ:"
       top_topics: "人気の投稿"
       other_new_topics: "人気のトピック"
-      unsubscribe: "こちらのメールマガジンでは、%{site_link} が最新情報をご紹介しています！配信停止はこちら %{unsubscribe_link}."
       click_here: "ここをクリック"
       from: "%{site_name} ダイジェスト"
       read_more: "もっと読む"
-      more_topics: "%{last_seen_at}ログイン以来%{new_topics_since_seen}個新規トピックが投稿されました。"
-      more_topics_category: "%{last_seen_at}ログイン以来%{new_topics_since_seen}個新規トピックが以下のカテゴリに投稿されました："
       posts:
         other: "%{count} 投稿"
     forgot_password:

@@ -60,13 +60,13 @@ Discourse.Post = Discourse.Model.extend({
     );
   }.property('reply_to_user', 'reply_to_post_number', 'post_number'),
 
-  byTopicCreator: Discourse.computed.propertyEqual('topic.details.created_by.id', 'user_id'),
+  topicOwner: Discourse.computed.propertyEqual('topic.details.created_by.id', 'user_id'),
   hasHistory: Em.computed.gt('version', 1),
   postElementId: Discourse.computed.fmt('post_number', 'post_%@'),
 
   canViewRawEmail: function() {
-    return Discourse.User.currentProp('staff');
-  }.property(),
+    return this.get("user_id") === Discourse.User.currentProp("id") || Discourse.User.currentProp('staff');
+  }.property("user_id"),
 
   bookmarkedChanged: function() {
     Discourse.Post.bookmark(this.get('id'), this.get('bookmarked'))

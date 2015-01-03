@@ -1,8 +1,12 @@
 
 export default Ember.ArrayController.extend({
-  needs: ['user-notifications'],
-  canLoadMore: true,
+  needs: ['user-notifications', 'application'],
   loading: false,
+
+  _showFooter: function() {
+    this.set("controllers.application.showFooter", !this.get("canLoadMore"));
+  }.observes("canLoadMore"),
+
   showDismissButton: function() {
     return this.get('user').total_unread_notifications > 0;
   }.property('user'),
@@ -26,7 +30,7 @@ export default Ember.ArrayController.extend({
           var notifications = result.get('content');
           self.pushObjects(notifications);
           // Stop trying if it's the end
-          if (notifications && notifications.length === 0) {
+          if (notifications && (notifications.length === 0 || notifications.length < 60)) {
             self.set('canLoadMore', false);
           }
         }).catch(function(error) {

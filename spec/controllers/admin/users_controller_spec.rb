@@ -33,13 +33,13 @@ describe Admin::UsersController do
           end
         end
 
-        it "logs an enty for all email shown" do
+        it "logs only 1 enty" do
           UserHistory.where(action: UserHistory.actions[:check_email], acting_user_id: @user.id).count.should == 0
 
           xhr :get, :index, show_emails: "true"
           data = ::JSON.parse(response.body)
 
-          UserHistory.where(action: UserHistory.actions[:check_email], acting_user_id: @user.id).count.should == data.length
+          UserHistory.where(action: UserHistory.actions[:check_email], acting_user_id: @user.id).count.should == 1
         end
 
       end
@@ -360,6 +360,37 @@ describe Admin::UsersController do
       end
     end
 
+    context 'activate' do
+      before do
+        @reg_user = Fabricate(:inactive_user)
+      end
+
+      it "returns success" do
+        xhr :put, :activate, user_id: @reg_user.id
+        response.should be_success
+        json = ::JSON.parse(response.body)
+        json['success'].should == "OK"
+      end
+    end
+
+    context 'log_out' do
+      before do
+        @reg_user = Fabricate(:user)
+      end
+
+      it "returns success" do
+        xhr :put, :log_out, user_id: @reg_user.id
+        response.should be_success
+        json = ::JSON.parse(response.body)
+        json['success'].should == "OK"
+      end
+
+      it "returns 404 when user_id does not exist" do
+        xhr :put, :log_out, user_id: 123123
+        response.should_not be_success
+      end
+    end
+
     context 'block' do
       before do
         @reg_user = Fabricate(:user)
@@ -412,6 +443,40 @@ describe Admin::UsersController do
         xhr :get, :ip_info, ip: "123.123.123.123"
       end
 
+    end
+
+    context "delete_other_accounts_with_same_ip" do
+
+      it "works" do
+        Fabricate(:user, ip_address: "42.42.42.42")
+        Fabricate(:user, ip_address: "42.42.42.42")
+
+        UserDestroyer.any_instance.expects(:destroy).twice
+
+        xhr :delete, :delete_other_accounts_with_same_ip, ip: "42.42.42.42", exclude: -1, order: "trust_level DESC"
+      end
+
+    end
+
+    context ".invite_admin" do
+      it 'should invite admin' do
+        Jobs.expects(:enqueue).with(:user_email, anything).returns(true)
+        xhr :post, :invite_admin, name: 'Bill', username: 'bill22', email: 'bill@bill.com'
+        response.should be_success
+
+        u = User.find_by(email: 'bill@bill.com')
+        u.name.should == "Bill"
+        u.username.should == "bill22"
+        u.admin.should == true
+      end
+
+      it "doesn't send the email with send_email falsy" do
+        Jobs.expects(:enqueue).with(:user_email, anything).never
+        xhr :post, :invite_admin, name: 'Bill', username: 'bill22', email: 'bill@bill.com', send_email: '0'
+        response.should be_success
+        json = ::JSON.parse(response.body)
+        json["password_url"].should be_present
+      end
     end
 
   end

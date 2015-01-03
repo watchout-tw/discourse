@@ -21,6 +21,14 @@ describe Topic do
       Fabricate.build(:topic, title: title).slug.should == slug
     end
 
+    let(:chinese_title) { "习近平:中企承建港口电站等助斯里兰卡发展" }
+    let(:chinese_slug) { "xi-jin-ping-zhong-qi-cheng-jian-gang-kou-dian-zhan-deng-zhu-si-li-lan-qia-fa-zhan" }
+
+    it "returns a symbolized slug for a chinese title" do
+      SiteSetting.default_locale = 'zh_CN'
+      Fabricate.build(:topic, title: chinese_title).slug.should == chinese_slug
+    end
+
     it "returns 'topic' when the slug is empty (say, non-english chars)" do
       Slug.expects(:for).with(title).returns("")
       Fabricate.build(:topic, title: title).slug.should == "topic"
@@ -629,14 +637,18 @@ describe Topic do
     describe "make_banner!" do
 
       it "changes the topic archetype to 'banner'" do
-        topic.expects(:add_moderator_post)
-        MessageBus.expects(:publish).with("/site/banner", banner)
-        topic.make_banner!(user)
-        topic.archetype.should == Archetype.banner
+        messages = MessageBus.track_publish do
+          topic.make_banner!(user)
+          topic.archetype.should == Archetype.banner
+        end
+
+        channels = messages.map(&:channel)
+        channels.should include('/site/banner')
+        channels.should include('/distributed_hash')
       end
 
       it "ensures only one banner topic at all time" do
-        banner_topic = Fabricate(:banner_topic)
+        _banner_topic = Fabricate(:banner_topic)
         Topic.where(archetype: Archetype.banner).count.should == 1
 
         topic.make_banner!(user)
@@ -1066,6 +1078,7 @@ describe Topic do
     let(:topic)         { Fabricate.build(:topic) }
     let(:closing_topic) { Fabricate.build(:topic, auto_close_hours: 5, auto_close_at: 5.hours.from_now, auto_close_started_at: 5.hours.from_now) }
     let(:admin)         { Fabricate.build(:user, id: 123) }
+    let(:trust_level_4) { Fabricate.build(:trust_level_4) }
 
     before { Discourse.stubs(:system_user).returns(admin) }
 
@@ -1119,17 +1132,22 @@ describe Topic do
       end
     end
 
-    it 'sets auto_close_user to given user if it is a staff user' do
+    it 'sets auto_close_user to given user if it is a staff or TL4 user' do
       topic.set_auto_close(3, admin)
       expect(topic.auto_close_user_id).to eq(admin.id)
     end
 
-    it 'sets auto_close_user to system user if given user is not staff' do
+    it 'sets auto_close_user to given user if it is a TL4 user' do
+      topic.set_auto_close(3, trust_level_4)
+      expect(topic.auto_close_user_id).to eq(trust_level_4.id)
+    end
+
+    it 'sets auto_close_user to system user if given user is not staff or a TL4 user' do
       topic.set_auto_close(3, Fabricate.build(:user, id: 444))
       expect(topic.auto_close_user_id).to eq(admin.id)
     end
 
-    it 'sets auto_close_user to system_user if user is not given and topic creator is not staff' do
+    it 'sets auto_close_user to system user if user is not given and topic creator is not staff nor TL4 user' do
       topic.set_auto_close(3)
       expect(topic.auto_close_user_id).to eq(admin.id)
     end
@@ -1138,6 +1156,12 @@ describe Topic do
       staff_topic = Fabricate.build(:topic, user: Fabricate.build(:admin, id: 999))
       staff_topic.set_auto_close(3)
       expect(staff_topic.auto_close_user_id).to eq(999)
+    end
+
+    it 'sets auto_close_user to topic creator if it is a TL4 user' do
+      tl4_topic = Fabricate.build(:topic, user: Fabricate.build(:trust_level_4, id: 998))
+      tl4_topic.set_auto_close(3)
+      expect(tl4_topic.auto_close_user_id).to eq(998)
     end
 
     it 'clears auto_close_at if arg is nil' do
@@ -1205,6 +1229,26 @@ describe Topic do
 
       Topic.for_digest(Fabricate(:user), 1.year.ago).count.should == 0
       Topic.for_digest(Fabricate(:admin), 1.year.ago).count.should == 1
+    end
+  end
+
+  describe '#listable_count_per_day' do
+    before(:each) do
+      Timecop.freeze
+      Fabricate(:topic)
+      Fabricate(:topic, created_at: 1.day.ago)
+      Fabricate(:topic, created_at: 1.day.ago)
+      Fabricate(:topic, created_at: 2.days.ago)
+      Fabricate(:topic, created_at: 4.days.ago)
+    end
+    after(:each) do
+      Timecop.return
+    end
+    let(:listable_topics_count_per_day) { {1.day.ago.to_date => 2, 2.days.ago.to_date => 1, Time.now.utc.to_date => 1 } }
+
+    it 'collect closed interval listable topics count' do
+      Topic.listable_count_per_day(2.days.ago, Time.now).should include(listable_topics_count_per_day)
+      Topic.listable_count_per_day(2.days.ago, Time.now).should_not include({4.days.ago.to_date => 1})
     end
   end
 

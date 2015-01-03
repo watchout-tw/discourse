@@ -1,3 +1,5 @@
+var INDEX_STREAM_ROUTES = ["user.deletedPosts", "user.flaggedPosts", "userActivity.index"];
+
 export default Discourse.Route.extend({
 
   titleToken: function() {
@@ -13,20 +15,27 @@ export default Discourse.Route.extend({
       Discourse.logout();
     },
 
-    composePrivateMessage: function() {
-      var user = this.modelFor('user');
+    composePrivateMessage: function(user) {
+      var recipient = user ? user.get('username') : '';
       return this.controllerFor('composer').open({
         action: Discourse.Composer.PRIVATE_MESSAGE,
-        usernames: user.get('username'),
+        usernames: recipient,
         archetypeId: 'private_message',
         draftKey: 'new_private_message'
       });
+    },
+
+    willTransition: function(transition) {
+      // will reset the indexStream when transitioning to routes that aren't "indexStream"
+      // otherwise the "header" will jump
+      var isIndexStream = ~INDEX_STREAM_ROUTES.indexOf(transition.targetName);
+      this.controllerFor('user').set('indexStream', isIndexStream);
+      return true;
     }
   },
 
   model: function(params) {
-    // If we're viewing the currently logged in user, return that object
-    // instead.
+    // If we're viewing the currently logged in user, return that object instead
     var currentUser = Discourse.User.current();
     if (currentUser && (params.username.toLowerCase() === currentUser.get('username_lower'))) {
       return currentUser;

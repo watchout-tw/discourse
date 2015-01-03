@@ -43,13 +43,12 @@ describe CategoriesController do
         end
       end
 
-
       describe "success" do
         it "works" do
           readonly = CategoryGroup.permission_types[:readonly]
           create_post = CategoryGroup.permission_types[:create_post]
 
-          xhr :post, :create, name: "hello", color: "ff0", text_color: "fff",
+          xhr :post, :create, name: "hello", color: "ff0", text_color: "fff", slug: "hello-cat",
                               auto_close_hours: 72,
                               permissions: {
                                 "everyone" => readonly,
@@ -62,6 +61,7 @@ describe CategoriesController do
             [Group[:everyone].id, readonly],[Group[:staff].id,create_post]
           ]
           category.name.should == "hello"
+          category.slug.should == "hello-cat"
           category.color.should == "ff0"
           category.auto_close_hours.should == 72
         end
@@ -180,7 +180,7 @@ describe CategoriesController do
           readonly = CategoryGroup.permission_types[:readonly]
           create_post = CategoryGroup.permission_types[:create_post]
 
-          xhr :put, :update, id: @category.id, name: "hello", color: "ff0", text_color: "fff",
+          xhr :put, :update, id: @category.id, name: "hello", color: "ff0", text_color: "fff", slug: "hello-category",
                               auto_close_hours: 72,
                               permissions: {
                                 "everyone" => readonly,
@@ -193,6 +193,7 @@ describe CategoriesController do
             [Group[:everyone].id, readonly],[Group[:staff].id,create_post]
           ]
           @category.name.should == "hello"
+          @category.slug.should == "hello-category"
           @category.color.should == "ff0"
           @category.auto_close_hours.should == 72
         end
@@ -202,4 +203,42 @@ describe CategoriesController do
 
   end
 
+  describe 'update_slug' do
+    it 'requires the user to be logged in' do
+      lambda { xhr :put, :update_slug, category_id: 'category'}.should raise_error(Discourse::NotLoggedIn)
+    end
+
+    describe 'logged in' do
+      let(:valid_attrs) { {id: @category.id, slug: 'fff'} }
+
+      before do
+        @user = log_in(:admin)
+        @category = Fabricate(:happy_category, user: @user)
+      end
+
+      it 'rejects blank' do
+        xhr :put, :update_slug, category_id: @category.id, slug: nil
+        response.status.should == 422
+      end
+
+      it 'accepts valid custom slug' do
+        xhr :put, :update_slug, category_id: @category.id, slug: 'valid-slug'
+        response.should be_success
+        category = Category.find(@category.id)
+        category.slug.should == 'valid-slug'
+      end
+
+      it 'accepts not well formed custom slug' do
+        xhr :put, :update_slug, category_id: @category.id, slug: ' valid slug'
+        response.should be_success
+        category = Category.find(@category.id)
+        category.slug.should == 'valid-slug'
+      end
+
+      it 'rejects invalid custom slug' do
+        xhr :put, :update_slug, category_id: @category.id, slug: '  '
+        response.status.should == 422
+      end
+    end
+  end
 end

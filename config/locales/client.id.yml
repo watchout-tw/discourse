@@ -68,7 +68,6 @@ id:
           other: "%{count} hari yang lalu"
     share:
       topic: 'share link ke topik ini'
-      post: 'share link ke post #%{postNumber}'
       close: 'tutup'
       twitter: 'share link ini di Twitter'
       facebook: 'share link ini di Facebook'
@@ -188,20 +187,12 @@ id:
     user:
       profile: "Profil"
       edit: "Ubah Preferensi"
-      download_archive: "download arsip postingan saya"
       private_message: "Private Message"
       private_messages: "Messages"
       activity_stream: "Activity"
       bio: "About me"
-      email:
-        invalid: "Masukkan email yang valid."
       name:
         title: "Name"
-        too_short: "Nama kamu terlalu pendek."
-      username:
-        available: "Username tersedia."
-        too_short: "Username kamu terlalu pendek."
-        too_long: "Username kamu terlalu panjang."
       last_seen: "Seen"
       created: "Joined"
       email_settings: "Email"
@@ -236,8 +227,6 @@ id:
       reply_here: "Balas Disini"
       reply: "Balas"
       cancel: "Batal"
-      create_topic: "Buat Topik"
-      create_pm: "Buat Pesan Pribadi"
       users_placeholder: "Tambahkan pengguna"
       bold_title: "Strong"
       italic_title: "Emphasis"

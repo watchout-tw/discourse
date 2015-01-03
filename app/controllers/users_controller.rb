@@ -30,6 +30,7 @@ class UsersController < ApplicationController
     user_serializer = UserSerializer.new(@user, scope: guardian, root: 'user')
     respond_to do |format|
       format.html do
+        @restrict_fields = guardian.restrict_user_fields?(@user)
         store_preloaded("user_#{@user.username}", MultiJson.dump(user_serializer))
       end
 
@@ -90,7 +91,10 @@ class UsersController < ApplicationController
     result = user.change_username(params[:new_username])
     raise Discourse::InvalidParameters.new(:new_username) unless result
 
-    render nothing: true
+    render json: {
+      id: user.id,
+      username: user.username
+    }
   end
 
   def check_emails
@@ -227,8 +231,7 @@ class UsersController < ApplicationController
     authentication = UserAuthenticator.new(user, session)
 
     if !authentication.has_authenticator? && !SiteSetting.enable_local_logins
-      render nothing: true, status: 500
-      return
+      return render nothing: true, status: 500
     end
 
     authentication.start
@@ -430,34 +433,6 @@ class UsersController < ApplicationController
     render json: to_render
   end
 
-  # [LEGACY] avatars in quotes/oneboxes might still be pointing to this route
-  # fixing it requires a rebake of all the posts
-  def avatar
-    user = User.find_by(username_lower: params[:username].downcase)
-    if user.present?
-      size = determine_avatar_size(params[:size])
-      url = user.avatar_template.gsub("{size}", size.to_s)
-      expires_in 1.day
-      redirect_to url
-    else
-      raise ActiveRecord::RecordNotFound
-    end
-  end
-
-  def determine_avatar_size(size)
-    size = size.to_i
-    size = 64 if size == 0
-    size = 10 if size < 10
-    size = 128 if size > 128
-    size
-  end
-
-  # LEGACY: used by the API
-  def upload_avatar
-    params[:image_type] = "avatar"
-    upload_user_image
-  end
-
   def upload_user_image
     params.require(:image_type)
     user = fetch_user_from_params
@@ -500,7 +475,7 @@ class UsersController < ApplicationController
     end
     user.save!
 
-    render nothing: true
+    render json: success_json
   end
 
   def destroy_user_image

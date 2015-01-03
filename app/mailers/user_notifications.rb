@@ -54,7 +54,7 @@ class UserNotifications < ActionMailer::Base
       featured_topic_ids = @featured_topics.map(&:id)
 
       @new_topics_since_seen = Topic.new_since_last_seen(user, min_date, featured_topic_ids).count
-      if @new_topics_since_seen > 1000
+      if @new_topics_since_seen > SiteSetting.digest_topics
         category_counts = Topic.new_since_last_seen(user, min_date, featured_topic_ids).group(:category_id).count
 
         @new_by_category = []
@@ -127,7 +127,7 @@ class UserNotifications < ActionMailer::Base
       title: post.topic.title,
       post: post,
       username: post.user.username,
-      from_alias: SiteSetting.enable_email_names ? post.user.name : post.user.username,
+      from_alias: (SiteSetting.enable_email_names && !post.user.name.empty?) ? post.user.name : post.user.username,
       allow_reply_by_email: true,
       use_site_subject: true,
       add_re_to_subject: true,
@@ -173,7 +173,7 @@ class UserNotifications < ActionMailer::Base
 
     user_name = @notification.data_hash[:original_username]
     if @post && SiteSetting.enable_email_names
-      user_name = User.find_by(id: @post.user_id).name
+      user_name = User.find_by(id: @post.user_id).name if !User.find_by(id: @post.user_id).name.empty?
     end
 
     notification_type = opts[:notification_type] || Notification.types[@notification.notification_type].to_s

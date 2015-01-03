@@ -21,7 +21,7 @@ export default DiscourseController.extend({
     var usernames = this.get('model.targetUsernames');
 
     // We need exactly one user to issue a warning
-    if (Em.empty(usernames) || usernames.split(',').length !== 1) {
+    if (Ember.isEmpty(usernames) || usernames.split(',').length !== 1) {
       return false;
     }
     return this.get('model.creatingPrivateMessage');
@@ -73,14 +73,34 @@ export default DiscourseController.extend({
     if (c) { c.updateDraftStatus(); }
   },
 
-  appendText: function(text) {
+  appendText: function(text, opts) {
     var c = this.get('model');
-    if (c) { c.appendText(text); }
+    if (c) {
+      opts = opts || {};
+      var wmd = $('#wmd-input');
+      var val = wmd.val() || '';
+      var position = opts.position === "cursor" ? wmd.caret() : val.length;
+
+      var caret = c.appendText(text, position, opts);
+      if(wmd[0]){
+        Em.run.next(function(){
+          Discourse.Utilities.setCaretPosition(wmd[0], caret);
+        });
+      }
+    }
   },
 
-  appendBlockAtCursor: function(text) {
-    var c = this.get('model');
-    if (c) { c.appendText(text, $('#wmd-input').caret(), {block: true}); }
+  appendTextAtCursor: function(text, opts) {
+    opts = opts || {};
+    opts.position = "cursor";
+    this.appendText(text, opts);
+  },
+
+  appendBlockAtCursor: function(text, opts) {
+    opts = opts || {};
+    opts.position = "cursor";
+    opts.block = true;
+    this.appendText(text, opts);
   },
 
   categories: function() {
@@ -316,15 +336,13 @@ export default DiscourseController.extend({
 
         // If we're already open, we don't have to do anything
         if (composerModel.get('composeState') === Discourse.Composer.OPEN &&
-            composerModel.get('draftKey') === opts.draftKey &&
-            composerModel.action === opts.action) {
+            composerModel.get('draftKey') === opts.draftKey) {
           return resolve();
         }
 
         // If it's the same draft, just open it up again.
         if (composerModel.get('composeState') === Discourse.Composer.DRAFT &&
-            composerModel.get('draftKey') === opts.draftKey &&
-            composerModel.action === opts.action) {
+            composerModel.get('draftKey') === opts.draftKey) {
 
             composerModel.set('composeState', Discourse.Composer.OPEN);
             return resolve();
@@ -445,6 +463,11 @@ export default DiscourseController.extend({
 
   canEdit: function() {
     return this.get("model.action") === "edit" && Discourse.User.current().get("can_edit");
-  }.property("model.action")
+  }.property("model.action"),
+
+  visible: function() {
+    var state = this.get('model.composeState');
+    return state && state !== 'closed';
+  }.property('model.composeState')
 
 });

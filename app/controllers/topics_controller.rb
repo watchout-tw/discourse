@@ -2,6 +2,7 @@ require_dependency 'topic_view'
 require_dependency 'promotion'
 require_dependency 'url_helper'
 require_dependency 'topics_bulk_action'
+require_dependency 'discourse_event'
 
 class TopicsController < ApplicationController
   include UrlHelper
@@ -47,6 +48,7 @@ class TopicsController < ApplicationController
     opts = params.slice(:username_filters, :filter, :page, :post_number, :show_deleted)
     username_filters = opts[:username_filters]
 
+    opts[:slow_platform] = true if slow_platform?
     opts[:username_filters] = username_filters.split(',') if username_filters.is_a?(String)
 
     begin
@@ -58,7 +60,7 @@ class TopicsController < ApplicationController
     end
 
     page = params[:page].to_i
-    if (page < 0) || ((page - 1) * SiteSetting.posts_chunksize > @topic_view.topic.highest_post_number)
+    if (page < 0) || ((page - 1) * @topic_view.chunk_size > @topic_view.topic.highest_post_number)
       raise Discourse::NotFound
     end
 
@@ -110,7 +112,7 @@ class TopicsController < ApplicationController
     params.require(:post_ids)
 
     @topic_view = TopicView.new(params[:topic_id], current_user, post_ids: params[:post_ids])
-    render_json_dump(TopicViewPostsSerializer.new(@topic_view, scope: guardian, root: false))
+    render_json_dump(TopicViewPostsSerializer.new(@topic_view, scope: guardian, root: false, include_raw: !!params[:include_raw]))
   end
 
   def destroy_timings
@@ -123,15 +125,17 @@ class TopicsController < ApplicationController
     guardian.ensure_can_edit!(topic)
 
     changes = {}
-    changes[:title]       = params[:title]       if params[:title]
-    changes[:category_id] = params[:category_id] if params[:category_id]
+    changes[:title]       = params[:title]       if params[:title] && topic.title != params[:title]
+    changes[:category_id] = params[:category_id] if params[:category_id] && topic.category_id != params[:category_id].to_i
 
     success = true
 
     if changes.length > 0
       first_post = topic.ordered_posts.first
-      success = PostRevisor.new(first_post, topic).revise!(current_user, changes)
+      success = PostRevisor.new(first_post, topic).revise!(current_user, changes, validate_post: false)
     end
+
+    DiscourseEvent.trigger(:topic_saved, topic, params)
 
     # this is used to return the title to the client as it may have been changed by "TextCleaner"
     success ? render_serialized(topic, BasicTopicSerializer) : render_json_error(topic)

@@ -7,11 +7,11 @@
     <%= render partial: "layouts/head" %>
 
     <%- if SiteSetting.enable_escaped_fragments? %>
-    <meta name="fragment" content="!">
+      <meta name="fragment" content="!">
     <%- end %>
 
     <%- if shared_session_key %>
-    <meta name="shared_session_key" content="<%= shared_session_key %>">
+      <meta name="shared_session_key" content="<%= shared_session_key %>">
     <%- end %>
 
     <%= script "preload_store" %>
@@ -61,6 +61,9 @@
     <section id='main'>
     </section>
 
+    <div id='offscreen-content'>
+    </div>
+
     <% unless current_user %>
       <form id='hidden-login-form' method="post" action="<%=login_path%>" style="display: none;">
         <input name="username" type="text"     id="signin_username">
@@ -80,10 +83,10 @@
 
     <%= yield :data %>
 
-    <footer id='bottom'><%= raw SiteText.text_for(:bottom) %></footer>
-
     <%= render :partial => "common/discourse_javascript" %>
 
     <%= render_google_analytics_code %>
+
+    <%= raw SiteText.text_for(:bottom) %>
   </body>
 </html>

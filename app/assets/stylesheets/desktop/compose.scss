@@ -89,7 +89,6 @@
   }
   .toggle-preview {
     right: 5px;
-    text-decoration: underline;
   }
   #file-uploading {
     left: 51%;
@@ -124,7 +123,6 @@
     }
   }
   a.cancel {
-    text-decoration: underline;
     padding-left: 7px;
   }
   .control-row {
@@ -330,13 +328,6 @@
   margin-bottom: 10px;
 }
 
-#reply-control.edit-title.private-message {
-  .wmd-controls {
-    transition: top 0.3s ease;
-    top: 140px;
-  }
-}
-
 #reply-control {
   &.hide-preview {
     .wmd-controls {
@@ -358,11 +349,6 @@
     bottom: 48px;
     top: 50px;
 
-    // this removes the topmost margin;
-    // if we don't have this, all posts would have extra space at the top
-    #wmd-preview > *:first-child {
-      margin-top: 0 !important;
-    }
 
     #wmd-input, #wmd-preview-scroller, #wmd-preview {
       box-sizing: border-box;

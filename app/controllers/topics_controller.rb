@@ -25,7 +25,8 @@ class TopicsController < ApplicationController
                                           :autoclose,
                                           :bulk,
                                           :reset_new,
-                                          :change_post_owners]
+                                          :change_post_owners,
+                                          :bookmark]
 
   before_filter :consider_user_for_promotion, only: :show
 
@@ -135,7 +136,7 @@ class TopicsController < ApplicationController
       success = PostRevisor.new(first_post, topic).revise!(current_user, changes, validate_post: false)
     end
 
-    DiscourseEvent.trigger(:topic_saved, topic, params)
+    DiscourseEvent.trigger(:topic_saved, topic, params, current_user)
 
     # this is used to return the title to the client as it may have been changed by "TextCleaner"
     success ? render_serialized(topic, BasicTopicSerializer) : render_json_error(topic)
@@ -163,14 +164,6 @@ class TopicsController < ApplicationController
     @topic = Topic.find_by(id: topic_id)
     guardian.ensure_can_moderate!(@topic)
     @topic.update_status(status, enabled, current_user)
-    render nothing: true
-  end
-
-  def star
-    @topic = Topic.find_by(id: params[:topic_id].to_i)
-    guardian.ensure_can_see!(@topic)
-
-    @topic.toggle_star(current_user, params[:starred] == 'true')
     render nothing: true
   end
 
@@ -216,6 +209,19 @@ class TopicsController < ApplicationController
     guardian.ensure_can_moderate!(topic)
 
     topic.remove_banner!(current_user)
+
+    render nothing: true
+  end
+
+  def bookmark
+    topic = Topic.find_by(id: params[:topic_id])
+    first_post = topic.ordered_posts.first
+
+    if params[:bookmarked] == "true"
+      PostAction.act(current_user, first_post, PostActionType.types[:bookmark])
+    else
+      PostAction.remove_act(current_user, first_post, PostActionType.types[:bookmark])
+    end
 
     render nothing: true
   end

@@ -52,6 +52,9 @@ class User < ActiveRecord::Base
   has_many :groups, through: :group_users
   has_many :secure_categories, through: :groups, source: :categories
 
+  has_many :group_managers, dependent: :destroy
+  has_many :managed_groups, through: :group_managers, source: :group
+
   has_one :user_search_data, dependent: :destroy
   has_one :api_key, dependent: :destroy
 
@@ -182,7 +185,11 @@ class User < ActiveRecord::Base
     Jobs.enqueue(:send_system_message, user_id: id, message_type: message_type)
   end
 
-  def change_username(new_username)
+  def change_username(new_username, actor=nil)
+    if actor && actor != self
+      StaffActionLogger.new(actor).log_username_change(self, self.username, new_username)
+    end
+
     self.username = new_username
     save
   end
@@ -801,6 +808,38 @@ class User < ActiveRecord::Base
         # if for some reason the user can't be deleted, continue on to the next one
       end
     end
+  end
+
+  def number_of_deleted_posts
+    Post.with_deleted
+        .where(user_id: self.id)
+        .where(user_deleted: false)
+        .where.not(deleted_by_id: self.id)
+        .where.not(deleted_at: nil)
+        .count
+  end
+
+  def number_of_flagged_posts
+    Post.with_deleted
+        .where(user_id: self.id)
+        .where(id: PostAction.where(post_action_type_id: PostActionType.notify_flag_type_ids)
+                             .where(disagreed_at: nil)
+                             .select(:post_id))
+        .count
+  end
+
+  def number_of_flags_given
+    PostAction.where(user_id: self.id)
+              .where(post_action_type_id: PostActionType.notify_flag_type_ids)
+              .count
+  end
+
+  def number_of_warnings
+    self.warnings.count
+  end
+
+  def number_of_suspensions
+    UserHistory.for(self, :suspend_user).count
   end
 
   private

@@ -46,8 +46,14 @@ Discourse::Application.routes.draw do
       collection do
         post "refresh_automatic_groups" => "groups#refresh_automatic_groups"
       end
-      get "users"
+      member do
+        put "members" => "groups#add_members"
+        delete "members" => "groups#remove_member"
+      end
     end
+
+    get "groups/:type" => "groups#show", constraints: AdminConstraint.new
+    get "groups/:type/:id" => "groups#show", constraints: AdminConstraint.new
 
     resources :users, id: USERNAME_ROUTE_FORMAT do
       collection do
@@ -241,6 +247,7 @@ Discourse::Application.routes.draw do
   put "users/:username/preferences/avatar/pick" => "users#pick_avatar", constraints: {username: USERNAME_ROUTE_FORMAT}
   get "users/:username/preferences/card-badge" => "users#card_badge", constraints: {username: USERNAME_ROUTE_FORMAT}
   put "users/:username/preferences/card-badge" => "users#update_card_badge", constraints: {username: USERNAME_ROUTE_FORMAT}
+  get "users/:username/staff-info" => "users#staff_info", constraints: {username: USERNAME_ROUTE_FORMAT}
 
   get "users/:username/invited" => "users#invited", constraints: {username: USERNAME_ROUTE_FORMAT}
   post "users/action/send_activation_email" => "users#send_activation_email"
@@ -271,6 +278,9 @@ Discourse::Application.routes.draw do
     get 'members'
     get 'posts'
     get 'counts'
+
+    put "members" => "groups#add_members"
+    delete "members/:username" => "groups#remove_member"
   end
 
   # In case people try the wrong URL
@@ -412,6 +422,7 @@ Discourse::Application.routes.draw do
   post "t/:topic_id/merge-topic" => "topics#merge_topic", constraints: {topic_id: /\d+/}
   post "t/:topic_id/change-owner" => "topics#change_post_owners", constraints: {topic_id: /\d+/}
   delete "t/:topic_id/timings" => "topics#destroy_timings", constraints: {topic_id: /\d+/}
+  put "t/:topic_id/bookmark" => "topics#bookmark", constraints: {topic_id: /\d+/}
 
   post "t/:topic_id/notifications" => "topics#set_notifications" , constraints: {topic_id: /\d+/}
 

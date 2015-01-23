@@ -8,14 +8,11 @@
   {{#if postStream.firstPostPresent}}
     <div id='topic-title'>
       <div class='container'>
-        {{#if showStarButton}}
-          <a {{bind-attr class=":star starred:starred"}} {{action "toggleStar"}} href {{bind-attr title="starTooltip"}}></a>
-        {{/if}}
 
         <div class="title-wrapper">
           {{#if editingTopic}}
             {{#if isPrivateMessage}}
-              <span class="private-message-glyph">{{fa-icon envelope}}</span>
+              <span class="private-message-glyph">{{fa-icon "envelope"}}</span>
               {{autofocus-text-field id='edit-title' value=buffered.title maxLength=maxTitleLength}}
             {{else}}
               {{autofocus-text-field id='edit-title' value=buffered.title maxLength=maxTitleLength}}
@@ -23,12 +20,14 @@
               {{category-chooser valueAttribute="id" value=buffered.category_id source=buffered.category_id}}
             {{/if}}
 
-            <button class='btn btn-primary btn-small no-text' {{action "finishedEditingTopic"}}>{{fa-icon check}}</button>
-            <button class='btn btn-small no-text' {{action "cancelEditingTopic"}}>{{fa-icon times}}</button>
+            {{plugin-outlet "edit-topic"}}
+
+            {{d-button action="finishedEditingTopic" class="btn-primary btn-small no-text" icon="check"}}
+            {{d-button action="cancelEditingTopic" class="btn-small no-text" icon="times"}}
           {{else}}
             <h1>
               {{#unless is_warning}}
-                <span class="private-message-glyph">{{fa-icon envelope}}</span>
+                <span class="private-message-glyph">{{fa-icon "envelope"}}</span>
               {{/unless}}
 
               {{#if details.loaded}}
@@ -39,15 +38,12 @@
               {{/if}}
 
               {{#if details.can_edit}}
-                <a href {{action "editTopic"}} class='edit-topic' title='{{i18n 'edit'}}'>{{fa-icon pencil}}</a>
+                <a href {{action "editTopic"}} class='edit-topic' title='{{i18n 'edit'}}'>{{fa-icon "pencil"}}</a>
               {{/if}}
             </h1>
 
             {{#unless isPrivateMessage}}
-              {{#if category.parentCategory}}
-                {{bound-category-link category.parentCategory}}
-              {{/if}}
-              {{bound-category-link category}}
+              {{topic-category topic=model}}
             {{/unless}}
           {{/if}}
         </div>
@@ -118,10 +114,10 @@
           <div>{{message}}</div>
           {{#if noRetry}}
             {{#unless currentUser}}
-              <button {{action "showLogin"}} class='btn btn-primary topic-retry'>{{fa-icon user}} {{i18n 'log_in'}}</button>
+              {{d-button action="showLogin" class="btn-primary topic-retry" icon="user" label="log_in"}}
             {{/unless}}
           {{else}}
-            <button class="btn btn-primary topic-retry" {{action "retryLoading"}}>{{fa-icon "refresh"}} {{i18n 'errors.buttons.again'}}</button>
+            {{d-button action="retryLoading" class="btn-primary topic-retry" icon="refresh" label="errors.buttons.again"}}
           {{/if}}
         </div>
         {{loading-spinner condition=retrying}}

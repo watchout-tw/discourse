@@ -1,6 +1,6 @@
 # See http://unicorn.bogomips.org/Unicorn/Configurator.html for complete
 # documentation.
-app_dir = "/home/apps/discourse/current"
+app_dir = "/srv/apps/discourse"
 
 # Use at least one worker per core if you're on a dedicated server,
 # more will usually help for _short_ waits on databases/caches.
@@ -12,7 +12,7 @@ working_directory app_dir
 
 # listen on a Unix domain socket
 # we use a shorter backlog for quicker failover when busy
-listen "/home/apps/discourse/shared/sockets/unicorn.sock", :backlog => 64
+listen "/srv/apps/discourse/shared/sockets/unicorn.sock", :backlog => 64
 
 # nuke workers after 30 seconds instead of 60 seconds (the default)
 timeout 30
@@ -67,6 +67,11 @@ after_fork do |server, worker|
   # the following is *required* for Rails + "preload_app true",
   defined?(ActiveRecord::Base) and
     ActiveRecord::Base.establish_connection
+  #defined?(REDIS) and REDIS.client.reconnect
+  #MessageBus.after_fork
+  #$redis.reconnect
+  #defined?(DiscourseRedis) and DiscourseRedis.reconnect
+  #defined?(DiscourseRedis) and DiscourseRedis.initialize
 
   # if preload_app is true, then you may also want to check and
   # restart any other shared sockets/descriptors such as Memcached,
